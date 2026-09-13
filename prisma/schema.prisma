@@ -1,0 +1,399 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. الشركة
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  logoUrl     String?
+  timezone    String   @default("Africa/Tripoli")
+  country     String   @default("LY")
+  currency    String   @default("LYD")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  branches      Branch[]
+  departments   Department[]
+  employees     Employee[]
+  shifts        Shift[]
+  holidays      Holiday[]
+  leaveTypes    LeaveType[]
+  systemSettings SystemSetting[]
+}
+
+// 2. الفروع
+model Branch {
+  id              String   @id @default(uuid())
+  companyId       String
+  name            String
+  address         String?
+  latitude        Float
+  longitude       Float
+  geofenceRadius  Float    @default(100.0) // بالمتر (30, 50, 100, 200, custom)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  departments       Department[]
+  employeeBranches  EmployeeBranch[]
+  employeesPrimary  Employee[]         @relation("PrimaryBranch")
+  attendanceEvents  AttendanceEvent[]
+  attendanceRecords AttendanceRecord[]
+
+  @@index([companyId])
+}
+
+// 3. الأقسام
+model Department {
+  id          String   @id @default(uuid())
+  companyId   String
+  branchId    String?
+  name        String
+  code        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch    Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  employees Employee[]
+}
+
+// 4. الحسابات والمنظومة (Users & Employee Profiles)
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  phone          String?   @unique
+  passwordHash   String
+  role           String    @default("EMPLOYEE") // SUPER_ADMIN, ADMIN, HR, BRANCH_MANAGER, SUPERVISOR, EMPLOYEE
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  employee       Employee?
+  auditLogs      AuditLog[]
+}
+
+// 5. ملف الموظف (Employee Profile)
+model Employee {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  companyId           String
+  primaryBranchId     String?
+  departmentId        String?
+  employeeNumber      String   @unique
+  firstName           String
+  lastName            String
+  avatarUrl           String?
+  jobTitle            String?
+  phone               String?
+  status              String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, ARCHIVED
+  allowOutsideBranch  Boolean  @default(false)
+  hireDate            DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company             Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  primaryBranch       Branch?          @relation("PrimaryBranch", fields: [primaryBranchId], references: [id])
+  department          Department?      @relation(fields: [departmentId], references: [id])
+  
+  employeeBranches    EmployeeBranch[]
+  employeeShifts      EmployeeShift[]
+  trustedDevices      TrustedDevice[]
+  attendanceEvents    AttendanceEvent[]
+  attendanceRecords   AttendanceRecord[]
+  breakRecords        BreakRecord[]
+  leaveRequests       LeaveRequest[]
+  permissionRequests  PermissionRequest[]
+  correctionRequests  AttendanceCorrectionRequest[]
+  suspiciousAttempts  SuspiciousAttempt[]
+  notifications       Notification[]
+
+  @@index([companyId])
+  @@index([status])
+}
+
+// 6. ربط الموظف بالفروع المصرحة (Employee Branch Mapping)
+model EmployeeBranch {
+  id          String   @id @default(uuid())
+  employeeId  String
+  branchId    String
+  isTemporary Boolean  @default(false)
+  validUntil  DateTime?
+  createdAt   DateTime @default(now())
+
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, branchId])
+}
+
+// 7. الأجهزة الموثوقة (Trusted Devices)
+model TrustedDevice {
+  id          String    @id @default(uuid())
+  employeeId  String
+  deviceId    String    @unique
+  deviceName  String?
+  browser     String?
+  os          String?
+  ipAddress   String?
+  isApproved  Boolean   @default(true)
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// 8. الورديات (Shifts)
+model Shift {
+  id              String   @id @default(uuid())
+  companyId       String
+  name            String   // مثل: الوردية الصباحية
+  startTime       String   // 09:00 (بصيغة HH:mm)
+  endTime         String   // 16:00
+  gracePeriodMins Int      @default(10) // فترة السماح للتأخير بالدقائق
+  isNightShift    Boolean  @default(false) // هل تعبر منتصف الليل 23:00 - 07:00
+  allowedBreakMins Int     @default(60)
+  workingDays     String   @default("SUN,MON,TUE,WED,THU") // الأيام المتاحة
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeShifts  EmployeeShift[]
+  attendanceRecords AttendanceRecord[]
+  attendanceEvents  AttendanceEvent[]
+}
+
+// 9. ربط الموظف بالورديات
+model EmployeeShift {
+  id          String   @id @default(uuid())
+  employeeId  String
+  shiftId     String
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift       Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, shiftId])
+}
+
+// 10. أحداث الحضور والانصراف الخام (Attendance Events - Immutable Log)
+model AttendanceEvent {
+  id                 String   @id @default(uuid())
+  employeeId         String
+  branchId           String?
+  shiftId            String?
+  type               String   // CHECK_IN, CHECK_OUT, BREAK_START, BREAK_END, MANUAL_CORRECTION
+  serverTimestamp    DateTime @default(now()) // توقيت السيرفر UTC الحقيقي
+  latitude           Float
+  longitude          Float
+  accuracy           Float
+  distanceFromBranch Float?
+  deviceId           String?
+  ipAddress          String?
+  source             String   @default("PWA_MOBILE") // PWA_MOBILE, ADMIN_MANUAL, WEB
+  status             String   @default("SUCCESS") // SUCCESS, WARNING, REJECTED
+  notes              String?
+  createdAt          DateTime @default(now())
+
+  employee           Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch             Branch?  @relation(fields: [branchId], references: [id])
+  shift              Shift?   @relation(fields: [shiftId], references: [id])
+
+  @@index([employeeId, serverTimestamp])
+}
+
+// 11. ملخص اليوم/الوردية للحضور (Attendance Record Summary)
+model AttendanceRecord {
+  id                 String    @id @default(uuid())
+  employeeId         String
+  shiftId            String?
+  branchId           String?
+  date               String    // YYYY-MM-DD
+  checkInAt          DateTime?
+  checkOutAt         DateTime?
+  totalWorkedMinutes Int       @default(0)
+  totalBreakMinutes  Int       @default(0)
+  lateMinutes        Int       @default(0)
+  earlyLeaveMinutes  Int       @default(0)
+  overtimeMinutes    Int       @default(0)
+  status             String    @default("PRESENT") // PRESENT, LATE, ABSENT, LEAVE, ON_BREAK, OFF_DAY
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  employee           Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift              Shift?    @relation(fields: [shiftId], references: [id])
+  branch             Branch?   @relation(fields: [branchId], references: [id])
+
+  @@unique([employeeId, date])
+  @@index([date])
+  @@index([status])
+}
+
+// 12. سجل الاستراحات (Break Records)
+model BreakRecord {
+  id               String    @id @default(uuid())
+  employeeId       String
+  startTime        DateTime  @default(now())
+  endTime          DateTime?
+  durationMinutes  Int       @default(0)
+  excessMinutes    Int       @default(0) // وقت الاستراحة الزائد عن المسموح
+  status           String    @default("ACTIVE") // ACTIVE, COMPLETED
+  createdAt        DateTime  @default(now())
+
+  employee         Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// 13. أنواع الإجازات (Leave Types)
+model LeaveType {
+  id           String   @id @default(uuid())
+  companyId    String
+  name         String   // سنوية، مرضية، اضطرارية، بدون مرتب
+  code         String?
+  maxDaysPerYear Int    @default(21)
+  requiresAttachment Boolean @default(false)
+  isPaid       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  leaveRequests LeaveRequest[]
+}
+
+// 14. طلبات الإجازات (Leave Requests)
+model LeaveRequest {
+  id             String    @id @default(uuid())
+  employeeId     String
+  leaveTypeId    String
+  startDate      DateTime
+  endDate        DateTime
+  totalDays      Int
+  reason         String
+  attachmentUrl  String?
+  status         String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  actionByUserId String?
+  actionReason   String?
+  actionAt       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  employee       Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType      LeaveType @relation(fields: [leaveTypeId], references: [id])
+}
+
+// 15. طلبات الأذونات (Permission Requests)
+model PermissionRequest {
+  id             String    @id @default(uuid())
+  employeeId     String
+  date           String    // YYYY-MM-DD
+  type           String    // DELAY, EARLY_EXIT, TEMPORARY_EXIT, EXTERNAL_MISSION
+  startTime      String    // 13:00
+  endTime        String    // 14:30
+  reason         String
+  status         String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  actionByUserId String?
+  actionReason   String?
+  createdAt      DateTime  @default(now())
+
+  employee       Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// 16. طلبات تصحيح الحضور (Attendance Correction Requests)
+model AttendanceCorrectionRequest {
+  id             String    @id @default(uuid())
+  employeeId     String
+  date           String    // YYYY-MM-DD
+  proposedCheckIn  String? // HH:mm
+  proposedCheckOut String? // HH:mm
+  reason         String
+  status         String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  actionByUserId String?
+  actionReason   String?
+  createdAt      DateTime  @default(now())
+
+  employee       Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// 17. العطلات الرسمية (Holidays)
+model Holiday {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  isRecurring Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// 18. المحاولات المشبوهة واكتشاف المخاطر (Suspicious Attempts)
+model SuspiciousAttempt {
+  id          String   @id @default(uuid())
+  employeeId  String
+  deviceId    String?
+  latitude    Float
+  longitude   Float
+  accuracy    Float
+  reason      String   // GPS_OUT_OF_BOUNDS, LOW_ACCURACY, MOCK_LOCATION_FLAG, LOCATION_JUMP
+  riskLevel   String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  actionTaken String   @default("BLOCKED") // BLOCKED, ALLOWED_WITH_WARNING, PENDING_APPROVAL
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// 19. سجل التدقيق الإداري (Audit Log)
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String
+  action       String   // CREATE, UPDATE, DELETE, MANUAL_ATTENDANCE_CORRECTION, PERMISSION_CHANGE
+  entity       String   // AttendanceRecord, Employee, Branch, Shift, UserRole
+  entityId     String?
+  oldValue     String?  // JSON string
+  newValue     String?  // JSON string
+  reason       String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 20. الإشعارات (Notifications)
+model Notification {
+  id          String   @id @default(uuid())
+  employeeId  String
+  title       String
+  message     String
+  type        String   @default("INFO") // INFO, WARNING, SUCCESS, URGENT
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// 21. إعدادات المنظومة المركزية (System Settings)
+model SystemSetting {
+  id                      String   @id @default(uuid())
+  companyId               String   @unique
+  maxAcceptedGpsAccuracy Float    @default(50.0) // بالمتر
+  suspiciousLocationPolicy String  @default("BLOCK") // BLOCK, WARNING, APPROVAL
+  trustedDevicesPolicy    String   @default("MULTI") // SINGLE, MULTI, UNRESTRICTED
+  overtimePolicy          String   @default("AUTO_APPROVE") // AUTO_APPROVE, APPROVAL_REQUIRED, DISABLED
+  allowOfflinePending     Boolean  @default(false)
+  pushNotificationsEnabled Boolean @default(true)
+  updatedAt               DateTime @updatedAt
+
+  company                 Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
