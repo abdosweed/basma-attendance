@@ -55,7 +55,9 @@ export async function POST(request: Request) {
     }
 
     const settings = employee.company.systemSettings[0];
-    const maxAccuracy = settings?.maxAcceptedGpsAccuracy || 50.0;
+    const maxAccuracy = settings?.maxAcceptedGpsAccuracy || 30.0;
+    const accuracyMustBeWithinRadius = settings?.accuracyMustBeWithinRadius || false;
+    const validationMode = (settings?.geofenceValidationMode as 'STRICT' | 'ACCURACY_AWARE') || 'STRICT';
 
     const geofenceResult = validateEmployeeLocation(
       latitude,
@@ -63,13 +65,21 @@ export async function POST(request: Request) {
       accuracy,
       maxAccuracy,
       authorizedBranches,
-      employee.allowOutsideBranch
+      employee.allowOutsideBranch,
+      accuracyMustBeWithinRadius,
+      validationMode
     );
 
     if (!geofenceResult.isAllowed) {
       return NextResponse.json(
-        { error: geofenceResult.reason || 'أنت خارج نطاق موقع العمل المسموح لتسجيل الانصراف.' },
-        { status: 400 }
+        {
+          error: geofenceResult.reason || 'أنت خارج نطاق موقع العمل المسموح لتسجيل الانصراف.',
+          code: geofenceResult.code,
+          distanceMeters: geofenceResult.distanceMeters,
+          allowedRadiusMeters: geofenceResult.nearestBranch?.geofenceRadius || 10,
+          accuracyMeters: accuracy,
+        },
+        { status: 403 }
       );
     }
 

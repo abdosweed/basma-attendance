@@ -53,7 +53,9 @@ export async function POST(request: Request) {
 
     // 2. جلب إعدادات الدقة القصوى
     const settings = employee.company.systemSettings[0];
-    const maxAccuracy = settings?.maxAcceptedGpsAccuracy || 50.0;
+    const maxAccuracy = settings?.maxAcceptedGpsAccuracy || 30.0;
+    const accuracyMustBeWithinRadius = settings?.accuracyMustBeWithinRadius || false;
+    const validationMode = (settings?.geofenceValidationMode as 'STRICT' | 'ACCURACY_AWARE') || 'STRICT';
 
     // 3. إجراء التحقق الجغرافي الخادم (Server-Side Geofencing)
     const geofenceResult = validateEmployeeLocation(
@@ -62,7 +64,9 @@ export async function POST(request: Request) {
       accuracy,
       maxAccuracy,
       authorizedBranches,
-      employee.allowOutsideBranch
+      employee.allowOutsideBranch,
+      accuracyMustBeWithinRadius,
+      validationMode
     );
 
     const nowServerTime = new Date();
@@ -70,7 +74,6 @@ export async function POST(request: Request) {
 
     // إذا فشل التحقق الجغرافي
     if (!geofenceResult.isAllowed) {
-      // تسجيل محاولة مشبوهة إذا كانت مشكوك بها
       if (geofenceResult.isSuspicious) {
         await prisma.suspiciousAttempt.create({
           data: {
@@ -89,10 +92,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error: geofenceResult.reason || 'أنت خارج نطاق موقع العمل المسموح.',
+          code: geofenceResult.code,
           distanceMeters: geofenceResult.distanceMeters,
+          allowedRadiusMeters: geofenceResult.nearestBranch?.geofenceRadius || 10,
+          accuracyMeters: accuracy,
+          maxAllowedAccuracyMeters: maxAccuracy,
           nearestBranch: geofenceResult.nearestBranch,
         },
-        { status: 400 }
+        { status: 403 }
       );
     }
 

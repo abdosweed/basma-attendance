@@ -10,56 +10,57 @@ generator client {
 
 // 1. الشركة
 model Company {
-  id          String   @id @default(uuid())
-  name        String
-  logoUrl     String?
-  timezone    String   @default("Africa/Tripoli")
-  country     String   @default("LY")
-  currency    String   @default("LYD")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  logoUrl   String?
+  timezone  String   @default("Africa/Tripoli")
+  country   String   @default("LY")
+  currency  String   @default("LYD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  branches      Branch[]
-  departments   Department[]
-  employees     Employee[]
-  shifts        Shift[]
-  holidays      Holiday[]
-  leaveTypes    LeaveType[]
+  branches       Branch[]
+  departments    Department[]
+  employees      Employee[]
+  shifts         Shift[]
+  holidays       Holiday[]
+  leaveTypes     LeaveType[]
   systemSettings SystemSetting[]
 }
 
 // 2. الفروع
 model Branch {
-  id              String   @id @default(uuid())
-  companyId       String
-  name            String
-  address         String?
-  latitude        Float
-  longitude       Float
-  geofenceRadius  Float    @default(100.0) // بالمتر (30, 50, 100, 200, custom)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  companyId      String
+  name           String
+  address        String?
+  latitude       Float
+  longitude      Float
+  geofenceRadius Float    @default(100.0) // بالمتر (30, 50, 100, 200, custom)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   departments       Department[]
   employeeBranches  EmployeeBranch[]
-  employeesPrimary  Employee[]         @relation("PrimaryBranch")
+  employeesPrimary  Employee[]          @relation("PrimaryBranch")
   attendanceEvents  AttendanceEvent[]
   attendanceRecords AttendanceRecord[]
+  geofenceViolations GeofenceViolation[]
 
   @@index([companyId])
 }
 
 // 3. الأقسام
 model Department {
-  id          String   @id @default(uuid())
-  companyId   String
-  branchId    String?
-  name        String
-  code        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  companyId String
+  branchId  String?
+  name      String
+  code      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   branch    Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
@@ -68,55 +69,56 @@ model Department {
 
 // 4. الحسابات والمنظومة (Users & Employee Profiles)
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  phone          String?   @unique
-  passwordHash   String
-  role           String    @default("EMPLOYEE") // SUPER_ADMIN, ADMIN, HR, BRANCH_MANAGER, SUPERVISOR, EMPLOYEE
-  isActive       Boolean   @default(true)
-  lastLoginAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id           String    @id @default(uuid())
+  email        String    @unique
+  phone        String?   @unique
+  passwordHash String
+  role         String    @default("EMPLOYEE") // SUPER_ADMIN, ADMIN, HR, BRANCH_MANAGER, SUPERVISOR, EMPLOYEE
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  employee       Employee?
-  auditLogs      AuditLog[]
+  employee  Employee?
+  auditLogs AuditLog[]
 }
 
 // 5. ملف الموظف (Employee Profile)
 model Employee {
-  id                  String   @id @default(uuid())
-  userId              String   @unique
-  companyId           String
-  primaryBranchId     String?
-  departmentId        String?
-  employeeNumber      String   @unique
-  firstName           String
-  lastName            String
-  avatarUrl           String?
-  jobTitle            String?
-  phone               String?
-  status              String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, ARCHIVED
-  allowOutsideBranch  Boolean  @default(false)
-  hireDate            DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  userId             String    @unique
+  companyId          String
+  primaryBranchId    String?
+  departmentId       String?
+  employeeNumber     String    @unique
+  firstName          String
+  lastName           String
+  avatarUrl          String?
+  jobTitle           String?
+  phone              String?
+  status             String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, ARCHIVED
+  allowOutsideBranch Boolean   @default(false)
+  hireDate           DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company             Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  primaryBranch       Branch?          @relation("PrimaryBranch", fields: [primaryBranchId], references: [id])
-  department          Department?      @relation(fields: [departmentId], references: [id])
-  
-  employeeBranches    EmployeeBranch[]
-  employeeShifts      EmployeeShift[]
-  trustedDevices      TrustedDevice[]
-  attendanceEvents    AttendanceEvent[]
-  attendanceRecords   AttendanceRecord[]
-  breakRecords        BreakRecord[]
-  leaveRequests       LeaveRequest[]
-  permissionRequests  PermissionRequest[]
-  correctionRequests  AttendanceCorrectionRequest[]
-  suspiciousAttempts  SuspiciousAttempt[]
-  notifications       Notification[]
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company       Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  primaryBranch Branch?     @relation("PrimaryBranch", fields: [primaryBranchId], references: [id])
+  department    Department? @relation(fields: [departmentId], references: [id])
+
+  employeeBranches   EmployeeBranch[]
+  employeeShifts     EmployeeShift[]
+  trustedDevices     TrustedDevice[]
+  attendanceEvents   AttendanceEvent[]
+  attendanceRecords  AttendanceRecord[]
+  breakRecords       BreakRecord[]
+  leaveRequests      LeaveRequest[]
+  permissionRequests PermissionRequest[]
+  correctionRequests AttendanceCorrectionRequest[]
+  suspiciousAttempts SuspiciousAttempt[]
+  notifications      Notification[]
+  geofenceViolations GeofenceViolation[]
 
   @@index([companyId])
   @@index([status])
@@ -124,66 +126,67 @@ model Employee {
 
 // 6. ربط الموظف بالفروع المصرحة (Employee Branch Mapping)
 model EmployeeBranch {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   employeeId  String
   branchId    String
-  isTemporary Boolean  @default(false)
+  isTemporary Boolean   @default(false)
   validUntil  DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  branch      Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch   Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
   @@unique([employeeId, branchId])
 }
 
 // 7. الأجهزة الموثوقة (Trusted Devices)
 model TrustedDevice {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   employeeId  String
-  deviceId    String    @unique
+  deviceId    String   @unique
   deviceName  String?
   browser     String?
   os          String?
   ipAddress   String?
-  isApproved  Boolean   @default(true)
-  firstSeenAt DateTime  @default(now())
-  lastSeenAt  DateTime  @default(now())
+  isApproved  Boolean  @default(true)
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
 
-  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 // 8. الورديات (Shifts)
 model Shift {
-  id              String   @id @default(uuid())
-  companyId       String
-  name            String   // مثل: الوردية الصباحية
-  startTime       String   // 09:00 (بصيغة HH:mm)
-  endTime         String   // 16:00
-  gracePeriodMins Int      @default(10) // فترة السماح للتأخير بالدقائق
-  isNightShift    Boolean  @default(false) // هل تعبر منتصف الليل 23:00 - 07:00
-  allowedBreakMins Int     @default(60)
-  workingDays     String   @default("SUN,MON,TUE,WED,THU") // الأيام المتاحة
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(uuid())
+  companyId         String
+  name              String // مثل: الوردية الصباحية
+  startTime         String // 09:00 (بصيغة HH:mm)
+  endTime           String // 16:00
+  gracePeriodMins   Int      @default(10) // فترة السماح للتأخير بالدقائق
+  isNightShift      Boolean  @default(false) // هل تعبر منتصف الليل 23:00 - 07:00
+  allowedBreakMins  Int      @default(60)
+  maxBreaksPerShift Int      @default(1)
+  workingDays       String   @default("SUN,MON,TUE,WED,THU") // الأيام المتاحة
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  employeeShifts  EmployeeShift[]
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeShifts    EmployeeShift[]
   attendanceRecords AttendanceRecord[]
   attendanceEvents  AttendanceEvent[]
 }
 
 // 9. ربط الموظف بالورديات
 model EmployeeShift {
-  id          String   @id @default(uuid())
-  employeeId  String
-  shiftId     String
-  startDate   DateTime @default(now())
-  endDate     DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(uuid())
+  employeeId String
+  shiftId    String
+  startDate  DateTime  @default(now())
+  endDate    DateTime?
+  createdAt  DateTime  @default(now())
 
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  shift       Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift    Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
 
   @@unique([employeeId, shiftId])
 }
@@ -194,7 +197,7 @@ model AttendanceEvent {
   employeeId         String
   branchId           String?
   shiftId            String?
-  type               String   // CHECK_IN, CHECK_OUT, BREAK_START, BREAK_END, MANUAL_CORRECTION
+  type               String // CHECK_IN, CHECK_OUT, BREAK_START, BREAK_END, MANUAL_CORRECTION
   serverTimestamp    DateTime @default(now()) // توقيت السيرفر UTC الحقيقي
   latitude           Float
   longitude          Float
@@ -207,9 +210,9 @@ model AttendanceEvent {
   notes              String?
   createdAt          DateTime @default(now())
 
-  employee           Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  branch             Branch?  @relation(fields: [branchId], references: [id])
-  shift              Shift?   @relation(fields: [shiftId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch   Branch?  @relation(fields: [branchId], references: [id])
+  shift    Shift?   @relation(fields: [shiftId], references: [id])
 
   @@index([employeeId, serverTimestamp])
 }
@@ -220,7 +223,7 @@ model AttendanceRecord {
   employeeId         String
   shiftId            String?
   branchId           String?
-  date               String    // YYYY-MM-DD
+  date               String // YYYY-MM-DD
   checkInAt          DateTime?
   checkOutAt         DateTime?
   totalWorkedMinutes Int       @default(0)
@@ -233,9 +236,10 @@ model AttendanceRecord {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  employee           Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  shift              Shift?    @relation(fields: [shiftId], references: [id])
-  branch             Branch?   @relation(fields: [branchId], references: [id])
+  employee          Employee            @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift             Shift?              @relation(fields: [shiftId], references: [id])
+  branch            Branch?             @relation(fields: [branchId], references: [id])
+  GeofenceViolation GeofenceViolation[]
 
   @@unique([employeeId, date])
   @@index([date])
@@ -244,30 +248,30 @@ model AttendanceRecord {
 
 // 12. سجل الاستراحات (Break Records)
 model BreakRecord {
-  id               String    @id @default(uuid())
-  employeeId       String
-  startTime        DateTime  @default(now())
-  endTime          DateTime?
-  durationMinutes  Int       @default(0)
-  excessMinutes    Int       @default(0) // وقت الاستراحة الزائد عن المسموح
-  status           String    @default("ACTIVE") // ACTIVE, COMPLETED
-  createdAt        DateTime  @default(now())
+  id              String    @id @default(uuid())
+  employeeId      String
+  startTime       DateTime  @default(now())
+  endTime         DateTime?
+  durationMinutes Int       @default(0)
+  excessMinutes   Int       @default(0) // وقت الاستراحة الزائد عن المسموح
+  status          String    @default("ACTIVE") // ACTIVE, COMPLETED
+  createdAt       DateTime  @default(now())
 
-  employee         Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 // 13. أنواع الإجازات (Leave Types)
 model LeaveType {
-  id           String   @id @default(uuid())
-  companyId    String
-  name         String   // سنوية، مرضية، اضطرارية، بدون مرتب
-  code         String?
-  maxDaysPerYear Int    @default(21)
-  requiresAttachment Boolean @default(false)
-  isPaid       Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id                 String   @id @default(uuid())
+  companyId          String
+  name               String // سنوية، مرضية، اضطرارية، بدون مرتب
+  code               String?
+  maxDaysPerYear     Int      @default(21)
+  requiresAttachment Boolean  @default(false)
+  isPaid             Boolean  @default(true)
+  createdAt          DateTime @default(now())
 
-  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   leaveRequests LeaveRequest[]
 }
 
@@ -288,41 +292,41 @@ model LeaveRequest {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  employee       Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  leaveType      LeaveType @relation(fields: [leaveTypeId], references: [id])
+  employee  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
 }
 
 // 15. طلبات الأذونات (Permission Requests)
 model PermissionRequest {
-  id             String    @id @default(uuid())
+  id             String   @id @default(uuid())
   employeeId     String
-  date           String    // YYYY-MM-DD
-  type           String    // DELAY, EARLY_EXIT, TEMPORARY_EXIT, EXTERNAL_MISSION
-  startTime      String    // 13:00
-  endTime        String    // 14:30
+  date           String // YYYY-MM-DD
+  type           String // DELAY, EARLY_EXIT, TEMPORARY_EXIT, EXTERNAL_MISSION
+  startTime      String // 13:00
+  endTime        String // 14:30
   reason         String
-  status         String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  status         String   @default("PENDING") // PENDING, APPROVED, REJECTED
   actionByUserId String?
   actionReason   String?
-  createdAt      DateTime  @default(now())
+  createdAt      DateTime @default(now())
 
-  employee       Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 // 16. طلبات تصحيح الحضور (Attendance Correction Requests)
 model AttendanceCorrectionRequest {
-  id             String    @id @default(uuid())
-  employeeId     String
-  date           String    // YYYY-MM-DD
+  id               String   @id @default(uuid())
+  employeeId       String
+  date             String // YYYY-MM-DD
   proposedCheckIn  String? // HH:mm
   proposedCheckOut String? // HH:mm
-  reason         String
-  status         String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  actionByUserId String?
-  actionReason   String?
-  createdAt      DateTime  @default(now())
+  reason           String
+  status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  actionByUserId   String?
+  actionReason     String?
+  createdAt        DateTime @default(now())
 
-  employee       Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 // 17. العطلات الرسمية (Holidays)
@@ -335,7 +339,7 @@ model Holiday {
   isRecurring Boolean  @default(false)
   createdAt   DateTime @default(now())
 
-  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 // 18. المحاولات المشبوهة واكتشاف المخاطر (Suspicious Attempts)
@@ -346,55 +350,100 @@ model SuspiciousAttempt {
   latitude    Float
   longitude   Float
   accuracy    Float
-  reason      String   // GPS_OUT_OF_BOUNDS, LOW_ACCURACY, MOCK_LOCATION_FLAG, LOCATION_JUMP
+  reason      String // GPS_OUT_OF_BOUNDS, LOW_ACCURACY, MOCK_LOCATION_FLAG, LOCATION_JUMP
   riskLevel   String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
   actionTaken String   @default("BLOCKED") // BLOCKED, ALLOWED_WITH_WARNING, PENDING_APPROVAL
   ipAddress   String?
   createdAt   DateTime @default(now())
 
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 // 19. سجل التدقيق الإداري (Audit Log)
 model AuditLog {
-  id           String   @id @default(uuid())
-  userId       String
-  action       String   // CREATE, UPDATE, DELETE, MANUAL_ATTENDANCE_CORRECTION, PERMISSION_CHANGE
-  entity       String   // AttendanceRecord, Employee, Branch, Shift, UserRole
-  entityId     String?
-  oldValue     String?  // JSON string
-  newValue     String?  // JSON string
-  reason       String?
-  ipAddress    String?
-  createdAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  action    String // CREATE, UPDATE, DELETE, MANUAL_ATTENDANCE_CORRECTION, PERMISSION_CHANGE
+  entity    String // AttendanceRecord, Employee, Branch, Shift, UserRole
+  entityId  String?
+  oldValue  String? // JSON string
+  newValue  String? // JSON string
+  reason    String?
+  ipAddress String?
+  createdAt DateTime @default(now())
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // 20. الإشعارات (Notifications)
 model Notification {
-  id          String   @id @default(uuid())
-  employeeId  String
-  title       String
-  message     String
-  type        String   @default("INFO") // INFO, WARNING, SUCCESS, URGENT
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id         String    @id @default(uuid())
+  employeeId String
+  title      String
+  message    String
+  type       String    @default("INFO") // INFO, WARNING, SUCCESS, URGENT
+  isRead     Boolean   @default(false)
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
 
-  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 // 21. إعدادات المنظومة المركزية (System Settings)
 model SystemSetting {
-  id                      String   @id @default(uuid())
-  companyId               String   @unique
-  maxAcceptedGpsAccuracy Float    @default(50.0) // بالمتر
-  suspiciousLocationPolicy String  @default("BLOCK") // BLOCK, WARNING, APPROVAL
-  trustedDevicesPolicy    String   @default("MULTI") // SINGLE, MULTI, UNRESTRICTED
-  overtimePolicy          String   @default("AUTO_APPROVE") // AUTO_APPROVE, APPROVAL_REQUIRED, DISABLED
-  allowOfflinePending     Boolean  @default(false)
-  pushNotificationsEnabled Boolean @default(true)
-  updatedAt               DateTime @updatedAt
+  id                                String   @id @default(uuid())
+  companyId                         String   @unique
+  enableWorkGeofenceMonitoring      Boolean  @default(true)
+  locationHeartbeatSeconds          Int      @default(45)
+  geofenceExitConfirmationSeconds   Int      @default(90)
+  geofenceReturnConfirmationSeconds Int      @default(60)
+  maxAcceptedGpsAccuracy            Float    @default(30.0) // بالمتر
+  gpsTargetAccuracyMeters           Float    @default(15.0)
+  gpsAcquisitionTimeoutSeconds      Int      @default(10)
+  maxLocationAgeSeconds             Int      @default(10)
+  accuracyMustBeWithinRadius        Boolean  @default(false)
+  geofenceValidationMode            String   @default("STRICT") // STRICT, ACCURACY_AWARE
+  maxBreaksPerShift                 Int      @default(1)
+  notifyAdminOnRepeatedBreakAttempt Boolean  @default(true)
+  notifyEmployeeOnExit              Boolean  @default(true)
+  notifyEmployeeOnReturn            Boolean  @default(true)
+  notifyAdminOnExit                 Boolean  @default(true)
+  notifyAdminOnReturn               Boolean  @default(true)
+  requireLocationForBreakStart      Boolean  @default(true)
+  requireLocationForBreakEnd        Boolean  @default(true)
+  suspiciousLocationPolicy          String   @default("BLOCK")
+  trustedDevicesPolicy              String   @default("MULTI")
+  overtimePolicy                    String   @default("AUTO_APPROVE")
+  allowOfflinePending               Boolean  @default(false)
+  pushNotificationsEnabled          Boolean  @default(true)
+  updatedAt                         DateTime @updatedAt
 
-  company                 Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// 22. مخالفات وسجل الخروج من نطاق العمل (Geofence Violations)
+model GeofenceViolation {
+  id                  String    @id @default(uuid())
+  employeeId          String
+  attendanceRecordId  String?
+  branchId            String?
+  exitDetectedAt      DateTime  @default(now())
+  returnDetectedAt    DateTime?
+  exitLatitude        Float
+  exitLongitude       Float
+  returnLatitude      Float?
+  returnLongitude     Float?
+  maxDistanceMeters   Float
+  durationMinutes     Int       @default(0)
+  authorized          Boolean   @default(false)
+  permissionRequestId String?
+  status              String    @default("ACTIVE") // ACTIVE, RETURNED, AUTHORIZED, REVIEWED
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  employee         Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch           Branch?           @relation(fields: [branchId], references: [id])
+  attendanceRecord AttendanceRecord? @relation(fields: [attendanceRecordId], references: [id])
+
+  @@index([employeeId, status])
 }

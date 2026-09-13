@@ -63,9 +63,70 @@ export default function EmployeePortalPage() {
     fetchUserData();
   }, []);
 
+  const [verifiedAccuracy, setVerifiedAccuracy] = useState<number | null>(null);
+  const [lastVerifiedTime, setLastVerifiedTime] = useState<string | null>(null);
+  const [gpsQuality, setGpsQuality] = useState<'EXCELLENT' | 'GOOD' | 'POOR' | 'UNSUITABLE'>('GOOD');
+
+  // مراقبة نطاق العمل أثناء الدوام (Work Geofence Monitoring) - تعمل فقط إذا كان الموظف CHECKED_IN
+  useEffect(() => {
+    if (!todayData || todayData.statusCode !== 'PRESENT') return;
+
+    let heartbeatTimer: any = null;
+    let watchId: number | null = null;
+
+    const sendHeartbeat = (latitude: number, longitude: number, accuracy: number) => {
+      // الالتزام بحرمة الخصوصية: لا يتم الإرسال إلا إذا كانت الصفحة مرئية (visible)
+      if (document.visibilityState !== 'visible') return;
+
+      fetch('/api/attendance/geofence-heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude,
+          longitude,
+          accuracy,
+          timestamp: Date.now(),
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.geofenceStatus === 'OUTSIDE') {
+            setGeoStatus({
+              message: `⚠️ تنبيه: تم رصد تواجدك خارج نطاق العمل (${Math.round(data.distanceMeters || 0)} متر).`,
+              type: 'error',
+            });
+          } else if (data.geofenceStatus === 'INSIDE') {
+            setGeoStatus({
+              message: 'أنت ضمن نطاق موقع العمل المسموح به حالياً 🟢',
+              type: 'success',
+            });
+          }
+        })
+        .catch(() => {});
+    };
+
+    if (navigator.geolocation) {
+      // إرسال النبضة كل 45 ثانية لتوفير البطارية
+      heartbeatTimer = setInterval(() => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            sendHeartbeat(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+      }, 45000);
+    }
+
+    return () => {
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+    };
+  }, [todayData]);
+
+  // خوارزمية تثبيت وتجميع قراءات الـ GPS (GPS Stabilization)
   const handleAttendanceAction = async (actionType: 'check-in' | 'check-out' | 'break-start' | 'break-end') => {
     setActionLoading(true);
-    setGeoStatus({ message: 'جاري تحديد موقعك الجغرافي الحالي بدقة عالية...', type: 'info' });
+    setGeoStatus({ message: 'جاري تحديد موقعك الجغرافي...', type: 'info' });
 
     if (!navigator.geolocation) {
       setGeoStatus({ message: 'متصفحك لا يدعم تحديد الموقع الجغرافي (Geolocation API).', type: 'error' });
@@ -73,62 +134,99 @@ export default function EmployeePortalPage() {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        setGeoStatus({
-          message: `تم جلب إحداثياتك (الدقة: ${Math.round(accuracy)} متر). جاري التحقق الخادم...`,
-          type: 'info',
+    const readings: Array<{ latitude: number; longitude: number; accuracy: number; timestamp: number }> = [];
+    const acquisitionTimeout = 10000; // 10 ثوان كحد أقصى
+    const targetAccuracy = 15; // 15 متر كدقة مستهدفة
+
+    let watchId: number | null = null;
+    let finished = false;
+
+    setGeoStatus({ message: 'جاري تحسين دقة الموقع واختيار أفضل قراءة...', type: 'info' });
+
+    const finishAcquisition = async () => {
+      if (finished) return;
+      finished = true;
+
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+
+      if (readings.length === 0) {
+        setGeoStatus({ message: 'تعذر الحصول على قراءات موقع دقيقة. يرجى تفعيل الـ GPS.', type: 'error' });
+        setActionLoading(false);
+        return;
+      }
+
+      // اختيار القراءة ذات أفضل (أدنى) accuracy وتصفية القراءات القديمة والشاذة
+      readings.sort((a, b) => a.accuracy - b.accuracy);
+      const bestReading = readings[0];
+
+      setVerifiedAccuracy(Math.round(bestReading.accuracy));
+      const nowTimeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      setLastVerifiedTime(nowTimeStr);
+
+      // تقييم مؤشر جودة الموقع
+      if (bestReading.accuracy <= 15) setGpsQuality('EXCELLENT');
+      else if (bestReading.accuracy <= 30) setGpsQuality('GOOD');
+      else if (bestReading.accuracy <= 50) setGpsQuality('POOR');
+      else setGpsQuality('UNSUITABLE');
+
+      setGeoStatus({
+        message: `تم تثبيت الموقع بدقة ±${Math.round(bestReading.accuracy)} متر. جاري التحقق الخادم...`,
+        type: 'info',
+      });
+
+      try {
+        let url = '/api/attendance/check-in';
+        if (actionType === 'check-out') url = '/api/attendance/check-out';
+        if (actionType === 'break-start') url = '/api/attendance/break/start';
+        if (actionType === 'break-end') url = '/api/attendance/break/end';
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            latitude: bestReading.latitude,
+            longitude: bestReading.longitude,
+            accuracy: bestReading.accuracy,
+            deviceId: navigator.userAgent,
+          }),
         });
 
-        try {
-          let url = '/api/attendance/check-in';
-          if (actionType === 'check-out') url = '/api/attendance/check-out';
-          if (actionType === 'break-start') url = '/api/attendance/break/start';
-          if (actionType === 'break-end') url = '/api/attendance/break/end';
+        const data = await res.json();
 
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              latitude,
-              longitude,
-              accuracy,
-              deviceId: navigator.userAgent,
-            }),
-          });
-
-          const data = await res.json();
-
-          if (!res.ok) {
-            setGeoStatus({ message: data.error || 'فشلت العملية', type: 'error' });
-          } else {
-            setGeoStatus({ message: data.message || 'تمت العملية بنجاح', type: 'success' });
-            await fetchUserData();
-          }
-        } catch (err) {
-          setGeoStatus({ message: 'حدث خطأ بالاتصال بالسيرفر أثناء معالجة الحضور', type: 'error' });
-        } finally {
-          setActionLoading(false);
+        if (!res.ok) {
+          setGeoStatus({ message: data.error || 'فشلت العملية', type: 'error' });
+        } else {
+          setGeoStatus({ message: data.message || 'تمت العملية بنجاح', type: 'success' });
+          await fetchUserData();
         }
-      },
-      (geoError) => {
+      } catch (err) {
+        setGeoStatus({ message: 'حدث خطأ بالاتصال بالسيرفر أثناء معالجة الحضور', type: 'error' });
+      } finally {
         setActionLoading(false);
-        let errorMsg = 'تعذر الحصول على الموقع الجغرافي.';
-        if (geoError.code === geoError.PERMISSION_DENIED) {
-          errorMsg = 'يرجى إعطاء إذن الوصول للموقع الجغرافي من المتصفح لتسجيل الحضور.';
-        } else if (geoError.code === geoError.POSITION_UNAVAILABLE) {
-          errorMsg = 'يرجى تفعيل خدمات الموقع GPS على هاتفك.';
-        } else if (geoError.code === geoError.TIMEOUT) {
-          errorMsg = 'انتهت مهلة تحديد الموقع، حاول مرة أخرى.';
-        }
-        setGeoStatus({ message: errorMsg, type: 'error' });
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
       }
+    };
+
+    // مهلة زمنية قصوى لإنهاء التجميع
+    const timeoutTimer = setTimeout(() => {
+      finishAcquisition();
+    }, acquisitionTimeout);
+
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        readings.push({ latitude, longitude, accuracy, timestamp: Date.now() });
+
+        // إذا وصلنا لـ Target Accuracy (<= 15m)، ننهي التثبيت فورا
+        if (accuracy <= targetAccuracy) {
+          clearTimeout(timeoutTimer);
+          finishAcquisition();
+        }
+      },
+      (err) => {
+        clearTimeout(timeoutTimer);
+        finishAcquisition();
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
     );
   };
 
@@ -210,7 +308,7 @@ export default function EmployeePortalPage() {
 
         {/* رسالة حالة الـ GPS والـ Geofence الحالية */}
         <div
-          className={`p-4 rounded-2xl text-xs border flex items-start gap-3 transition-all ${
+          className={`p-4 rounded-2xl text-xs border flex items-start justify-between gap-3 transition-all ${
             geoStatus.type === 'error'
               ? 'bg-red-500/10 border-red-500/30 text-red-300'
               : geoStatus.type === 'success'
@@ -218,11 +316,21 @@ export default function EmployeePortalPage() {
               : 'bg-sky-500/10 border-sky-500/30 text-sky-300'
           }`}
         >
-          <MapPin className="w-5 h-5 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <span className="font-bold block mb-0.5">الحالة الجغرافية (Server Geofence):</span>
-            {geoStatus.message}
+          <div className="flex items-start gap-3">
+            <MapPin className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <span className="font-bold block mb-0.5">الحالة الجغرافية (Strict Server Geofence):</span>
+              {geoStatus.message}
+            </div>
           </div>
+
+          {verifiedAccuracy !== null && (
+            <div className="text-left shrink-0 bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800">
+              <span className="text-[10px] block text-slate-400 font-mono">آخر دقة معتمدة</span>
+              <span className="font-bold text-white text-xs font-mono">±{verifiedAccuracy}م</span>
+              <span className="text-[9px] block text-sky-400 font-mono">{lastVerifiedTime}</span>
+            </div>
+          )}
         </div>
 
         {/* أزرار الحضور والانصراف الكبيرة للاستخدام المباشر من الهاتف */}

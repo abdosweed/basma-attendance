@@ -23,6 +23,9 @@ export async function GET() {
         breakRecords: {
           where: { status: 'ACTIVE' },
         },
+        geofenceViolations: {
+          where: { status: { in: ['ACTIVE', 'AUTHORIZED'] } },
+        },
       },
       orderBy: { firstName: 'asc' },
     });
@@ -31,9 +34,12 @@ export async function GET() {
       const todayRec = emp.attendanceRecords[0] || null;
       const activeBreak = emp.breakRecords[0] || null;
       const shift = emp.employeeShifts[0]?.shift || null;
+      const activeViolation = emp.geofenceViolations[0] || null;
 
       let statusLabel = '🔴 غائب';
       let statusBadge = 'bg-red-100 text-red-700';
+      let geofenceStatus = '⚪ تعذر التحقق من الموقع';
+      let geofenceBadge = 'bg-slate-800 text-slate-400';
 
       if (activeBreak) {
         statusLabel = '🟠 في استراحة';
@@ -42,6 +48,19 @@ export async function GET() {
         statusLabel = '⚪ غادر الموعد';
         statusBadge = 'bg-gray-100 text-gray-700';
       } else if (todayRec?.checkInAt) {
+        if (activeViolation) {
+          if (activeViolation.authorized) {
+            geofenceStatus = '🟡 خروج بإذن رسمي';
+            geofenceBadge = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+          } else {
+            geofenceStatus = `🔴 خارج نطاق العمل (${Math.round(activeViolation.maxDistanceMeters)}م)`;
+            geofenceBadge = 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+          }
+        } else {
+          geofenceStatus = '🟢 داخل نطاق العمل';
+          geofenceBadge = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        }
+
         if (todayRec.status === 'LATE') {
           statusLabel = '🟡 متأخر';
           statusBadge = 'bg-yellow-100 text-yellow-800';
@@ -70,6 +89,8 @@ export async function GET() {
           : '—',
         statusLabel,
         statusBadge,
+        geofenceStatus,
+        geofenceBadge,
         workedHours: todayRec?.checkInAt ? hoursStr : '—',
         lateMinutes: todayRec?.lateMinutes || 0,
       };
