@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { validateEmployeeLocation } from '@/lib/geofence';
-import { broadcastNotificationToUser } from '@/app/api/notifications/stream/route';
+import { broadcastNotificationToUser } from '@/lib/sse-notifications';
 
 export const dynamic = 'force-dynamic';
 

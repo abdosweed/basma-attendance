@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { broadcastNotificationToUser } from '@/app/api/notifications/stream/route';
+import { broadcastNotificationToUser } from '@/lib/sse-notifications';
 import { validateEmployeeLocation } from '@/lib/geofence';
 
 export async function POST(request: Request) {

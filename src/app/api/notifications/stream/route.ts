@@ -1,20 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { notificationClients } from '@/lib/sse-notifications';
 
 export const dynamic = 'force-dynamic';
-
-export const notificationClients = new Map<string, Set<(data: any) => void>>();
-
-export function broadcastNotificationToUser(employeeId: string, notification: any) {
-  const userClients = notificationClients.get(employeeId);
-  if (userClients) {
-    userClients.forEach((send) => {
-      try {
-        send(notification);
-      } catch (e) {}
-    });
-  }
-}
 
 export async function GET(request: Request) {
   const session = await getAuthenticatedUser();
