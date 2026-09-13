@@ -600,6 +600,15 @@ export default function EmployeePortalPage() {
               </p>
             </div>
 
+            {verificationModal.verificationCode && (
+              <div className="bg-gradient-to-r from-sky-950/60 to-blue-950/60 border border-sky-500/30 rounded-2xl p-4 text-center space-y-1">
+                <span className="text-[11px] text-sky-300 font-medium block">كود التأكيد الخاص بك:</span>
+                <div className="text-3xl font-black tracking-widest text-sky-400 font-mono select-all">
+                  {verificationModal.verificationCode}
+                </div>
+              </div>
+            )}
+
             {verificationModal.error && (
               <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs text-rose-400 font-medium">
                 {verificationModal.error}

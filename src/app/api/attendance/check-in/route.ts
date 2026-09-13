@@ -118,11 +118,23 @@ export async function POST(request: Request) {
         },
       });
 
+      // إنشاء إشعار في قاعدة البيانات
+      try {
+        await prisma.notification.create({
+          data: {
+            employeeId: employee.id,
+            title: 'كود تأكيد الحضور',
+            message: `كود تأكيد تسجيل الحضور الخاص بك هو: ${generatedCode} (صالح لمدة دقيقتين)`,
+            type: 'INFO',
+          },
+        });
+      } catch (e) {}
+
       return NextResponse.json({
         requiresVerification: true,
         verificationId: vRecord.id,
         verificationCode: generatedCode,
-        message: 'أدخل كود التأكيد المباشر لإتمام تسجيل الحضور بنجاح',
+        message: `كود التأكيد الخاص بك هو: ${generatedCode}. أدخله في النافذة لإتمام الحضور.`,
         expiresInSeconds: 120,
         distanceMeters: geofenceResult.distanceMeters,
         branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,

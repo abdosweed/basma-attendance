@@ -97,11 +97,23 @@ export async function POST(request: Request) {
         },
       });
 
+      // إنشاء إشعار في قاعدة البيانات وبثه لحظياً عبر SSE
+      try {
+        await prisma.notification.create({
+          data: {
+            employeeId: employee.id,
+            title: 'كود تأكيد الانصراف',
+            message: `كود تأكيد تسجيل الانصراف الخاص بك هو: ${generatedCode} (صالح لمدة دقيقتين)`,
+            type: 'INFO',
+          },
+        });
+      } catch (e) {}
+
       return NextResponse.json({
         requiresVerification: true,
         verificationId: vRecord.id,
         verificationCode: generatedCode,
-        message: 'أدخل كود التأكيد المباشر لإتمام تسجيل الانصراف بنجاح',
+        message: `كود التأكيد الخاص بك هو: ${generatedCode}. أدخله في النافذة لإتمام الانصراف.`,
         expiresInSeconds: 120,
         distanceMeters: geofenceResult.distanceMeters,
         branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,
