@@ -447,3 +447,17 @@ model GeofenceViolation {
 
   @@index([employeeId, status])
 }
+
+// 23. أكواد تأكيد الحضور المزدوج (Dynamic Attendance Verification Codes)
+model VerificationCode {
+  id         String    @id @default(uuid())
+  employeeId String
+  type       String    // CHECK_IN, CHECK_OUT, BREAK_START, BREAK_END
+  code       String    // 6-digit dynamic code
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([employeeId, type])
+}
+

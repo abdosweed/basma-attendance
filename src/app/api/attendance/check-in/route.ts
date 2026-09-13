@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { latitude, longitude, accuracy, deviceId } = body;
+    const { latitude, longitude, accuracy, deviceId, verificationId, verificationCode } = body;
 
     if (latitude === undefined || longitude === undefined || accuracy === undefined) {
       return NextResponse.json(
@@ -102,6 +102,56 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
+
+    // 4. فحص كود التأكيد التفاعلي المزدوج (Double Verification Code Step)
+    if (!verificationCode || !verificationId) {
+      // إنشاء كود ديناميكي متجدد من 6 أرقام ينتهي خلال 120 ثانية
+      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 120 * 1000);
+
+      const vRecord = await prisma.verificationCode.create({
+        data: {
+          employeeId: employee.id,
+          type: 'CHECK_IN',
+          code: generatedCode,
+          expiresAt,
+        },
+      });
+
+      return NextResponse.json({
+        requiresVerification: true,
+        verificationId: vRecord.id,
+        verificationCode: generatedCode,
+        message: 'أدخل كود التأكيد المباشر لإتمام تسجيل الحضور بنجاح',
+        expiresInSeconds: 120,
+        distanceMeters: geofenceResult.distanceMeters,
+        branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,
+      });
+    }
+
+    // التحقق من كود التأكيد المرسل
+    const vCheck = await prisma.verificationCode.findUnique({
+      where: { id: verificationId },
+    });
+
+    if (
+      !vCheck ||
+      vCheck.employeeId !== employee.id ||
+      vCheck.code !== verificationCode ||
+      vCheck.usedAt !== null ||
+      vCheck.expiresAt < nowServerTime
+    ) {
+      return NextResponse.json(
+        { error: 'كود التأكيد غير صحيح أو انتهت صلاحيته. يرجى إعادة المحاولة.' },
+        { status: 400 }
+      );
+    }
+
+    // تعليم الكود كمستخدم
+    await prisma.verificationCode.update({
+      where: { id: verificationId },
+      data: { usedAt: nowServerTime },
+    });
 
     // 4. فحص حالة الحضور اليوم لمنع الحضور المكرر (Duplicate Check-In Prevention)
     const existingRecord = await prisma.attendanceRecord.findUnique({

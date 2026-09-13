@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { latitude, longitude, accuracy, deviceId } = body;
+    const { latitude, longitude, accuracy, deviceId, verificationId, verificationCode } = body;
 
     const employee = await prisma.employee.findUnique({
       where: { id: session.employeeId },
@@ -82,6 +82,53 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
+
+    // 3. فحص كود التأكيد التفاعلي المزدوج (Double Verification Code Step)
+    if (!verificationCode || !verificationId) {
+      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 120 * 1000);
+
+      const vRecord = await prisma.verificationCode.create({
+        data: {
+          employeeId: employee.id,
+          type: 'CHECK_OUT',
+          code: generatedCode,
+          expiresAt,
+        },
+      });
+
+      return NextResponse.json({
+        requiresVerification: true,
+        verificationId: vRecord.id,
+        verificationCode: generatedCode,
+        message: 'أدخل كود التأكيد المباشر لإتمام تسجيل الانصراف بنجاح',
+        expiresInSeconds: 120,
+        distanceMeters: geofenceResult.distanceMeters,
+        branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,
+      });
+    }
+
+    const vCheck = await prisma.verificationCode.findUnique({
+      where: { id: verificationId },
+    });
+
+    if (
+      !vCheck ||
+      vCheck.employeeId !== employee.id ||
+      vCheck.code !== verificationCode ||
+      vCheck.usedAt !== null ||
+      vCheck.expiresAt < nowServerTime
+    ) {
+      return NextResponse.json(
+        { error: 'كود التأكيد غير صحيح أو انتهت صلاحيته. يرجى إعادة المحاولة.' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.verificationCode.update({
+      where: { id: verificationId },
+      data: { usedAt: nowServerTime },
+    });
 
     // 3. إنهاء أي استراحة جارية
     const activeBreak = await prisma.breakRecord.findFirst({

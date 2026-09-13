@@ -32,10 +32,76 @@ export default function EmployeePortalPage() {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showCorrectionModal, setShowCorrectionModal] = useState(false);
 
+  const [verificationModal, setVerificationModal] = useState<{
+    isOpen: boolean;
+    actionType: 'check-in' | 'check-out' | 'break-start' | 'break-end' | null;
+    verificationId: string | null;
+    verificationCode: string | null;
+    inputCode: string;
+    bestReading: any;
+    message: string;
+    expiresInSeconds: number;
+    distanceMeters?: number;
+    branchName?: string;
+    loading: boolean;
+    error?: string;
+  }>({
+    isOpen: false,
+    actionType: null,
+    verificationId: null,
+    verificationCode: null,
+    inputCode: '',
+    bestReading: null,
+    message: '',
+    expiresInSeconds: 120,
+    loading: false,
+  });
+
   const [geoStatus, setGeoStatus] = useState<{ message: string; type: 'info' | 'error' | 'success' }>({
     message: 'جاهز للحصول على موقعك الجغرافي عند الضغط',
     type: 'info',
   });
+
+  const submitVerificationCode = async () => {
+    if (!verificationModal.inputCode || verificationModal.inputCode.length !== 6) {
+      setVerificationModal((prev) => ({ ...prev, error: 'يرجى إدخال كود تأكيد مكون من 6 أرقام' }));
+      return;
+    }
+
+    setVerificationModal((prev) => ({ ...prev, loading: true, error: undefined }));
+
+    try {
+      let url = '/api/attendance/check-in';
+      if (verificationModal.actionType === 'check-out') url = '/api/attendance/check-out';
+      if (verificationModal.actionType === 'break-start') url = '/api/attendance/break/start';
+      if (verificationModal.actionType === 'break-end') url = '/api/attendance/break/end';
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: verificationModal.bestReading?.latitude,
+          longitude: verificationModal.bestReading?.longitude,
+          accuracy: verificationModal.bestReading?.accuracy,
+          deviceId: navigator.userAgent,
+          verificationId: verificationModal.verificationId,
+          verificationCode: verificationModal.inputCode,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setVerificationModal((prev) => ({ ...prev, loading: false, error: data.error || 'فشل التحقق من الكود' }));
+      } else {
+        setVerificationModal((prev) => ({ ...prev, isOpen: false, loading: false }));
+        setGeoStatus({ message: data.message || 'تمت العملية بنجاح 🟢', type: 'success' });
+        await fetchUserData();
+      }
+    } catch (err) {
+      setVerificationModal((prev) => ({ ...prev, loading: false, error: 'حدث خطأ بالاتصال بالسيرفر أثناء التحقق' }));
+    }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -192,6 +258,25 @@ export default function EmployeePortalPage() {
         });
 
         const data = await res.json();
+
+        if (data.requiresVerification) {
+          setVerificationModal({
+            isOpen: true,
+            actionType,
+            verificationId: data.verificationId,
+            verificationCode: data.verificationCode,
+            inputCode: data.verificationCode || '',
+            bestReading,
+            message: data.message || 'أدخل كود التأكيد التفاعلي لإتمام العملية',
+            expiresInSeconds: data.expiresInSeconds || 120,
+            distanceMeters: data.distanceMeters,
+            branchName: data.branchName,
+            loading: false,
+          });
+          setGeoStatus({ message: 'أدخل كود التأكيد المباشر في النافذة لإتمام البصمة 🔐', type: 'info' });
+          setActionLoading(false);
+          return;
+        }
 
         if (!res.ok) {
           setGeoStatus({ message: data.error || 'فشلت العملية', type: 'error' });
@@ -481,6 +566,87 @@ export default function EmployeePortalPage() {
           onClose={() => setShowCorrectionModal(false)}
           onSuccess={() => fetchUserData()}
         />
+      )}
+
+      {/* مودال كود التأكيد التفاعلي المزدوج */}
+      {verificationModal.isOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5 dir-rtl">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">تأكيد كود البصمة المباشر</h3>
+                <p className="text-xs text-slate-400">إثبات التواجد الفعلي والتفاعل المباشر</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">موقع الفرع:</span>
+                <span className="font-bold text-sky-400">{verificationModal.branchName || 'الفرع المصرح'}</span>
+              </div>
+              {verificationModal.distanceMeters !== undefined && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">المسافة الحسابية:</span>
+                  <span className="font-bold text-emerald-400">
+                    {Math.round(verificationModal.distanceMeters)} متر
+                  </span>
+                </div>
+              )}
+              <p className="text-xs text-slate-300 leading-relaxed pt-1 border-t border-slate-800/60">
+                {verificationModal.message}
+              </p>
+            </div>
+
+            {verificationModal.error && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-xs text-rose-400 font-medium">
+                {verificationModal.error}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-300">أدخل كود التأكيد (6 أرقام):</label>
+              <input
+                type="text"
+                maxLength={6}
+                value={verificationModal.inputCode}
+                onChange={(e) => setVerificationModal((prev) => ({ ...prev, inputCode: e.target.value }))}
+                placeholder="123456"
+                className="w-full bg-slate-950 border border-sky-500/30 rounded-2xl px-4 py-3 text-center text-xl font-bold tracking-widest text-white focus:outline-none focus:border-sky-500 transition-all dir-ltr"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={submitVerificationCode}
+                disabled={verificationModal.loading}
+                className="flex-1 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 disabled:opacity-50"
+              >
+                {verificationModal.loading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>جاري التأكيد...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>تأكيد واعتماد البصمة</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setVerificationModal((prev) => ({ ...prev, isOpen: false }))}
+                disabled={verificationModal.loading}
+                className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl text-xs font-bold transition-all disabled:opacity-50"
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <InstallPWAPrompt />
