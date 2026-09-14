@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck } from 'lucide-react';
 
 interface NavbarProps {
-  user: any;
+  user?: any;
   notifications?: any[];
   onRefreshNotifications?: () => void;
 }
@@ -168,13 +168,29 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
           </div>
 
           {isAdminOrManager && (
-            <Link
-              href="/admin"
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-              <span className="hidden sm:inline">لوحة الإدارة</span>
-            </Link>
+            <div className="flex items-center gap-1.5">
+              <Link
+                href="/dashboard/admin/shifts"
+                className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
+              >
+                <span>إدارة الورديات</span>
+              </Link>
+
+              <Link
+                href="/dashboard/admin/devices"
+                className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
+              >
+                <span>الأجهزة الموثوقة</span>
+              </Link>
+
+              <Link
+                href="/admin"
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span className="hidden sm:inline">لوحة الإدارة</span>
+              </Link>
+            </div>
           )}
 
           <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-slate-800/80 rounded-xl border border-slate-800 text-xs">

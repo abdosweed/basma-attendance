@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { latitude, longitude, accuracy, deviceId, verificationId, verificationCode } = body;
+    const { latitude, longitude, accuracy, deviceId, trustedDeviceId, deviceInfo, verificationId, verificationCode } = body;
 
     const employee = await prisma.employee.findUnique({
       where: { id: session.employeeId },
@@ -22,11 +22,32 @@ export async function POST(request: Request) {
         employeeBranches: { include: { branch: true } },
         primaryBranch: true,
         employeeShifts: { include: { shift: true } },
+        trustedDevices: true,
       },
     });
 
     if (!employee || employee.status !== 'ACTIVE') {
       return NextResponse.json({ error: 'حساب الموظف غير نشط' }, { status: 403 });
+    }
+
+    // 0. فحص واعتماد هاتف الموظف المقترن الموثوق (Trusted Device Binding Lock)
+    const reqDeviceId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
+    const existingDevices = employee.trustedDevices;
+
+    if (existingDevices.length > 0) {
+      const matchedDevice = existingDevices.find((d) => d.deviceId === reqDeviceId);
+      if (!matchedDevice || !matchedDevice.isApproved) {
+        const primaryDevice = existingDevices.find((d) => d.isApproved);
+        return NextResponse.json(
+          {
+            error: `🛑 هذا الجهاز غير معتمد لحسابك. يمكنك تسجيل الانصراف فقط من هاتفك المعتمد${
+              primaryDevice?.deviceName ? ` (${primaryDevice.deviceName})` : ''
+            }.`,
+            code: 'UNAUTHORIZED_DEVICE',
+          },
+          { status: 403 }
+        );
+      }
     }
 
     const nowServerTime = new Date();

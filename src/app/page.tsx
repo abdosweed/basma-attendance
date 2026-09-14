@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import InstallPWAPrompt from '@/components/InstallPWAPrompt';
 import LeaveRequestModal from '@/components/LeaveRequestModal';
 import CorrectionRequestModal from '@/components/CorrectionRequestModal';
+import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
 import {
   Fingerprint,
   MapPin,
@@ -84,6 +85,8 @@ export default function EmployeePortalPage() {
           longitude: verificationModal.bestReading?.longitude,
           accuracy: verificationModal.bestReading?.accuracy,
           deviceId: navigator.userAgent,
+          trustedDeviceId: getOrCreateDeviceId(),
+          deviceInfo: getDeviceInfo(),
           verificationId: verificationModal.verificationId,
           verificationCode: verificationModal.inputCode,
         }),
@@ -254,6 +257,8 @@ export default function EmployeePortalPage() {
             longitude: bestReading.longitude,
             accuracy: bestReading.accuracy,
             deviceId: navigator.userAgent,
+            trustedDeviceId: getOrCreateDeviceId(),
+            deviceInfo: getDeviceInfo(),
           }),
         });
 

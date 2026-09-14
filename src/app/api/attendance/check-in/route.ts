@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { latitude, longitude, accuracy, deviceId, verificationId, verificationCode } = body;
+    const { latitude, longitude, accuracy, deviceId, trustedDeviceId, deviceInfo, verificationId, verificationCode } = body;
 
     if (latitude === undefined || longitude === undefined || accuracy === undefined) {
       return NextResponse.json(
@@ -35,11 +35,52 @@ export async function POST(request: Request) {
         employeeShifts: {
           include: { shift: true },
         },
+        trustedDevices: true,
       },
     });
 
     if (!employee || employee.status !== 'ACTIVE') {
       return NextResponse.json({ error: 'حساب الموظف غير نشط أو غير موجود' }, { status: 403 });
+    }
+
+    // 0. فحص واعتماد هاتف الموظف المقترن الموثوق (Trusted Device Binding Lock)
+    const reqDeviceId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
+    const existingDevices = employee.trustedDevices;
+
+    if (existingDevices.length === 0) {
+      // إقرار واقتران الهاتف الأول تلقائياً بحساب الموظف
+      await prisma.trustedDevice.create({
+        data: {
+          employeeId: employee.id,
+          deviceId: reqDeviceId,
+          deviceName: deviceInfo?.deviceName || 'هاتف محمول',
+          browser: deviceInfo?.browser || 'Browser',
+          os: deviceInfo?.os || 'Mobile OS',
+          isApproved: true,
+        },
+      });
+    } else {
+      // الموظف يملك جهازاً معتمداً سابقاً -> التأكد من المطابقة
+      const matchedDevice = existingDevices.find((d) => d.deviceId === reqDeviceId);
+
+      if (!matchedDevice || !matchedDevice.isApproved) {
+        const primaryDevice = existingDevices.find((d) => d.isApproved);
+        return NextResponse.json(
+          {
+            error: `🛑 هذا الجهاز غير معتمد لحسابك. يمكنك تسجيل الحضور فقط من هاتفك المعتمد${
+              primaryDevice?.deviceName ? ` (${primaryDevice.deviceName})` : ''
+            }. لتغيير هاتفك المعتمد يرجى مراجعة إدارة الموارد البشرية.`,
+            code: 'UNAUTHORIZED_DEVICE',
+          },
+          { status: 403 }
+        );
+      }
+
+      // تحديث آخر تواجد للهاتف المعتمد
+      await prisma.trustedDevice.update({
+        where: { id: matchedDevice.id },
+        data: { lastSeenAt: new Date() },
+      });
     }
 
     // 1. تحديد الفروع المصرح بها للموظف
