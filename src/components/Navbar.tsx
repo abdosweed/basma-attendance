@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck } from 'lucide-react';
+import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck, Sun, Moon } from 'lucide-react';
 
 interface NavbarProps {
   user?: any;
@@ -17,6 +17,28 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
   const [items, setItems] = useState<any[]>(notifications);
   const [showDropdown, setShowDropdown] = useState(false);
   const [toastNotif, setToastNotif] = useState<any | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const savedTheme = (localStorage.getItem('basma_theme') as 'dark' | 'light') || 'dark';
+    setTheme(savedTheme);
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-mode');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('basma_theme', nextTheme);
+    if (nextTheme === 'light') {
+      document.documentElement.classList.add('light-mode');
+    } else {
+      document.documentElement.classList.remove('light-mode');
+    }
+  };
 
   useEffect(() => {
     setItems(notifications);
@@ -200,6 +222,15 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
               {user?.role}
             </span>
           </div>
+
+          {/* زر التبديل بين الوضع الداكن والفاتح */}
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'التحويل للوضع الفاتح ☀️' : 'التحويل للوضع الداكن 🌙'}
+            className="p-2 rounded-xl transition-all border border-slate-700/80 bg-slate-800/80 text-amber-400 hover:bg-slate-700 active:scale-95"
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5 text-sky-400" />}
+          </button>
 
           <button
             onClick={handleLogout}

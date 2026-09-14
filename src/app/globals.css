@@ -24,3 +24,51 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #0284c7;
 }
+
+/* دعم النمط الفاتح (Light Mode Theme) */
+html.light-mode {
+  color-scheme: light;
+}
+html.light-mode body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+html.light-mode header {
+  background-color: #ffffff/95 !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+html.light-mode main {
+  background-color: #f8fafc !important;
+}
+html.light-mode .bg-slate-950 {
+  background-color: #f8fafc !important;
+}
+html.light-mode .bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+html.light-mode .bg-slate-900\/90,
+html.light-mode .bg-slate-900\/80 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.light-mode .bg-slate-950\/80,
+html.light-mode .bg-slate-950\/60 {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+html.light-mode .border-slate-800 {
+  border-color: #e2e8f0 !important;
+}
+html.light-mode .text-white {
+  color: #0f172a !important;
+}
+html.light-mode .text-slate-400,
+html.light-mode .text-slate-300 {
+  color: #475569 !important;
+}
+
