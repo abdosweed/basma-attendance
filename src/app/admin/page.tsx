@@ -55,6 +55,9 @@ export default function AdminDashboardPage() {
   const [showImportEmployeesModal, setShowImportEmployeesModal] = useState(false);
   const [selectedEmployeeForEdit, setSelectedEmployeeForEdit] = useState<any>(null);
 
+  const [envMode, setEnvMode] = useState<'DEMO' | 'LIVE'>('DEMO');
+  const [resetLoading, setResetLoading] = useState(false);
+
   const fetchAdminData = async () => {
     try {
       const meRes = await fetch('/api/auth/me');
@@ -69,13 +72,14 @@ export default function AdminDashboardPage() {
       }
       setUser(me.user);
 
-      const [dashRes, liveRes, reportRes, empRes, leavesRes, correctionsRes] = await Promise.all([
+      const [dashRes, liveRes, reportRes, empRes, leavesRes, correctionsRes, envRes] = await Promise.all([
         fetch('/api/admin/dashboard'),
         fetch('/api/admin/live'),
         fetch(`/api/reports/monthly?month=${monthFilter}`),
         fetch('/api/employees'),
         fetch('/api/leave-requests'),
         fetch('/api/corrections'),
+        fetch('/api/admin/environment-switch'),
       ]);
 
       if (dashRes.ok) setDashData(await dashRes.json());
@@ -96,10 +100,57 @@ export default function AdminDashboardPage() {
         const c = await correctionsRes.json();
         setCorrectionsList(c.corrections || []);
       }
+      if (envRes.ok) {
+        const env = await envRes.json();
+        if (env.environmentMode) setEnvMode(env.environmentMode);
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleEnvMode = async () => {
+    const nextMode = envMode === 'DEMO' ? 'LIVE' : 'DEMO';
+    const label = nextMode === 'LIVE' ? 'التحويل للوضع الحقيقي والعمل الفعلي' : 'التحويل لوضع التجربة والاختبار';
+    if (!window.confirm(`هل أنت متأكد من ${label}؟`)) return;
+
+    try {
+      const res = await fetch('/api/admin/environment-switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: nextMode }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEnvMode(data.mode);
+        fetchAdminData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleResetDemoData = async () => {
+    if (!window.confirm('⚠️ تحذير مهم: هل أنت متأكد من تصفير وإلغاء جميع سجلات البصمات والمحاولات التجريبية بالكامل لتنقية النظام للعمل الفعلي؟')) return;
+
+    setResetLoading(true);
+    try {
+      const res = await fetch('/api/admin/environment-switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'RESET_DEMO' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        fetchAdminData();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -212,19 +263,52 @@ export default function AdminDashboardPage() {
           <div>
             <h1 className="text-xl font-black text-white flex items-center gap-2">
               لوحة التحكم الإدارية
-              <span className="text-xs bg-sky-500/20 text-sky-400 font-bold px-2.5 py-0.5 rounded-full border border-sky-500/30">
-                مباشر
+              <span
+                className={`text-xs font-bold px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 ${
+                  envMode === 'LIVE'
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                    : 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-lg shadow-amber-500/20 animate-pulse'
+                }`}
+              >
+                {envMode === 'LIVE' ? '🟢 وضع الإنتاج الحقيقي' : '🧪 بيئة التجربة والاختبار'}
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">متابعة الحضور والانصراف وإدارة الموظفين والفروع ونطاقات الـ Geofence</p>
+            <p className="text-xs text-slate-400 mt-1">متابعة الحضور والانصراف وإدارة الموظفين والفروع وتحديد بيئة المنظومة</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {['SUPER_ADMIN', 'ADMIN'].includes(user?.role) && (
+              <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800">
+                <button
+                  onClick={handleToggleEnvMode}
+                  title="التبديل بين بيئة الإنتاج والوضع التجريبي"
+                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+                    envMode === 'LIVE'
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white shadow-md'
+                  }`}
+                >
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>{envMode === 'LIVE' ? 'التحويل للتجريبي 🧪' : 'التحويل للحقيقي 🟢'}</span>
+                </button>
+
+                <button
+                  onClick={handleResetDemoData}
+                  disabled={resetLoading}
+                  title="تصفير وسحق جميع البصمات وسجلات الاختبار للبدء بصفحة ناصعة البياض"
+                  className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>{resetLoading ? 'جاري التصفير...' : 'تصفير بيانات الاختبار 🧹'}</span>
+                </button>
+              </div>
+            )}
+
             {['SUPER_ADMIN', 'ADMIN', 'HR'].includes(user?.role) && (
               <>
                 <button
                   onClick={() => router.push('/admin/shifts')}
-                  className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
+                  className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
                 >
                   <Clock className="w-4 h-4" />
                   <span>إدارة الورديات</span>
@@ -232,7 +316,7 @@ export default function AdminDashboardPage() {
 
                 <button
                   onClick={() => router.push('/admin/devices')}
-                  className="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
+                  className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
                 >
                   <Users className="w-4 h-4" />
                   <span>الأجهزة الموثوقة</span>

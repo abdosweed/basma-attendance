@@ -393,6 +393,7 @@ model Notification {
 model SystemSetting {
   id                                String   @id @default(uuid())
   companyId                         String   @unique
+  environmentMode                   String   @default("DEMO") // DEMO or LIVE
   enableWorkGeofenceMonitoring      Boolean  @default(true)
   locationHeartbeatSeconds          Int      @default(45)
   geofenceExitConfirmationSeconds   Int      @default(90)
