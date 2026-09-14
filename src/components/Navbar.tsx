@@ -111,7 +111,7 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div className="max-w-[98%] mx-auto px-2 sm:px-4 py-3 flex items-center justify-between">
         {/* الشعار واسم التطبيق */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
