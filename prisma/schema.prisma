@@ -190,8 +190,10 @@ model Shift {
   gracePeriodMins Int      @default(15)
   maxBreakMins   Int       @default(60)
   isNightShift   Boolean   @default(false)
-  workingDays    String    @default("SUN,MON,TUE,WED,THU") // مفصولة بفواصل
-  isActive       Boolean   @default(true)
+  rotateFriday    Boolean   @default(false)
+  fridayShiftType String    @default("MORNING") // MORNING or EVENING or OFF
+  workingDays     String    @default("SUN,MON,TUE,WED,THU") // مفصولة بفواصل
+  isActive        Boolean   @default(true)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import {
   Clock,
@@ -20,6 +21,7 @@ import {
   Check,
   Zap,
   Sliders,
+  ArrowRight,
 } from 'lucide-react';
 
 const WEEK_DAYS = [
@@ -258,14 +260,24 @@ export default function AdminShiftsPage() {
       <main className="flex-1 max-w-[98%] w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* الترويسة العليا */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-5 rounded-3xl">
-          <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
-              <Clock className="w-6 h-6 text-sky-400" />
-              <span>إدارة الورديات ومواعيد الدوام الذكية (2026 Shift Engine)</span>
-            </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              تعريف أنواع الورديات (ثابتة، مرنة، مقسومة)، اختيار أيام الدوام التفاعلية وتسكين الموظفين بسهولة.
-            </p>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin"
+              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-2xl border border-slate-700 transition-all active:scale-95 flex items-center justify-center shrink-0"
+              title="العودة للوحة الإدارة الرئيسية"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+
+            <div>
+              <h1 className="text-xl font-black text-white flex items-center gap-2">
+                <Clock className="w-6 h-6 text-sky-400" />
+                <span>إدارة الورديات ومواعيد الدوام الذكية (2026 Shift Engine)</span>
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                تعريف أنواع الورديات، إعدادات تناوب يوم الجمعة، اختيار أيام الدوام التفاعلية وتسكين الموظفين بسهولة.
+              </p>
+            </div>
           </div>
 
           <button
