@@ -117,34 +117,67 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
         </div>
       )}
 
-      <div className="max-w-[98%] mx-auto px-2 sm:px-4 py-3 flex items-center justify-between">
+      <div className="max-w-[98%] mx-auto px-2 sm:px-4 py-2.5 flex items-center justify-between gap-2">
         {/* الشعار واسم التطبيق */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
-            <Fingerprint className="w-6 h-6" />
+        <a href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
+            <Fingerprint className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
               بصمة
-              <span className="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">
+              <span className="text-[9px] bg-sky-500/20 text-sky-400 font-semibold px-1.5 py-0.2 rounded-full border border-sky-500/30">
                 PWA
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400">Basma Attendance System</p>
+            <p className="text-[10px] text-slate-400 hidden sm:block">Basma Attendance</p>
           </div>
-        </Link>
+        </a>
 
         {/* الروابط وأزرار التحكم */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-none py-1">
+          {isAdminOrManager && (
+            <div className="flex items-center gap-1 shrink-0">
+              <a
+                href="/admin/shifts"
+                className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
+              >
+                <span>الورديات</span>
+              </a>
+
+              <a
+                href="/admin/tasks"
+                className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-400 hover:text-amber-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
+              >
+                <span>المهام</span>
+              </a>
+
+              <a
+                href="/admin/devices"
+                className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
+              >
+                <span>الأجهزة</span>
+              </a>
+
+              <a
+                href="/admin"
+                className="px-2.5 py-1.5 bg-sky-950/80 hover:bg-sky-900/90 text-sky-400 hover:text-sky-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-sky-800/60 flex items-center gap-1"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">لوحة الإدارة</span>
+              </a>
+            </div>
+          )}
+
           {/* جرس الإشعارات المباشر */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 text-slate-300 hover:text-white rounded-xl bg-slate-800/70 border border-slate-700/60 relative"
+              className="p-1.5 text-slate-300 hover:text-white rounded-xl bg-slate-800/70 border border-slate-700/60 relative"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white font-bold text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center animate-pulse">
                   {unreadCount}
                 </span>
               )}
@@ -152,29 +185,29 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
 
             {/* قائمة الإشعارات المنسدلة */}
             {showDropdown && (
-              <div className="absolute left-0 sm:right-auto mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-4 z-50 text-xs animate-in fade-in zoom-in-95">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+              <div className="absolute left-0 sm:right-auto mt-2 w-72 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-3.5 z-50 text-xs animate-in fade-in zoom-in-95">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
                   <span className="font-bold text-white flex items-center gap-1.5">
                     <Bell className="w-4 h-4 text-sky-400" />
-                    الإشعارات {unreadCount > 0 && `(${unreadCount} غير مقروء)`}
+                    الإشعارات {unreadCount > 0 && `(${unreadCount})`}
                   </span>
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-[11px] text-sky-400 hover:underline flex items-center gap-1 font-semibold"
+                      className="text-[10px] text-sky-400 hover:underline flex items-center gap-1 font-semibold"
                     >
-                      <CheckCheck className="w-3.5 h-3.5" />
+                      <CheckCheck className="w-3 h-3" />
                       تحديد الكل كمقروء
                     </button>
                   )}
                 </div>
 
-                <div className="max-h-72 overflow-y-auto space-y-2">
+                <div className="max-h-64 overflow-y-auto space-y-2">
                   {items.length > 0 ? (
                     items.map((item) => (
                       <div
                         key={item.id || Math.random()}
-                        className={`p-3 rounded-xl border text-xs leading-relaxed ${
+                        className={`p-2.5 rounded-xl border text-xs leading-relaxed ${
                           !item.readAt && !item.isRead
                             ? 'bg-sky-500/10 border-sky-500/30 text-sky-200'
                             : 'bg-slate-950/60 border-slate-800/80 text-slate-300'
@@ -188,50 +221,17 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-slate-500 py-4">لا توجد إشعارات حالية.</p>
+                    <p className="text-center text-slate-500 py-3">لا توجد إشعارات حالية.</p>
                   )}
                 </div>
               </div>
             )}
           </div>
 
-          {isAdminOrManager && (
-            <div className="flex items-center gap-1.5">
-              <a
-                href="/admin/shifts"
-                className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
-              >
-                <span>إدارة الورديات</span>
-              </a>
-
-              <a
-                href="/admin/tasks"
-                className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-400 hover:text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
-              >
-                <span>إدارة المهام</span>
-              </a>
-
-              <a
-                href="/admin/devices"
-                className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
-              >
-                <span>الأجهزة الموثوقة</span>
-              </a>
-
-              <a
-                href="/admin"
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span className="hidden sm:inline">لوحة الإدارة</span>
-              </a>
-            </div>
-          )}
-
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-slate-800/80 rounded-xl border border-slate-800 text-xs">
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 rounded-xl border border-slate-800 text-xs shrink-0">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-slate-300 font-medium">{user?.name || user?.email}</span>
-            <span className="text-[10px] text-sky-400 bg-sky-950/60 px-1.5 py-0.5 rounded font-mono">
+            <span className="text-slate-300 font-medium max-w-[120px] truncate">{user?.name || user?.email}</span>
+            <span className="text-[9px] text-sky-400 bg-sky-950/60 px-1 py-0.5 rounded font-mono">
               {user?.role}
             </span>
           </div>
@@ -240,17 +240,17 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
           <button
             onClick={toggleTheme}
             title={theme === 'dark' ? 'التحويل للوضع الفاتح ☀️' : 'التحويل للوضع الداكن 🌙'}
-            className="p-2 rounded-xl transition-all border border-slate-700/80 bg-slate-800/80 text-amber-400 hover:bg-slate-700 active:scale-95"
+            className="p-1.5 rounded-xl transition-all border border-slate-700/80 bg-slate-800/80 text-amber-400 hover:bg-slate-700 active:scale-95 shrink-0"
           >
-            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5 text-sky-400" />}
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-sky-400" />}
           </button>
 
           <button
             onClick={handleLogout}
             title="تسجيل الخروج"
-            className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all shrink-0"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -288,18 +288,18 @@ export default function AdminDashboardPage() {
                       : 'bg-amber-600 hover:bg-amber-500 text-white shadow-md'
                   }`}
                 >
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>{envMode === 'LIVE' ? 'التحويل للتجريبي 🧪' : 'التحويل للحقيقي 🟢'}</span>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>{envMode === 'LIVE' ? 'بيئة حقيقية 🟢' : 'بيئة تجريبية 🧪'}</span>
                 </button>
 
                 <button
                   onClick={handleResetDemoData}
                   disabled={resetLoading}
-                  title="تصفير وسحق جميع البصمات وسجلات الاختبار للبدء بصفحة ناصعة البياض"
-                  className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                  title="تصفير وسحق جميع البصمات وسجلات الاختبار"
+                  className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
                 >
                   <ShieldAlert className="w-3.5 h-3.5" />
-                  <span>{resetLoading ? 'جاري التصفير...' : 'تصفير بيانات الاختبار 🧹'}</span>
+                  <span className="hidden sm:inline">{resetLoading ? 'تصفير...' : 'تصفير الاختبار'}</span>
                 </button>
               </div>
             )}
@@ -307,24 +307,8 @@ export default function AdminDashboardPage() {
             {['SUPER_ADMIN', 'ADMIN', 'HR'].includes(user?.role) && (
               <>
                 <button
-                  onClick={() => router.push('/admin/shifts')}
-                  className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
-                >
-                  <Clock className="w-4 h-4" />
-                  <span>إدارة الورديات</span>
-                </button>
-
-                <button
-                  onClick={() => router.push('/admin/devices')}
-                  className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>الأجهزة الموثوقة</span>
-                </button>
-
-                <button
                   onClick={() => setShowAddEmployeeModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-sky-600/20 active:scale-95"
+                  className="px-3.5 py-2 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-lg shadow-sky-600/20 active:scale-95"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>+ إضافة موظف</span>
@@ -332,20 +316,20 @@ export default function AdminDashboardPage() {
 
                 <button
                   onClick={() => setShowImportEmployeesModal(true)}
-                  className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold rounded-xl flex items-center gap-2 transition-all border border-slate-700"
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all border border-slate-700"
                 >
                   <Upload className="w-4 h-4" />
-                  <span>استيراد CSV</span>
+                  <span className="hidden sm:inline">استيراد CSV</span>
                 </button>
               </>
             )}
 
             <button
               onClick={fetchAdminData}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl flex items-center gap-2 transition-all border border-slate-700"
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl flex items-center justify-center transition-all border border-slate-700 text-sky-400"
+              title="تحديث البيانات"
             >
-              <RefreshCw className="w-4 h-4 text-sky-400" />
-              <span>تحديث</span>
+              <RefreshCw className="w-4 h-4" />
             </button>
           </div>
         </div>
