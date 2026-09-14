@@ -105,63 +105,67 @@ export async function POST(request: Request) {
     }
 
     // 3. فحص كود التأكيد التفاعلي المزدوج (Double Verification Code Step)
-    if (!verificationCode || !verificationId) {
-      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 120 * 1000);
+    const enableOtp = settings?.enableVerificationOtp ?? false;
 
-      const vRecord = await prisma.verificationCode.create({
-        data: {
-          employeeId: employee.id,
-          type: 'CHECK_OUT',
-          code: generatedCode,
-          expiresAt,
-        },
-      });
+    if (enableOtp) {
+      if (!verificationCode || !verificationId) {
+        const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 120 * 1000);
 
-      // إنشاء إشعار في قاعدة البيانات وبثه لحظياً عبر SSE
-      try {
-        await prisma.notification.create({
+        const vRecord = await prisma.verificationCode.create({
           data: {
             employeeId: employee.id,
-            title: 'كود تأكيد الانصراف',
-            message: `كود تأكيد تسجيل الانصراف الخاص بك هو: ${generatedCode} (صالح لمدة دقيقتين)`,
-            type: 'INFO',
+            type: 'CHECK_OUT',
+            code: generatedCode,
+            expiresAt,
           },
         });
-      } catch (e) {}
 
-      return NextResponse.json({
-        requiresVerification: true,
-        verificationId: vRecord.id,
-        verificationCode: generatedCode,
-        message: `كود التأكيد الخاص بك هو: ${generatedCode}. أدخله في النافذة لإتمام الانصراف.`,
-        expiresInSeconds: 120,
-        distanceMeters: geofenceResult.distanceMeters,
-        branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,
+        // إنشاء إشعار في قاعدة البيانات وبثه لحظياً عبر SSE
+        try {
+          await prisma.notification.create({
+            data: {
+              employeeId: employee.id,
+              title: 'كود تأكيد الانصراف',
+              message: `كود تأكيد تسجيل الانصراف الخاص بك هو: ${generatedCode} (صالح لمدة دقيقتين)`,
+              type: 'INFO',
+            },
+          });
+        } catch (e) {}
+
+        return NextResponse.json({
+          requiresVerification: true,
+          verificationId: vRecord.id,
+          verificationCode: generatedCode,
+          message: `كود التأكيد الخاص بك هو: ${generatedCode}. أدخله في النافذة لإتمام الانصراف.`,
+          expiresInSeconds: 120,
+          distanceMeters: geofenceResult.distanceMeters,
+          branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,
+        });
+      }
+
+      const vCheck = await prisma.verificationCode.findUnique({
+        where: { id: verificationId },
+      });
+
+      if (
+        !vCheck ||
+        vCheck.employeeId !== employee.id ||
+        vCheck.code !== verificationCode ||
+        vCheck.usedAt !== null ||
+        vCheck.expiresAt < nowServerTime
+      ) {
+        return NextResponse.json(
+          { error: 'كود التأكيد غير صحيح أو انتهت صلاحيته. يرجى إعادة المحاولة.' },
+          { status: 400 }
+        );
+      }
+
+      await prisma.verificationCode.update({
+        where: { id: verificationId },
+        data: { usedAt: nowServerTime },
       });
     }
-
-    const vCheck = await prisma.verificationCode.findUnique({
-      where: { id: verificationId },
-    });
-
-    if (
-      !vCheck ||
-      vCheck.employeeId !== employee.id ||
-      vCheck.code !== verificationCode ||
-      vCheck.usedAt !== null ||
-      vCheck.expiresAt < nowServerTime
-    ) {
-      return NextResponse.json(
-        { error: 'كود التأكيد غير صحيح أو انتهت صلاحيته. يرجى إعادة المحاولة.' },
-        { status: 400 }
-      );
-    }
-
-    await prisma.verificationCode.update({
-      where: { id: verificationId },
-      data: { usedAt: nowServerTime },
-    });
 
     // 3. إنهاء أي استراحة جارية
     const activeBreak = await prisma.breakRecord.findFirst({

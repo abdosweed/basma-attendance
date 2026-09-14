@@ -456,6 +456,7 @@ model SystemSetting {
   id                                String   @id @default(uuid())
   companyId                         String   @unique
   environmentMode                   String   @default("DEMO") // DEMO or LIVE
+  enableVerificationOtp             Boolean  @default(false) // هل يلزم كود التحقق 6 أرقام عند البصمة
   enableWorkGeofenceMonitoring      Boolean  @default(true)
   locationHeartbeatSeconds          Int      @default(45)
   geofenceExitConfirmationSeconds   Int      @default(90)
