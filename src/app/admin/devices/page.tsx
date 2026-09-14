@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Users,
   Monitor,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function AdminTrustedDevicesPage() {
@@ -129,6 +130,13 @@ export default function AdminTrustedDevicesPage() {
         {/* العنوان والترويسة */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl">
           <div className="flex items-center gap-4">
+            <a
+              href="/admin"
+              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-2xl border border-slate-700 transition-all active:scale-95 flex items-center justify-center shrink-0"
+              title="العودة للوحة الإدارة الرئيسية"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </a>
             <div className="p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400">
               <Smartphone className="w-7 h-7" />
             </div>

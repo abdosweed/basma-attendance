@@ -17,6 +17,7 @@ import {
   Clock,
   User,
   Zap,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function AdminTasksPage() {
@@ -132,14 +133,23 @@ export default function AdminTasksPage() {
       <main className="flex-1 max-w-[98%] w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* الترويسة الرئيسية */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-5 rounded-3xl">
-          <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
-              <ListTodo className="w-6 h-6 text-sky-400" />
-              <span>إدارة وتكليف مهام الموظفين (Task Engine 2026)</span>
-            </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              إسناد المسؤوليات والمهام اليومية للموظفين ومتابعة نسبة الإنجاز والربط ببصمة الحضور والانصراف.
-            </p>
+          <div className="flex items-center gap-3">
+            <a
+              href="/admin"
+              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-2xl border border-slate-700 transition-all active:scale-95 flex items-center justify-center shrink-0"
+              title="العودة للوحة الإدارة الرئيسية"
+            >
+              <ArrowRight className="w-5 h-5" />
+            </a>
+            <div>
+              <h1 className="text-xl font-black text-white flex items-center gap-2">
+                <ListTodo className="w-6 h-6 text-sky-400" />
+                <span>إدارة وتكليف مهام الموظفين (Task Engine 2026)</span>
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                إسناد المسؤوليات والمهام اليومية للموظفين ومتابعة نسبة الإنجاز والربط ببصمة الحضور والانصراف.
+              </p>
+            </div>
           </div>
 
           <button
