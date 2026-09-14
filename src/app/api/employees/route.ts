@@ -48,6 +48,7 @@ export async function GET(request: Request) {
         department: true,
         employeeBranches: { include: { branch: true } },
         employeeShifts: { include: { shift: true } },
+        trustedDevices: true,
         attendanceRecords: {
           orderBy: { date: 'desc' },
           take: 1,

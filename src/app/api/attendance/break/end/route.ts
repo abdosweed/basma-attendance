@@ -1,12 +1,43 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { evaluateDeviceTrust } from '@/lib/device';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const session = await getAuthenticatedUser();
     if (!session || !session.employeeId) {
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const { deviceId, trustedDeviceId } = body;
+    const userAgent = request.headers.get('user-agent') || '';
+    const rawDevId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
+
+    const empObj = await prisma.employee.findUnique({
+      where: { id: session.employeeId },
+      select: { companyId: true },
+    });
+
+    if (empObj) {
+      const deviceEval = await evaluateDeviceTrust(
+        session.employeeId,
+        rawDevId,
+        empObj.companyId,
+        userAgent
+      );
+
+      if (!deviceEval.isAllowed) {
+        return NextResponse.json(
+          {
+            error: deviceEval.reason || 'هذا الجهاز غير معتمد لإنهاء الاستراحة.',
+            code: 'UNAUTHORIZED_DEVICE',
+            deviceStatus: deviceEval.status,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     const activeBreak = await prisma.breakRecord.findFirst({

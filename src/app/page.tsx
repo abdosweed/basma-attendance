@@ -21,6 +21,8 @@ import {
   Building,
   Bell,
   PlusCircle,
+  Smartphone,
+  Ban,
 } from 'lucide-react';
 
 export default function EmployeePortalPage() {
@@ -128,9 +130,74 @@ export default function EmployeePortalPage() {
     }
   };
 
+  const [deviceStatusState, setDeviceStatusState] = useState<'PENDING' | 'APPROVED' | 'REVOKED' | 'BLOCKED' | 'NOT_FOUND'>('APPROVED');
+  const [myCurrentDevice, setMyCurrentDevice] = useState<any>(null);
+
+  const fetchDeviceStatus = async () => {
+    try {
+      const res = await fetch('/api/employees/me/devices');
+      if (res.ok) {
+        const data = await res.json();
+        const currentDevId = getOrCreateDeviceId();
+
+        if (data.devices && data.devices.length > 0) {
+          const matched = data.devices.find((d: any) => d.deviceId === currentDevId);
+          if (matched) {
+            setMyCurrentDevice(matched);
+            setDeviceStatusState(matched.status);
+          } else {
+            const approved = data.devices.find((d: any) => d.status === 'APPROVED');
+            setMyCurrentDevice(approved || data.devices[0]);
+            setDeviceStatusState(approved ? 'APPROVED' : data.devices[0].status);
+          }
+        } else {
+          setDeviceStatusState('NOT_FOUND');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRequestDeviceApproval = async () => {
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/employees/me/devices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trustedDeviceId: getOrCreateDeviceId(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGeoStatus({ message: data.message || 'تم إرسال طلب اعتماد الجهاز بنجاح 🟢', type: 'info' });
+        await fetchDeviceStatus();
+      } else {
+        setGeoStatus({ message: data.error || 'فشل إرسال طلب الاعتماد', type: 'error' });
+      }
+    } catch (e) {
+      setGeoStatus({ message: 'حدث خطأ بالاتصال أثناء إرسال طلب الاعتماد', type: 'error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
+    fetchDeviceStatus();
   }, []);
+
+  // Polling خفيف كل 15 ثانية كـ Fallback في حالة كان الجهاز PENDING لحين الاعتماد
+  useEffect(() => {
+    if (deviceStatusState !== 'PENDING') return;
+
+    const pollTimer = setInterval(() => {
+      fetchDeviceStatus();
+    }, 15000);
+
+    return () => clearInterval(pollTimer);
+  }, [deviceStatusState]);
 
   const [verifiedAccuracy, setVerifiedAccuracy] = useState<number | null>(null);
   const [lastVerifiedTime, setLastVerifiedTime] = useState<string | null>(null);
@@ -396,27 +463,95 @@ export default function EmployeePortalPage() {
           </div>
         </div>
 
-        {/* رسالة حالة الـ GPS والـ Geofence الحالية */}
+        {/* بطاقة وحالة اعتماد الجهاز للموظف (Trusted Device Status) */}
+        {deviceStatusState === 'PENDING' && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center justify-between gap-3 shadow-lg animate-in fade-in">
+            <div className="flex items-center gap-3">
+              <Clock className="w-6 h-6 text-amber-400 animate-pulse shrink-0" />
+              <div>
+                <span className="font-bold block text-sm">🟡 جهازك بانتظار الاعتماد من الإدارة</span>
+                <span className="text-xs text-amber-200/80">
+                  تم تقديم هذا الجهاز للإدارة وهو بانتظار الموافقة. يمكنك الضغط على تحديث أو الانتظار.
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={fetchDeviceStatus}
+              className="px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 rounded-xl text-xs font-bold border border-amber-500/40 flex items-center gap-1.5 shrink-0 transition-all active:scale-95"
+            >
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              <span className="hidden sm:inline">تحديث الحالة</span>
+            </button>
+          </div>
+        )}
+
+        {deviceStatusState === 'REVOKED' && (
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-6 h-6 text-rose-400 shrink-0" />
+              <div>
+                <span className="font-bold block text-sm">🔴 تم إلغاء اعتماد هذا الجهاز</span>
+                <span className="text-xs text-rose-200/80">
+                  {myCurrentDevice?.reviewNote
+                    ? `ملاحظة الإدارة: ${myCurrentDevice.reviewNote}`
+                    : 'لم يعد هذا الجهاز معتمداً لتسجيل الحضور والانصراف. يمكنك إرسال طلب اعتماد جديد.'}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleRequestDeviceApproval}
+              disabled={actionLoading}
+              className="px-3.5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all active:scale-95 disabled:opacity-50"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span>طلب اعتماد الجهاز</span>
+            </button>
+          </div>
+        )}
+
+        {deviceStatusState === 'BLOCKED' && (
+          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-slate-300 flex items-center gap-3 shadow-lg">
+            <Ban className="w-6 h-6 text-slate-400 shrink-0" />
+            <div>
+              <span className="font-bold block text-sm">⚫ هذا الجهاز محظور من قبل المنظومة</span>
+              <span className="text-xs text-slate-400">تمنع سياسة الشركة تسجيل الحضور والانصراف من هذا الجهاز.</span>
+            </div>
+          </div>
+        )}
+
+        {deviceStatusState === 'APPROVED' && (
+          <div className="p-2.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>📱 جهازك معتمد ومقترن بـ Basma</span>
+            </div>
+            <span className="text-[10px] text-emerald-400/80 font-mono">APPROVED</span>
+          </div>
+        )}
+
+        {/* رسالة حالة الـ GPS والـ Geofence الحالية مع محرك ثقة الموقع Location Confidence Engine */}
         <div
           className={`p-4 rounded-2xl text-xs border flex items-start justify-between gap-3 transition-all ${
             geoStatus.type === 'error'
               ? 'bg-red-500/10 border-red-500/30 text-red-300'
               : geoStatus.type === 'success'
               ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-              : 'bg-sky-500/10 border-sky-500/30 text-sky-300'
+              : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
           }`}
         >
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="leading-relaxed">
-              <span className="font-bold block mb-0.5">الحالة الجغرافية (Strict Server Geofence):</span>
-              {geoStatus.message}
+              <span className="font-bold block mb-0.5 flex items-center gap-1.5">
+                <span>حالة الموقع الجغرافي (Location Confidence Engine):</span>
+              </span>
+              <span>{geoStatus.message}</span>
             </div>
           </div>
 
           {verifiedAccuracy !== null && (
             <div className="text-left shrink-0 bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800">
-              <span className="text-[10px] block text-slate-400 font-mono">آخر دقة معتمدة</span>
+              <span className="text-[10px] block text-slate-400 font-mono">الدقة المقاسة</span>
               <span className="font-bold text-white text-xs font-mono">±{verifiedAccuracy}م</span>
               <span className="text-[9px] block text-sky-400 font-mono">{lastVerifiedTime}</span>
             </div>

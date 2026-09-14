@@ -32,6 +32,7 @@ import {
   Settings,
   Upload,
   Send,
+  Smartphone,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -325,6 +326,15 @@ export default function AdminDashboardPage() {
             )}
 
             <button
+              onClick={() => router.push('/admin/devices?status=PENDING')}
+              className="px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+              title="عرض وخصم طلبات اعتماد الأجهزة المعلقة"
+            >
+              <Smartphone className="w-4 h-4 text-amber-400" />
+              <span>طلبات الأجهزة ({dashData?.summary?.pendingDevicesCount || 0})</span>
+            </button>
+
+            <button
               onClick={fetchAdminData}
               className="p-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl flex items-center justify-center transition-all border border-slate-700 text-sky-400"
               title="تحديث البيانات"
@@ -334,55 +344,85 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* بطاقات الإحصائيات السريعة اليومية */}
+        {/* بطاقات الإحصائيات السريعة اليومية - أصبحت أزراراً تفاعلية للفلترة السريعة */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+          <button
+            onClick={() => setActiveTab('employees')}
+            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
+              activeTab === 'employees' ? 'border-sky-500 ring-2 ring-sky-500/30' : 'border-slate-800 hover:border-slate-700'
+            }`}
+          >
             <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-              <span>الموظفين</span>
+              <span>إجمالي الموظفين</span>
               <Users className="w-4 h-4 text-sky-400" />
             </div>
             <span className="text-2xl font-black text-white">{summary.totalEmployees || 0}</span>
-          </div>
+          </button>
 
-          <div className="bg-slate-900/80 border border-emerald-500/20 p-4 rounded-2xl">
+          <button
+            onClick={() => setActiveTab('live')}
+            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
+              activeTab === 'live' ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-emerald-500/20 hover:border-emerald-500/40'
+            }`}
+          >
             <div className="flex items-center justify-between text-emerald-400 text-xs mb-2">
-              <span>🟢 حاضر</span>
+              <span>🟢 حاضر الان</span>
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <span className="text-2xl font-black text-emerald-400">{summary.presentCount || 0}</span>
-          </div>
+          </button>
 
-          <div className="bg-slate-900/80 border border-yellow-500/20 p-4 rounded-2xl">
+          <button
+            onClick={() => setActiveTab('live')}
+            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
+              activeTab === 'live' ? 'border-yellow-500 ring-2 ring-yellow-500/30' : 'border-yellow-500/20 hover:border-yellow-500/40'
+            }`}
+          >
             <div className="flex items-center justify-between text-yellow-400 text-xs mb-2">
               <span>🟡 متأخر</span>
               <Clock className="w-4 h-4" />
             </div>
             <span className="text-2xl font-black text-yellow-400">{summary.lateCount || 0}</span>
-          </div>
+          </button>
 
-          <div className="bg-slate-900/80 border border-red-500/20 p-4 rounded-2xl">
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
+              activeTab === 'stats' ? 'border-red-500 ring-2 ring-red-500/30' : 'border-red-500/20 hover:border-red-500/40'
+            }`}
+          >
             <div className="flex items-center justify-between text-red-400 text-xs mb-2">
               <span>🔴 غائب</span>
               <XCircle className="w-4 h-4" />
             </div>
             <span className="text-2xl font-black text-red-400">{summary.absentCount || 0}</span>
-          </div>
+          </button>
 
-          <div className="bg-slate-900/80 border border-orange-500/20 p-4 rounded-2xl">
+          <button
+            onClick={() => setActiveTab('live')}
+            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
+              activeTab === 'live' ? 'border-orange-500 ring-2 ring-orange-500/30' : 'border-orange-500/20 hover:border-orange-500/40'
+            }`}
+          >
             <div className="flex items-center justify-between text-orange-400 text-xs mb-2">
-              <span>🟠 استراحة</span>
+              <span>🟠 في استراحة</span>
               <Coffee className="w-4 h-4" />
             </div>
             <span className="text-2xl font-black text-orange-400">{summary.onBreakCount || 0}</span>
-          </div>
+          </button>
 
-          <div className="bg-slate-900/80 border border-rose-500/30 p-4 rounded-2xl">
+          <button
+            onClick={() => setActiveTab('suspicious')}
+            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
+              activeTab === 'suspicious' ? 'border-rose-500 ring-2 ring-rose-500/30' : 'border-rose-500/30 hover:border-rose-500/50'
+            }`}
+          >
             <div className="flex items-center justify-between text-rose-400 text-xs mb-2">
               <span>⚠️ محاولات مشبوهة</span>
               <ShieldAlert className="w-4 h-4" />
             </div>
             <span className="text-2xl font-black text-rose-400">{summary.suspiciousAttemptsCount || 0}</span>
-          </div>
+          </button>
         </div>
 
         {/* شريط التبويبات الرئيسي للوحة التحكم */}
@@ -440,6 +480,17 @@ export default function AdminDashboardPage() {
             }`}
           >
             🗺️ الفروع والـ Geofence
+          </button>
+
+          <button
+            onClick={() => setActiveTab('suspicious')}
+            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border ${
+              activeTab === 'suspicious'
+                ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/25'
+                : 'bg-slate-900 text-rose-400 hover:text-white border-rose-500/30'
+            }`}
+          >
+            ⚠️ سجل المحاولات المشبوهة ({dashData?.summary?.suspiciousAttemptsCount || 0})
           </button>
 
           <button
@@ -564,6 +615,115 @@ export default function AdminDashboardPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. سجل وسيناريوهات المحاولات المشبوهة High-Clarity Audit Log */}
+        {activeTab === 'suspicious' && (
+          <div className="bg-slate-900/90 border border-rose-500/30 rounded-3xl p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-rose-400" />
+                  <span>تقرير المحاولات المشبوهة وخروقات الموقع الجغرافي (Suspicious Audit Log)</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  رصد تفصيلي لجميع محاولات التبصيم من أجهزة غير معتمدة أو خارج النطاق الجغرافي المحدد للفروع.
+                </p>
+              </div>
+              <span className="px-3 py-1 bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-rose-500/30">
+                إجمالي المحاولات المحظورة: {dashData?.suspiciousAttempts?.length || 0}
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-xs text-slate-300">
+                <thead className="bg-slate-950/80 text-slate-400 text-[11px] font-bold border-b border-slate-800">
+                  <tr>
+                    <th className="p-3">الموظف</th>
+                    <th className="p-3">السبب والتشخيص</th>
+                    <th className="p-3">مستوى الخطورة</th>
+                    <th className="p-3">ملاحظات دقة GPS</th>
+                    <th className="p-3">الإجراء المتخذ</th>
+                    <th className="p-3">التوقيت والتاريخ</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {dashData?.suspiciousAttempts?.length > 0 ? (
+                    dashData.suspiciousAttempts.map((item: any) => (
+                      <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="p-3 font-bold text-white">
+                          <div>
+                            <span>{item.employee ? `${item.employee.firstName} ${item.employee.lastName}` : 'غير معروف'}</span>
+                            <span className="block text-[10px] text-slate-400 font-mono">
+                              #{item.employee?.employeeNumber || item.employeeId || 'N/A'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-rose-300 font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                            <span>
+                              {item.reason === 'GPS_OUT_OF_BOUNDS' || item.reason?.includes('خارج')
+                                ? '📍 محاولة تبصيم من خارج النطاق الجغرافي المصرح'
+                                : item.reason === 'LOW_ACCURACY' || item.reason?.includes('دقة')
+                                ? '📡 دقة الـ GPS ضئيلة جداً أو غير موثوقة'
+                                : item.reason === 'UNAUTHORIZED_DEVICE' || item.reason?.includes('جهاز')
+                                ? '📱 استخدام هاتف غير معتمد بحساب الموظف'
+                                : item.reason}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                              item.riskLevel === 'HIGH'
+                                ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                                : item.riskLevel === 'MEDIUM'
+                                ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                            }`}
+                          >
+                            {item.riskLevel === 'HIGH' ? '⚠️ عالي الخطورة' : item.riskLevel === 'MEDIUM' ? '⚡ متوسط' : item.riskLevel}
+                          </span>
+                        </td>
+                        <td className="p-3 text-[11px] font-mono text-slate-400">
+                          {item.latitude && item.longitude ? (
+                            <div>
+                              <span className="text-sky-400">
+                                Lat: {Number(item.latitude).toFixed(4)} | Lng: {Number(item.longitude).toFixed(4)}
+                              </span>
+                              <span className="block text-[10px] text-slate-500">
+                                الدقة: {Math.round(item.accuracy || 0)}m
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-500">غ/م</span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <span className="px-2.5 py-1 bg-red-500/20 text-red-400 font-bold rounded-xl text-[10px] border border-red-500/30">
+                            🛡️ حظر التبصيم (BLOCKED)
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono text-[11px] text-slate-400">
+                          {new Date(item.createdAt || item.timestamp).toLocaleString('ar-EG', {
+                            dateStyle: 'short',
+                            timeStyle: 'short',
+                          })}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
+                        🎉 ممتاز! لا توجد أي محاولات مشبوهة أو خروقات موقع سجلت مؤخراً.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

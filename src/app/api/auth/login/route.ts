@@ -35,10 +35,44 @@ export async function POST(request: Request) {
       );
     }
 
+    // 1. فحص الحظر التلقائي للحساب بسبب محاولات متتالية خاطئة
+    const now = new Date();
+    if (user.lockoutUntil && user.lockoutUntil > now) {
+      const remainingMins = Math.ceil((user.lockoutUntil.getTime() - now.getTime()) / (1000 * 60));
+      return NextResponse.json(
+        {
+          error: `🛑 تم حظر الحساب مؤقتاً بسبب تكرار محاولات الدخول الخاطئة. يرجى الانتظار لمدة ${remainingMins} دقيقة ثم إعادة المحاولة.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const isValidPassword = await verifyPassword(password, user.passwordHash);
     if (!isValidPassword) {
+      const newFailedAttempts = (user.failedLoginAttempts || 0) + 1;
+      let newLockoutUntil = user.lockoutUntil;
+
+      if (newFailedAttempts >= 5) {
+        newLockoutUntil = new Date(Date.now() + 15 * 60 * 1000); // حظر 15 دقيقة
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: newFailedAttempts,
+          lockoutUntil: newLockoutUntil,
+        },
+      });
+
+      if (newFailedAttempts >= 5) {
+        return NextResponse.json(
+          { error: '🛑 تم تجاوز الحد الأقصى للمحاولات (5 محاولات). تم حظر الحساب لمدة 15 دقيقة لحماية المنظومة.' },
+          { status: 429 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'كلمة المرور غير صحيحة' },
+        { error: `كلمة المرور غير صحيحة. المحاولة (${newFailedAttempts} من 5)` },
         { status: 401 }
       );
     }
@@ -55,10 +89,14 @@ export async function POST(request: Request) {
 
     await setSessionCookie(sessionData);
 
-    // تحديث وقت آخر دخول
+    // تحديث وقت آخر دخول وتصفير محاولات الفشل
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: {
+        lastLoginAt: new Date(),
+        failedLoginAttempts: 0,
+        lockoutUntil: null,
+      },
     });
 
     return NextResponse.json({
@@ -70,6 +108,7 @@ export async function POST(request: Request) {
         name: sessionData.name,
         employeeId: employee?.id,
         companyName: employee?.company?.name,
+        mustChangePassword: user.mustChangePassword,
       },
     });
   } catch (error: any) {

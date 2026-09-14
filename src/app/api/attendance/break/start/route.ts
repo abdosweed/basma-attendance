@@ -3,6 +3,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { broadcastNotificationToUser } from '@/lib/sse-notifications';
 import { validateEmployeeLocation } from '@/lib/geofence';
+import { evaluateDeviceTrust } from '@/lib/device';
 
 export async function POST(request: Request) {
   try {
@@ -27,6 +28,28 @@ export async function POST(request: Request) {
 
     if (!employee) {
       return NextResponse.json({ error: 'تعذر العثور على بيانات الموظف' }, { status: 404 });
+    }
+
+    const { deviceId, trustedDeviceId } = body;
+    const userAgent = request.headers.get('user-agent') || '';
+    const rawDevId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
+
+    const deviceEval = await evaluateDeviceTrust(
+      employee.id,
+      rawDevId,
+      employee.companyId,
+      userAgent
+    );
+
+    if (!deviceEval.isAllowed) {
+      return NextResponse.json(
+        {
+          error: deviceEval.reason || 'هذا الجهاز غير معتمد لبدء الاستراحة.',
+          code: 'UNAUTHORIZED_DEVICE',
+          deviceStatus: deviceEval.status,
+        },
+        { status: 403 }
+      );
     }
 
     const settings = employee.company.systemSettings[0] || {

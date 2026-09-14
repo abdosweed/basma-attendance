@@ -19,6 +19,8 @@ export async function GET() {
       activeBreaksCount,
       pendingLeavesCount,
       suspiciousAttemptsCount,
+      pendingDevicesCount,
+      suspiciousAttemptsList,
       recentEvents,
       branches,
     ] = await Promise.all([
@@ -34,6 +36,16 @@ export async function GET() {
       prisma.breakRecord.count({ where: { status: 'ACTIVE' } }),
       prisma.leaveRequest.count({ where: { status: 'PENDING' } }),
       prisma.suspiciousAttempt.count({ where: { actionTaken: 'BLOCKED' } }),
+      prisma.trustedDevice.count({ where: { status: 'PENDING' } }),
+      prisma.suspiciousAttempt.findMany({
+        take: 30,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          employee: {
+            include: { primaryBranch: true, department: true },
+          },
+        },
+      }),
       prisma.attendanceEvent.findMany({
         take: 10,
         orderBy: { serverTimestamp: 'desc' },
@@ -62,10 +74,12 @@ export async function GET() {
         absentCount,
         onBreakCount: activeBreaksCount,
         pendingLeavesCount,
+        pendingDevicesCount,
         suspiciousAttemptsCount,
         checkedOutCount,
       },
       todayRecords,
+      suspiciousAttempts: suspiciousAttemptsList,
       recentEvents,
       branches,
     });

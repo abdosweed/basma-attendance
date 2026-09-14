@@ -25,6 +25,24 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
+export function validatePasswordPolicy(password: string): { isValid: boolean; error?: string } {
+  if (!password || password.length < 8) {
+    return { isValid: false, error: 'كلمة المرور يجب ألا تقل عن 8 خانات' };
+  }
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasDigit = /[0-9]/.test(password);
+
+  if (!hasUpper || !hasLower || !hasDigit) {
+    return {
+      isValid: false,
+      error: 'كلمة المرور يجب أن تحتوي على حرف كبير (A-Z) وحرف صغير (a-z) ورقم (0-9) على الأقل',
+    };
+  }
+
+  return { isValid: true };
+}
+
 export async function createSessionToken(payload: UserSessionPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })

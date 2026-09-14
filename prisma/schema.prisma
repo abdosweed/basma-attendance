@@ -48,6 +48,7 @@ model Branch {
   attendanceEvents  AttendanceEvent[]
   attendanceRecords AttendanceRecord[]
   geofenceViolations GeofenceViolation[]
+  locationVerificationRequests LocationVerificationRequest[]
 
   @@index([companyId])
 }
@@ -73,14 +74,18 @@ model User {
   email        String    @unique
   phone        String?   @unique
   passwordHash String
-  role         String    @default("EMPLOYEE") // SUPER_ADMIN, ADMIN, HR, BRANCH_MANAGER, SUPERVISOR, EMPLOYEE
-  isActive     Boolean   @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  role                String    @default("EMPLOYEE") // SUPER_ADMIN, ADMIN, HR, BRANCH_MANAGER, SUPERVISOR, EMPLOYEE
+  isActive            Boolean   @default(true)
+  mustChangePassword  Boolean   @default(false)
+  failedLoginAttempts Int       @default(0)
+  lockoutUntil        DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   employee  Employee?
   auditLogs AuditLog[]
+  otpChallenges OtpChallenge[]
 }
 
 // 5. ملف الموظف (Employee Profile)
@@ -120,6 +125,7 @@ model Employee {
   notifications      Notification[]
   geofenceViolations GeofenceViolation[]
   taskAssignments    TaskAssignment[]
+  locationVerificationRequests LocationVerificationRequest[]
 
   @@index([companyId])
   @@index([status])
@@ -140,20 +146,34 @@ model EmployeeBranch {
   @@unique([employeeId, branchId])
 }
 
-// 7. الأجهزة الموثوقة (Trusted Devices)
+// 7. الأجهزة الموثوقة (Trusted Devices / Approved Device Model)
 model TrustedDevice {
-  id          String   @id @default(uuid())
-  employeeId  String
-  deviceId    String   @unique
-  deviceName  String?
-  browser     String?
-  os          String?
-  ipAddress   String?
-  isApproved  Boolean  @default(true)
-  firstSeenAt DateTime @default(now())
-  lastSeenAt  DateTime @default(now())
+  id              String    @id @default(uuid())
+  employeeId      String
+  deviceId        String    @unique
+  deviceTokenHash String?
+  deviceName      String?
+  browser         String?
+  os              String?
+  platform        String?
+  ipAddress       String?
+  status          String    @default("APPROVED") // PENDING, APPROVED, REVOKED, BLOCKED
+  isApproved      Boolean   @default(true)
+  approvedAt      DateTime?
+  approvedBy      String?
+  revokedAt       DateTime?
+  revokedBy       String?
+  rejectedAt      DateTime?
+  rejectedBy      String?
+  reviewNote      String?
+  firstSeenAt     DateTime  @default(now())
+  lastSeenAt      DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, status])
 }
 
 enum ShiftType {
@@ -479,6 +499,15 @@ model SystemSetting {
   trustedDevicesPolicy              String   @default("MULTI")
   overtimePolicy                    String   @default("AUTO_APPROVE")
   allowOfflinePending               Boolean  @default(false)
+  allowManagerVerificationInUncertaintyZone Boolean @default(true)
+  managerVerificationMaxDistance            Float   @default(60.0)
+  otpExpiryMinutes                  Int      @default(3)
+  maxOtpAttempts                    Int      @default(5)
+  otpRequiredForLogin               Boolean  @default(false)
+  otpRequiredForCheckIn             Boolean  @default(false)
+  otpRequiredForCheckOut            Boolean  @default(false)
+  otpRequiredForDeviceApproval      Boolean  @default(false)
+  otpRequiredForAdminLogin          Boolean  @default(false)
   pushNotificationsEnabled          Boolean  @default(true)
   updatedAt                         DateTime @updatedAt
 
@@ -524,4 +553,57 @@ model VerificationCode {
 
   @@index([employeeId, type])
 }
+
+// 24. طلبات التحقق من الموقع عند منطقة عدم التأكد (Location Verification Requests)
+model LocationVerificationRequest {
+  id                  String    @id @default(uuid())
+  employeeId          String
+  branchId            String?
+  attendanceSessionId String?
+  operationType       String    // CHECK_IN, CHECK_OUT, BREAK_START, BREAK_END
+  latitude            Float
+  longitude           Float
+  accuracy            Float
+  distanceMeters      Float
+  confidenceScore     Float     @default(50.0)
+  locationState       String    @default("UNCERTAIN")
+  status              String    @default("PENDING") // PENDING, APPROVED, REJECTED, EXPIRED
+  requestedAt         DateTime  @default(now())
+  reviewedAt          DateTime?
+  reviewedBy          String?
+  reviewNote          String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @default(now()) @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  branch   Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([employeeId, status])
+  @@index([branchId, status])
+}
+
+// 25. تحديات وتأكيدات الـ OTP المحصنة (Cryptographic OTP Challenges)
+model OtpChallenge {
+  id           String    @id @default(uuid())
+  userId       String
+  purpose      String    // LOGIN, CHECK_IN, CHECK_OUT, DEVICE_APPROVAL, PASSWORD_CHANGE, ADMIN_ACTION
+  otpHash      String
+  salt         String
+  expiresAt    DateTime
+  attemptCount Int       @default(0)
+  maxAttempts  Int       @default(5)
+  usedAt       DateTime?
+  status       String    @default("PENDING") // PENDING, VERIFIED, EXPIRED, BLOCKED
+  resendCount  Int       @default(0)
+  lastSentAt   DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@index([status])
+}
+
+
 

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { validateEmployeeLocation } from '@/lib/geofence';
+import { evaluateLocationConfidence, validateEmployeeLocation } from '@/lib/geofence';
+import { evaluateDeviceTrust } from '@/lib/device';
 
 export async function POST(request: Request) {
   try {
@@ -43,44 +44,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'حساب الموظف غير نشط أو غير موجود' }, { status: 403 });
     }
 
-    // 0. فحص واعتماد هاتف الموظف المقترن الموثوق (Trusted Device Binding Lock)
-    const reqDeviceId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
-    const existingDevices = employee.trustedDevices;
+    // 0. فحص وتقييم ثقة الجهاز (Approved Device Model Engine)
+    const userAgent = request.headers.get('user-agent') || '';
+    const rawDevId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
 
-    if (existingDevices.length === 0) {
-      // إقرار واقتران الهاتف الأول تلقائياً بحساب الموظف
-      await prisma.trustedDevice.create({
-        data: {
-          employeeId: employee.id,
-          deviceId: reqDeviceId,
-          deviceName: deviceInfo?.deviceName || 'هاتف محمول',
-          browser: deviceInfo?.browser || 'Browser',
-          os: deviceInfo?.os || 'Mobile OS',
-          isApproved: true,
+    const deviceEval = await evaluateDeviceTrust(
+      employee.id,
+      rawDevId,
+      employee.companyId,
+      userAgent
+    );
+
+    if (!deviceEval.isAllowed) {
+      return NextResponse.json(
+        {
+          error: deviceEval.reason || 'هذا الجهاز غير معتمد.',
+          code: 'UNAUTHORIZED_DEVICE',
+          deviceStatus: deviceEval.status,
         },
-      });
-    } else {
-      // الموظف يملك جهازاً معتمداً سابقاً -> التأكد من المطابقة
-      const matchedDevice = existingDevices.find((d) => d.deviceId === reqDeviceId);
-
-      if (!matchedDevice || !matchedDevice.isApproved) {
-        const primaryDevice = existingDevices.find((d) => d.isApproved);
-        return NextResponse.json(
-          {
-            error: `🛑 هذا الجهاز غير معتمد لحسابك. يمكنك تسجيل الحضور فقط من هاتفك المعتمد${
-              primaryDevice?.deviceName ? ` (${primaryDevice.deviceName})` : ''
-            }. لتغيير هاتفك المعتمد يرجى مراجعة إدارة الموارد البشرية.`,
-            code: 'UNAUTHORIZED_DEVICE',
-          },
-          { status: 403 }
-        );
-      }
-
-      // تحديث آخر تواجد للهاتف المعتمد
-      await prisma.trustedDevice.update({
-        where: { id: matchedDevice.id },
-        data: { lastSeenAt: new Date() },
-      });
+        { status: 403 }
+      );
     }
 
     // 1. تحديد الفروع المصرح بها للموظف
@@ -98,24 +81,41 @@ export async function POST(request: Request) {
     const accuracyMustBeWithinRadius = settings?.accuracyMustBeWithinRadius || false;
     const validationMode = (settings?.geofenceValidationMode as 'STRICT' | 'ACCURACY_AWARE') || 'STRICT';
 
-    // 3. إجراء التحقق الجغرافي الخادم (Server-Side Geofencing)
-    const geofenceResult = validateEmployeeLocation(
-      latitude,
-      longitude,
-      accuracy,
-      maxAccuracy,
+    // 3. إجراء التحقق الخادم المتقدم (Multi-sample Location Confidence Engine)
+    const readings = body.readings && Array.isArray(body.readings) && body.readings.length > 0
+      ? body.readings
+      : [{ latitude, longitude, accuracy, timestamp: Date.now() }];
+
+    const confidenceAssessment = evaluateLocationConfidence(
+      readings,
       authorizedBranches,
       employee.allowOutsideBranch,
-      accuracyMustBeWithinRadius,
-      validationMode
+      { maxAcceptableAccuracy: maxAccuracy }
     );
 
     const nowServerTime = new Date();
     const todayDateStr = nowServerTime.toISOString().split('T')[0];
 
-    // إذا فشل التحقق الجغرافي
-    if (!geofenceResult.isAllowed) {
-      if (geofenceResult.isSuspicious) {
+    // التعامل مع حالات عدم التأكد أو الخروج الخارجي
+    if (confidenceAssessment.state === 'UNCERTAIN') {
+      return NextResponse.json(
+        {
+          error: confidenceAssessment.reason,
+          code: 'UNCERTAIN',
+          locationState: 'UNCERTAIN',
+          confidenceScore: confidenceAssessment.confidenceScore,
+          distanceMeters: confidenceAssessment.medianDistance,
+          accuracyMeters: confidenceAssessment.bestAccuracy,
+          nearestBranch: confidenceAssessment.nearestBranch,
+          requiresFallback: true,
+          message: 'موقعك غير مؤكد تماماً. يمكنك إعادة التثبيت أو طلب تأكيد الوجود من الإدارة.',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (confidenceAssessment.state === 'OUTSIDE_CONFIRMED' || confidenceAssessment.state === 'LOCATION_UNAVAILABLE') {
+      if (confidenceAssessment.state === 'OUTSIDE_CONFIRMED') {
         await prisma.suspiciousAttempt.create({
           data: {
             employeeId: employee.id,
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
             latitude,
             longitude,
             accuracy,
-            reason: geofenceResult.reason || 'GPS_OUT_OF_BOUNDS',
+            reason: confidenceAssessment.reason || 'GPS_OUT_OF_BOUNDS',
             riskLevel: accuracy > maxAccuracy ? 'MEDIUM' : 'HIGH',
             actionTaken: 'BLOCKED',
           },
@@ -132,13 +132,13 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          error: geofenceResult.reason || 'أنت خارج نطاق موقع العمل المسموح.',
-          code: geofenceResult.code,
-          distanceMeters: geofenceResult.distanceMeters,
-          allowedRadiusMeters: geofenceResult.nearestBranch?.geofenceRadius || 10,
-          accuracyMeters: accuracy,
-          maxAllowedAccuracyMeters: maxAccuracy,
-          nearestBranch: geofenceResult.nearestBranch,
+          error: confidenceAssessment.reason,
+          code: confidenceAssessment.state,
+          locationState: confidenceAssessment.state,
+          confidenceScore: confidenceAssessment.confidenceScore,
+          distanceMeters: confidenceAssessment.medianDistance,
+          accuracyMeters: confidenceAssessment.bestAccuracy,
+          nearestBranch: confidenceAssessment.nearestBranch,
         },
         { status: 403 }
       );
@@ -180,8 +180,8 @@ export async function POST(request: Request) {
           verificationCode: generatedCode,
           message: `كود التأكيد الخاص بك هو: ${generatedCode}. أدخله في النافذة لإتمام الحضور.`,
           expiresInSeconds: 120,
-          distanceMeters: geofenceResult.distanceMeters,
-          branchName: geofenceResult.matchedBranch?.name || authorizedBranches[0]?.name,
+          distanceMeters: confidenceAssessment.medianDistance,
+          branchName: confidenceAssessment.matchedBranch?.name || authorizedBranches[0]?.name,
         });
       }
 
@@ -247,7 +247,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const branchId = geofenceResult.matchedBranch?.id || authorizedBranches[0]?.id;
+    const branchId = confidenceAssessment.matchedBranch?.id || authorizedBranches[0]?.id;
 
     // 6. حفظ حدث الحضور الخام في جدول AttendanceEvent غير القابل للتعديل
     const event = await prisma.attendanceEvent.create({
@@ -260,7 +260,7 @@ export async function POST(request: Request) {
         latitude,
         longitude,
         accuracy,
-        distanceFromBranch: geofenceResult.distanceMeters,
+        distanceFromBranch: confidenceAssessment.medianDistance,
         deviceId,
         status: 'SUCCESS',
         source: 'PWA_MOBILE',
@@ -318,7 +318,9 @@ export async function POST(request: Request) {
       checkInTime: timeFormatted,
       lateMinutes,
       status: recordStatus,
-      branchName: geofenceResult.matchedBranch?.name,
+      branchName: confidenceAssessment.matchedBranch?.name,
+      locationState: confidenceAssessment.state,
+      confidenceScore: confidenceAssessment.confidenceScore,
       record,
     });
   } catch (error: any) {

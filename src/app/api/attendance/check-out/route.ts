@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { validateEmployeeLocation } from '@/lib/geofence';
+import { evaluateDeviceTrust } from '@/lib/device';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,24 +31,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'حساب الموظف غير نشط' }, { status: 403 });
     }
 
-    // 0. فحص واعتماد هاتف الموظف المقترن الموثوق (Trusted Device Binding Lock)
-    const reqDeviceId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
-    const existingDevices = employee.trustedDevices;
+    // 0. فحص وتقييم ثقة الجهاز (Approved Device Model Engine)
+    const userAgent = request.headers.get('user-agent') || '';
+    const rawDevId = trustedDeviceId || deviceId || 'UNKNOWN_DEV';
 
-    if (existingDevices.length > 0) {
-      const matchedDevice = existingDevices.find((d) => d.deviceId === reqDeviceId);
-      if (!matchedDevice || !matchedDevice.isApproved) {
-        const primaryDevice = existingDevices.find((d) => d.isApproved);
-        return NextResponse.json(
-          {
-            error: `🛑 هذا الجهاز غير معتمد لحسابك. يمكنك تسجيل الانصراف فقط من هاتفك المعتمد${
-              primaryDevice?.deviceName ? ` (${primaryDevice.deviceName})` : ''
-            }.`,
-            code: 'UNAUTHORIZED_DEVICE',
-          },
-          { status: 403 }
-        );
-      }
+    const deviceEval = await evaluateDeviceTrust(
+      employee.id,
+      rawDevId,
+      employee.companyId,
+      userAgent
+    );
+
+    if (!deviceEval.isAllowed) {
+      return NextResponse.json(
+        {
+          error: deviceEval.reason || 'هذا الجهاز غير معتمد.',
+          code: 'UNAUTHORIZED_DEVICE',
+          deviceStatus: deviceEval.status,
+        },
+        { status: 403 }
+      );
     }
 
     const nowServerTime = new Date();

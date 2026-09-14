@@ -117,12 +117,12 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* أزرار التجربة السريعة للـ Seed Data */}
+        {/* خيارات الحسابات الرسمية والتجريبية المعتمدة */}
         <div className="mt-8 pt-6 border-t border-slate-800">
-          <p className="text-[11px] font-bold text-slate-400 mb-3 text-center">حسابات للتجربة السريعة (Demo):</p>
+          <p className="text-[11px] font-bold text-slate-400 mb-3 text-center">اختيار البريد الإلكتروني للحساب:</p>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <button
-              onClick={() => handleQuickDemo('admin@basma.com', 'admin123')}
+              onClick={() => { setLogin('admin@basma.com'); setPassword(''); }}
               className="p-2.5 bg-slate-800/60 hover:bg-slate-800 text-sky-400 rounded-xl border border-slate-700/60 text-right transition-colors"
             >
               <div className="font-bold">🔑 المدير العام</div>
@@ -130,7 +130,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => handleQuickDemo('employee@basma.com', 'emp123')}
+              onClick={() => { setLogin('employee@basma.com'); setPassword(''); }}
               className="p-2.5 bg-slate-800/60 hover:bg-slate-800 text-emerald-400 rounded-xl border border-slate-700/60 text-right transition-colors"
             >
               <div className="font-bold">👤 موظف (أحمد)</div>
@@ -138,7 +138,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => handleQuickDemo('hr@basma.com', 'hr123')}
+              onClick={() => { setLogin('hr@basma.com'); setPassword(''); }}
               className="p-2.5 bg-slate-800/60 hover:bg-slate-800 text-purple-400 rounded-xl border border-slate-700/60 text-right transition-colors"
             >
               <div className="font-bold">📋 الموارد البشرية</div>
@@ -146,7 +146,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => handleQuickDemo('manager@basma.com', 'manager123')}
+              onClick={() => { setLogin('manager@basma.com'); setPassword(''); }}
               className="p-2.5 bg-slate-800/60 hover:bg-slate-800 text-amber-400 rounded-xl border border-slate-700/60 text-right transition-colors"
             >
               <div className="font-bold">🏢 مدير الفرع</div>
