@@ -170,14 +170,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
           {isAdminOrManager && (
             <div className="flex items-center gap-1.5">
               <Link
-                href="/dashboard/admin/shifts"
+                href="/admin/shifts"
                 className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
               >
                 <span>إدارة الورديات</span>
               </Link>
 
               <Link
-                href="/dashboard/admin/devices"
+                href="/admin/devices"
                 className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
               >
                 <span>الأجهزة الموثوقة</span>

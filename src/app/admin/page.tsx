@@ -223,7 +223,7 @@ export default function AdminDashboardPage() {
             {['SUPER_ADMIN', 'ADMIN', 'HR'].includes(user?.role) && (
               <>
                 <button
-                  onClick={() => router.push('/dashboard/admin/shifts')}
+                  onClick={() => router.push('/admin/shifts')}
                   className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
                 >
                   <Clock className="w-4 h-4" />
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
                 </button>
 
                 <button
-                  onClick={() => router.push('/dashboard/admin/devices')}
+                  onClick={() => router.push('/admin/devices')}
                   className="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-2 transition-all active:scale-95"
                 >
                   <Users className="w-4 h-4" />
@@ -386,14 +386,14 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => router.push('/dashboard/admin/shifts')}
+            onClick={() => router.push('/admin/shifts')}
             className="px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-slate-900 text-amber-400 hover:text-amber-300 border border-amber-500/30 flex items-center gap-1.5"
           >
             ⏰ إدارة الورديات والمواعيد
           </button>
 
           <button
-            onClick={() => router.push('/dashboard/admin/devices')}
+            onClick={() => router.push('/admin/devices')}
             className="px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-slate-900 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5"
           >
             📱 الأجهزة المقترنة الموثوقة
