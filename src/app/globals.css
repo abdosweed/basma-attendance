@@ -26,49 +26,63 @@
 }
 
 /* دعم النمط الفاتح (Light Mode Theme) */
-html.light-mode {
-  color-scheme: light;
-}
-html.light-mode body {
-  background-color: #f8fafc !important;
+html.light-mode,
+body.light-mode {
+  color-scheme: light !important;
+  background-color: #f1f5f9 !important;
   color: #0f172a !important;
 }
-html.light-mode header {
-  background-color: #ffffff/95 !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-html.light-mode main {
-  background-color: #f8fafc !important;
-}
-html.light-mode .bg-slate-950 {
-  background-color: #f8fafc !important;
-}
-html.light-mode .bg-slate-900 {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-html.light-mode .bg-slate-900\/90,
-html.light-mode .bg-slate-900\/80 {
+
+.light-mode header {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
-html.light-mode .bg-slate-950\/80,
-html.light-mode .bg-slate-950\/60 {
+
+.light-mode main {
   background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
-  color: #1e293b !important;
 }
-html.light-mode .border-slate-800 {
-  border-color: #e2e8f0 !important;
+
+.light-mode .bg-slate-950 {
+  background-color: #f1f5f9 !important;
 }
-html.light-mode .text-white {
+
+.light-mode .bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
-html.light-mode .text-slate-400,
-html.light-mode .text-slate-300 {
-  color: #475569 !important;
+
+.light-mode .bg-slate-900\/90,
+.light-mode .bg-slate-900\/80,
+.light-mode .bg-slate-900\/95 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light-mode .bg-slate-950\/80,
+.light-mode .bg-slate-950\/60 {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light-mode .border-slate-800,
+.light-mode .border-slate-700 {
+  border-color: #cbd5e1 !important;
+}
+
+.light-mode .text-white {
+  color: #0f172a !important;
+}
+
+.light-mode .text-slate-400,
+.light-mode .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light-mode .text-slate-100 {
+  color: #0f172a !important;
 }
 

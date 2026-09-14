@@ -24,19 +24,25 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
     setTheme(savedTheme);
     if (savedTheme === 'light') {
       document.documentElement.classList.add('light-mode');
+      document.body.classList.add('light-mode');
     } else {
       document.documentElement.classList.remove('light-mode');
+      document.body.classList.remove('light-mode');
     }
   }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
     localStorage.setItem('basma_theme', nextTheme);
     if (nextTheme === 'light') {
       document.documentElement.classList.add('light-mode');
+      document.body.classList.add('light-mode');
     } else {
       document.documentElement.classList.remove('light-mode');
+      document.body.classList.remove('light-mode');
     }
   };
 
