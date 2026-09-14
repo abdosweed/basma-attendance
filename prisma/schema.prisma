@@ -119,6 +119,7 @@ model Employee {
   suspiciousAttempts SuspiciousAttempt[]
   notifications      Notification[]
   geofenceViolations GeofenceViolation[]
+  taskAssignments    TaskAssignment[]
 
   @@index([companyId])
   @@index([status])
@@ -155,25 +156,84 @@ model TrustedDevice {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
-// 8. الورديات (Shifts)
+enum ShiftType {
+  FIXED
+  FLEXIBLE
+  SPLIT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// 7. الورديات (Shifts)
 model Shift {
-  id                String   @id @default(uuid())
-  companyId         String
-  name              String // مثل: الوردية الصباحية
-  startTime         String // 09:00 (بصيغة HH:mm)
-  endTime           String // 16:00
-  gracePeriodMins   Int      @default(10) // فترة السماح للتأخير بالدقائق
-  isNightShift      Boolean  @default(false) // هل تعبر منتصف الليل 23:00 - 07:00
-  allowedBreakMins  Int      @default(60)
-  maxBreaksPerShift Int      @default(1)
-  workingDays       String   @default("SUN,MON,TUE,WED,THU") // الأيام المتاحة
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id             String    @id @default(uuid())
+  companyId      String
+  name           String
+  type           ShiftType @default(FIXED)
+  startTime      String    @default("08:00") // HH:mm
+  endTime        String    @default("16:00") // HH:mm
+  splitStartTime String?   // للوردية المقسمة الفترتين
+  splitEndTime   String?
+  requiredHours  Float     @default(8.0) // للوردية المرنة
+  gracePeriodMins Int      @default(15)
+  maxBreakMins   Int       @default(60)
+  isNightShift   Boolean   @default(false)
+  workingDays    String    @default("SUN,MON,TUE,WED,THU") // مفصولة بفواصل
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
   employeeShifts    EmployeeShift[]
   attendanceRecords AttendanceRecord[]
   attendanceEvents  AttendanceEvent[]
+
+  @@index([companyId])
+}
+
+// 8. المهام والمسؤوليات (Task Engine 2026)
+model Task {
+  id          String       @id @default(uuid())
+  companyId   String
+  title       String
+  description String?
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  status      TaskStatus   @default(PENDING)
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  assignments TaskAssignment[]
+
+  @@index([companyId])
+}
+
+model TaskAssignment {
+  id          String     @id @default(uuid())
+  taskId      String
+  employeeId  String
+  status      TaskStatus @default(PENDING)
+  note        String?
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+
+  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, employeeId])
 }
 
 // 9. ربط الموظف بالورديات

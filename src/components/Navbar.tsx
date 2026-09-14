@@ -205,6 +205,13 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
               </Link>
 
               <Link
+                href="/admin/tasks"
+                className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-400 hover:text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
+              >
+                <span>إدارة المهام</span>
+              </Link>
+
+              <Link
                 href="/admin/devices"
                 className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border border-slate-700"
               >

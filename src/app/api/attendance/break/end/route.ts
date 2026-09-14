@@ -28,7 +28,7 @@ export async function POST() {
       include: { employeeShifts: { include: { shift: true } } },
     });
 
-    const allowedMins = emp?.employeeShifts[0]?.shift?.allowedBreakMins || 60;
+    const allowedMins = emp?.employeeShifts[0]?.shift?.maxBreakMins || 60;
     const excessMinutes = durationMinutes > allowedMins ? durationMinutes - allowedMins : 0;
 
     const updatedBreak = await prisma.breakRecord.update({

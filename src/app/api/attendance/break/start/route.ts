@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     };
 
     const currentShift = employee.employeeShifts[0]?.shift || null;
-    const maxBreaksAllowed = currentShift?.maxBreaksPerShift || 1;
+    const maxBreaksAllowed = 5;
 
     // 1. فحص الـ Geofence للاستراحة إذا كان الخيار مفعلاً
     if (settings.requireLocationForBreakStart && latitude && longitude) {

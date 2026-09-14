@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         endTime: endTime.trim(),
         gracePeriodMins: Number(gracePeriodMins) || 10,
         isNightShift: Boolean(isNightShift),
-        allowedBreakMins: Number(allowedBreakMins) || 60,
+        maxBreakMins: Number(allowedBreakMins) || 60,
       },
     });
 

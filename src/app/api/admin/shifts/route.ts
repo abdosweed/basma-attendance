@@ -49,7 +49,7 @@ export async function GET() {
   }
 }
 
-// POST: إنشاء وردية جديدة
+// POST: إنشاء وردية جديدة مرنة / مقسمة / ثابتة لعام 2026
 export async function POST(request: Request) {
   try {
     const session = await getAuthenticatedUser();
@@ -65,27 +65,35 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       name,
+      type,
       startTime,
       endTime,
+      splitStartTime,
+      splitEndTime,
+      requiredHours,
       gracePeriodMins,
+      maxBreakMins,
       isNightShift,
-      maxBreaksPerShift,
       workingDays,
     } = body;
 
-    if (!name || !startTime || !endTime) {
-      return NextResponse.json({ error: 'اسم الوردية وتوقيت البداية والنهاية حقول إجبارية' }, { status: 400 });
+    if (!name || !name.trim()) {
+      return NextResponse.json({ error: 'يرجى كتابة اسم الوردية' }, { status: 400 });
     }
 
     const newShift = await prisma.shift.create({
       data: {
         companyId: company.id,
-        name,
-        startTime,
-        endTime,
+        name: name.trim(),
+        type: type || 'FIXED',
+        startTime: startTime || '08:00',
+        endTime: endTime || '16:00',
+        splitStartTime: splitStartTime || null,
+        splitEndTime: splitEndTime || null,
+        requiredHours: Number(requiredHours) || 8.0,
         gracePeriodMins: Number(gracePeriodMins) || 15,
+        maxBreakMins: Number(maxBreakMins) || 60,
         isNightShift: Boolean(isNightShift),
-        maxBreaksPerShift: Number(maxBreaksPerShift) || 1,
         workingDays: workingDays || 'SUN,MON,TUE,WED,THU',
       },
     });
@@ -96,22 +104,22 @@ export async function POST(request: Request) {
         action: 'CREATE_SHIFT',
         entity: 'Shift',
         entityId: newShift.id,
-        reason: `إنشاء وردية جديدة: ${name} (${startTime} - ${endTime})`,
+        reason: `إنشاء وردية جديدة لعام 2026: ${name} (${type})`,
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'تم إنشاء الوردية بنجاح',
+      message: 'تم إنشاء الوردية بنجاح ✨',
       shift: newShift,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create shift error:', error);
-    return NextResponse.json({ error: 'حدث خطأ في إنشاء الوردية' }, { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ أثناء إنشاء الوردية' }, { status: 500 });
   }
 }
 
-// PUT: تحديث وردية قائمة
+// PUT: تعديل الوردية
 export async function PUT(request: Request) {
   try {
     const session = await getAuthenticatedUser();
@@ -123,48 +131,46 @@ export async function PUT(request: Request) {
     const {
       id,
       name,
+      type,
       startTime,
       endTime,
+      splitStartTime,
+      splitEndTime,
+      requiredHours,
       gracePeriodMins,
+      maxBreakMins,
       isNightShift,
-      maxBreaksPerShift,
       workingDays,
     } = body;
 
-    if (!id || !name || !startTime || !endTime) {
-      return NextResponse.json({ error: 'بيانات الوردية غير مكتملة' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'معرف الوردية مطلوب' }, { status: 400 });
     }
 
     const updatedShift = await prisma.shift.update({
       where: { id },
       data: {
         name,
+        type,
         startTime,
         endTime,
-        gracePeriodMins: Number(gracePeriodMins) || 15,
-        isNightShift: Boolean(isNightShift),
-        maxBreaksPerShift: Number(maxBreaksPerShift) || 1,
-        workingDays: workingDays || 'SUN,MON,TUE,WED,THU',
-      },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        userId: session.userId,
-        action: 'UPDATE_SHIFT',
-        entity: 'Shift',
-        entityId: updatedShift.id,
-        reason: `تحديث الوردية: ${name}`,
+        splitStartTime,
+        splitEndTime,
+        requiredHours: requiredHours !== undefined ? Number(requiredHours) : undefined,
+        gracePeriodMins: gracePeriodMins !== undefined ? Number(gracePeriodMins) : undefined,
+        maxBreakMins: maxBreakMins !== undefined ? Number(maxBreakMins) : undefined,
+        isNightShift: isNightShift !== undefined ? Boolean(isNightShift) : undefined,
+        workingDays,
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: 'تم تعديل بيانات الوردية بنجاح',
+      message: 'تم تحديث الوردية بنجاح 🔄',
       shift: updatedShift,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update shift error:', error);
-    return NextResponse.json({ error: 'حدث خطأ في تعديل الوردية' }, { status: 500 });
+    return NextResponse.json({ error: 'حدث خطأ أثناء تعديل الوردية' }, { status: 500 });
   }
 }

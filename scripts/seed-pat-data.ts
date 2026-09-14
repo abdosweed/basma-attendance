@@ -84,7 +84,7 @@ async function main() {
   // 4. Create Shifts
   const morningShift = await prisma.shift.upsert({
     where: { id: 'pat-shift-morning' },
-    update: { maxBreaksPerShift: 1 },
+    update: { maxBreakMins: 60 },
     create: {
       id: 'pat-shift-morning',
       companyId: company.id,
@@ -94,13 +94,13 @@ async function main() {
       gracePeriodMins: 15,
       workingDays: 'SUN,MON,TUE,WED,THU',
       isNightShift: false,
-      maxBreaksPerShift: 1,
+      maxBreakMins: 60,
     },
   });
 
   const eveningShift = await prisma.shift.upsert({
     where: { id: 'pat-shift-evening' },
-    update: { maxBreaksPerShift: 1 },
+    update: { maxBreakMins: 60 },
     create: {
       id: 'pat-shift-evening',
       companyId: company.id,
@@ -110,13 +110,13 @@ async function main() {
       gracePeriodMins: 15,
       workingDays: 'SUN,MON,TUE,WED,THU',
       isNightShift: false,
-      maxBreaksPerShift: 1,
+      maxBreakMins: 60,
     },
   });
 
   const nightShift = await prisma.shift.upsert({
     where: { id: 'pat-shift-night' },
-    update: { maxBreaksPerShift: 2 },
+    update: { maxBreakMins: 60 },
     create: {
       id: 'pat-shift-night',
       companyId: company.id,
@@ -126,7 +126,7 @@ async function main() {
       gracePeriodMins: 15,
       workingDays: 'SUN,MON,TUE,WED,THU,FRI,SAT',
       isNightShift: true,
-      maxBreaksPerShift: 2,
+      maxBreakMins: 60,
     },
   });
   console.log('✅ Shifts created:', morningShift.name, '|', eveningShift.name, '|', nightShift.name);

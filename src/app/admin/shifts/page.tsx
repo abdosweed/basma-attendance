@@ -17,7 +17,20 @@ import {
   CheckSquare,
   Square,
   Edit2,
+  Check,
+  Zap,
+  Sliders,
 } from 'lucide-react';
+
+const WEEK_DAYS = [
+  { id: 'SUN', label: 'الأحد' },
+  { id: 'MON', label: 'الإثنين' },
+  { id: 'TUE', label: 'الثلاثاء' },
+  { id: 'WED', label: 'الأربعاء' },
+  { id: 'THU', label: 'الخميس' },
+  { id: 'FRI', label: 'الجمعة' },
+  { id: 'SAT', label: 'السبت' },
+];
 
 export default function AdminShiftsPage() {
   const [shifts, setShifts] = useState<any[]>([]);
@@ -31,12 +44,16 @@ export default function AdminShiftsPage() {
   const [editingShiftId, setEditingShiftId] = useState<string | null>(null);
   const [shiftForm, setShiftForm] = useState({
     name: '',
-    startTime: '09:00',
+    type: 'FIXED', // FIXED, FLEXIBLE, SPLIT
+    startTime: '08:00',
     endTime: '16:00',
+    splitStartTime: '17:00',
+    splitEndTime: '21:00',
+    requiredHours: 8.0,
     gracePeriodMins: 15,
+    maxBreakMins: 60,
     isNightShift: false,
-    maxBreaksPerShift: 1,
-    workingDays: 'SUN,MON,TUE,WED,THU',
+    selectedDays: ['SUN', 'MON', 'TUE', 'WED', 'THU'],
   });
 
   // Shift Assignment State
@@ -68,6 +85,26 @@ export default function AdminShiftsPage() {
     fetchData();
   }, []);
 
+  const toggleDay = (dayId: string) => {
+    setShiftForm((prev) => {
+      const exists = prev.selectedDays.includes(dayId);
+      const updated = exists
+        ? prev.selectedDays.filter((d) => d !== dayId)
+        : [...prev.selectedDays, dayId];
+      return { ...prev, selectedDays: updated };
+    });
+  };
+
+  const selectPresetDays = (type: 'OFFICIAL' | 'ALL' | 'WEEKEND') => {
+    if (type === 'OFFICIAL') {
+      setShiftForm((prev) => ({ ...prev, selectedDays: ['SUN', 'MON', 'TUE', 'WED', 'THU'] }));
+    } else if (type === 'ALL') {
+      setShiftForm((prev) => ({ ...prev, selectedDays: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] }));
+    } else {
+      setShiftForm((prev) => ({ ...prev, selectedDays: ['FRI', 'SAT'] }));
+    }
+  };
+
   const handleSaveShift = async (e: React.FormEvent) => {
     e.preventDefault();
     setActionLoading(true);
@@ -75,12 +112,16 @@ export default function AdminShiftsPage() {
 
     try {
       const method = editingShiftId ? 'PUT' : 'POST';
-      const bodyPayload = editingShiftId ? { ...shiftForm, id: editingShiftId } : shiftForm;
+      const payload = {
+        ...shiftForm,
+        workingDays: shiftForm.selectedDays.join(','),
+        id: editingShiftId || undefined,
+      };
 
       const res = await fetch('/api/admin/shifts', {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyPayload),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -93,12 +134,16 @@ export default function AdminShiftsPage() {
         setEditingShiftId(null);
         setShiftForm({
           name: '',
-          startTime: '09:00',
+          type: 'FIXED',
+          startTime: '08:00',
           endTime: '16:00',
+          splitStartTime: '17:00',
+          splitEndTime: '21:00',
+          requiredHours: 8.0,
           gracePeriodMins: 15,
+          maxBreakMins: 60,
           isNightShift: false,
-          maxBreaksPerShift: 1,
-          workingDays: 'SUN,MON,TUE,WED,THU',
+          selectedDays: ['SUN', 'MON', 'TUE', 'WED', 'THU'],
         });
         await fetchData();
       }
@@ -148,6 +193,33 @@ export default function AdminShiftsPage() {
     }
   };
 
+  const openEditModal = (shift: any) => {
+    setEditingShiftId(shift.id);
+    const daysArr = shift.workingDays ? shift.workingDays.split(',') : ['SUN', 'MON', 'TUE', 'WED', 'THU'];
+    setShiftForm({
+      name: shift.name,
+      type: shift.type || 'FIXED',
+      startTime: shift.startTime || '08:00',
+      endTime: shift.endTime || '16:00',
+      splitStartTime: shift.splitStartTime || '17:00',
+      splitEndTime: shift.splitEndTime || '21:00',
+      requiredHours: shift.requiredHours || 8.0,
+      gracePeriodMins: shift.gracePeriodMins || 15,
+      maxBreakMins: shift.maxBreakMins || 60,
+      isNightShift: Boolean(shift.isNightShift),
+      selectedDays: daysArr,
+    });
+    setShowShiftModal(true);
+  };
+
+  const filteredEmployees = employees.filter((emp) => {
+    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+    const empNum = emp.employeeNumber.toLowerCase();
+    const matchSearch = fullName.includes(searchTerm.toLowerCase()) || empNum.includes(searchTerm.toLowerCase());
+    const matchDept = !deptFilter || emp.departmentId === deptFilter;
+    return matchSearch && matchDept;
+  });
+
   const toggleSelectAll = () => {
     if (selectedEmployeeIds.length === filteredEmployees.length) {
       setSelectedEmployeeIds([]);
@@ -156,69 +228,44 @@ export default function AdminShiftsPage() {
     }
   };
 
-  const toggleSelectEmployee = (empId: string) => {
-    if (selectedEmployeeIds.includes(empId)) {
-      setSelectedEmployeeIds(selectedEmployeeIds.filter((id) => id !== empId));
+  const toggleSelectEmployee = (id: string) => {
+    if (selectedEmployeeIds.includes(id)) {
+      setSelectedEmployeeIds(selectedEmployeeIds.filter((eId) => eId !== id));
     } else {
-      setSelectedEmployeeIds([...selectedEmployeeIds, empId]);
+      setSelectedEmployeeIds([...selectedEmployeeIds, id]);
     }
   };
 
-  const filteredEmployees = employees.filter((emp) => {
-    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
-    const matchSearch = fullName.includes(searchTerm.toLowerCase()) || emp.employeeNumber.includes(searchTerm);
-    const matchDept = !deptFilter || emp.departmentId === deptFilter;
-    return matchSearch && matchDept;
-  });
-
-  const openEditModal = (shift: any) => {
-    setEditingShiftId(shift.id);
-    setShiftForm({
-      name: shift.name,
-      startTime: shift.startTime,
-      endTime: shift.endTime,
-      gracePeriodMins: shift.gracePeriodMins,
-      isNightShift: shift.isNightShift,
-      maxBreaksPerShift: shift.maxBreaksPerShift,
-      workingDays: shift.workingDays,
-    });
-    setShowShiftModal(true);
-  };
+  const departmentsList = Array.from(
+    new Set(employees.map((e) => e.department).filter(Boolean).map((d) => JSON.stringify(d)))
+  ).map((s: any) => JSON.parse(s));
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white dir-rtl">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <RefreshCw className="w-8 h-8 text-sky-400 animate-spin" />
-          <p className="text-xs text-slate-400">جاري تحميل واجهة مواعيد الورديات...</p>
+          <p className="text-xs text-slate-400">جاري تحميل واجهة مواعيد الدوام والورديات الحديثة 2026...</p>
         </div>
       </div>
     );
   }
 
-  const departmentsList = Array.from(
-    new Set(employees.map((e) => JSON.stringify({ id: e.departmentId, name: e.department?.name })))
-  )
-    .map((s) => JSON.parse(s))
-    .filter((d) => d.id);
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col dir-rtl">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-        {/* الهيدر والعنوان الرئيسي */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400">
-              <Clock className="w-7 h-7" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">إدارة الورديات وتسكين الموظفين</h1>
-              <p className="text-xs text-slate-400 mt-1">
-                تعريف مواعيد الدوام الرسمية وتعيين الموظفين في وردياتهم المعتمدة
-              </p>
-            </div>
+      <main className="flex-1 max-w-[98%] w-full mx-auto p-4 sm:p-6 space-y-6">
+        {/* الترويسة العليا */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-5 rounded-3xl">
+          <div>
+            <h1 className="text-xl font-black text-white flex items-center gap-2">
+              <Clock className="w-6 h-6 text-sky-400" />
+              <span>إدارة الورديات ومواعيد الدوام الذكية (2026 Shift Engine)</span>
+            </h1>
+            <p className="text-xs text-slate-400 mt-1">
+              تعريف أنواع الورديات (ثابتة، مرنة، مقسومة)، اختيار أيام الدوام التفاعلية وتسكين الموظفين بسهولة.
+            </p>
           </div>
 
           <button
@@ -226,60 +273,62 @@ export default function AdminShiftsPage() {
               setEditingShiftId(null);
               setShiftForm({
                 name: '',
-                startTime: '09:00',
+                type: 'FIXED',
+                startTime: '08:00',
                 endTime: '16:00',
+                splitStartTime: '17:00',
+                splitEndTime: '21:00',
+                requiredHours: 8.0,
                 gracePeriodMins: 15,
+                maxBreakMins: 60,
                 isNightShift: false,
-                maxBreaksPerShift: 1,
-                workingDays: 'SUN,MON,TUE,WED,THU',
+                selectedDays: ['SUN', 'MON', 'TUE', 'WED', 'THU'],
               });
               setShowShiftModal(true);
             }}
-            className="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-2xl text-xs font-bold transition-all shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2"
+            className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-sky-600/20 active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>إضافة وردية جديدة</span>
+            <span>+ إضافة وردية جديدة</span>
           </button>
         </div>
 
-        {/* تنبيه الحالة */}
+        {/* رسائل التنبيه */}
         {statusMsg && (
           <div
-            className={`p-4 rounded-2xl border text-xs font-medium flex items-center gap-2 ${
+            className={`p-4 rounded-2xl border text-xs flex items-center gap-3 ${
               statusMsg.type === 'success'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
             }`}
           >
-            {statusMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-            <span>{statusMsg.text}</span>
+            {statusMsg.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+            <span className="font-bold">{statusMsg.text}</span>
           </div>
         )}
 
-        {/* كروت الورديات المتاحة */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* قسم بطاقات الورديات المعرفة */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {shifts.map((shift) => {
-            const isNight = shift.isNightShift;
-            const assignedCount = shift._count?.employeeShifts || 0;
+            const shiftDays = shift.workingDays ? shift.workingDays.split(',') : [];
+            const isAssigned = selectedShiftId === shift.id;
 
             return (
               <div
                 key={shift.id}
                 onClick={() => setSelectedShiftId(shift.id)}
-                className={`bg-slate-900/90 border rounded-3xl p-5 space-y-4 cursor-pointer transition-all ${
-                  selectedShiftId === shift.id
-                    ? 'border-sky-500 ring-2 ring-sky-500/20 shadow-xl'
-                    : 'border-slate-800 hover:border-slate-700'
+                className={`p-5 rounded-3xl border transition-all cursor-pointer relative overflow-hidden ${
+                  isAssigned
+                    ? 'bg-slate-900 border-sky-500/80 shadow-xl shadow-sky-500/10 ring-2 ring-sky-500/30'
+                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {isNight ? (
-                      <Moon className="w-5 h-5 text-amber-400" />
-                    ) : (
-                      <Sun className="w-5 h-5 text-sky-400" />
-                    )}
-                    <span className="font-bold text-sm text-white">{shift.name}</span>
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border bg-sky-500/10 text-sky-400 border-sky-500/20 mb-1 inline-block">
+                      {shift.type === 'FLEXIBLE' ? '⚡ وردية مرنة' : shift.type === 'SPLIT' ? '✂️ فترتين مقسومة' : '⏱️ وردية ثابتة'}
+                    </span>
+                    <h3 className="font-bold text-white text-base">{shift.name}</h3>
                   </div>
 
                   <button
@@ -287,34 +336,75 @@ export default function AdminShiftsPage() {
                       e.stopPropagation();
                       openEditModal(shift);
                     }}
-                    className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all"
+                    className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-3 grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">توقيت العمل:</span>
-                    <span className="font-bold text-white dir-ltr inline-block mt-0.5">
-                      {shift.startTime} → {shift.endTime}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px]">فترة السماح:</span>
-                    <span className="font-bold text-emerald-400 inline-block mt-0.5">
-                      {shift.gracePeriodMins} دقيقة
-                    </span>
+                {/* تفاصيل التوقيت */}
+                <div className="space-y-2 text-xs mb-4">
+                  {shift.type === 'FIXED' && (
+                    <div className="flex items-center justify-between bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80">
+                      <span className="text-slate-400">ساعات الدوام:</span>
+                      <span className="font-bold text-sky-400 font-mono">
+                        {shift.startTime} ➔ {shift.endTime}
+                      </span>
+                    </div>
+                  )}
+
+                  {shift.type === 'FLEXIBLE' && (
+                    <div className="flex items-center justify-between bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80">
+                      <span className="text-slate-400">الدوام المطلوب:</span>
+                      <span className="font-bold text-amber-400 font-mono">{shift.requiredHours || 8} ساعات يومياً</span>
+                    </div>
+                  )}
+
+                  {shift.type === 'SPLIT' && (
+                    <div className="space-y-1 bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80">
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-400">الفترة الأولى:</span>
+                        <span className="font-bold text-sky-400 font-mono">{shift.startTime} ➔ {shift.endTime}</span>
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-400">الفترة الثانية:</span>
+                        <span className="font-bold text-emerald-400 font-mono">{shift.splitStartTime} ➔ {shift.splitEndTime}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span>فترة السماح: <strong className="text-slate-200">{shift.gracePeriodMins} دقيقة</strong></span>
+                    <span>الاستراحة: <strong className="text-slate-200">{shift.maxBreakMins} دقيقة</strong></span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-800/60">
+                {/* شارات أيام العمل */}
+                <div className="flex flex-wrap gap-1">
+                  {WEEK_DAYS.map((d) => {
+                    const active = shiftDays.includes(d.id);
+                    return (
+                      <span
+                        key={d.id}
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+                          active
+                            ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+                            : 'bg-slate-950/40 text-slate-600 border-slate-800/50 line-through'
+                        }`}
+                      >
+                        {d.label}
+                      </span>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
                   <span className="text-slate-400 flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-sky-400" />
-                    <span>الموظفين المسكنين:</span>
+                    المسكنين:
                   </span>
-                  <span className="px-2.5 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-full font-bold">
-                    {assignedCount} موظف
+                  <span className="font-black text-white bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-700">
+                    {shift._count?.employeeShifts || 0} موظف
                   </span>
                 </div>
               </div>
@@ -322,55 +412,49 @@ export default function AdminShiftsPage() {
           })}
         </div>
 
-        {/* واجهة تسكين الموظفين بالوردية */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+        {/* قسم تسكين الموظفين في الوردية المحددة */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <Users className="w-5 h-5 text-sky-400" />
                 <span>تسكين الموظفين في الوردية المحددة</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                اختر الوردية أعلاه، حدد الموظفين المطلوبين، ثم اضغط حفظ التسكين
+              <p className="text-xs text-slate-400 mt-0.5">
+                اختر الوردية من الأعلى، حدد الموظفين المطلوبين، ثم اضغط حفظ التسكين
               </p>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={handleAssignEmployees}
-                disabled={actionLoading || selectedEmployeeIds.length === 0}
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {actionLoading ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="w-4 h-4" />
-                )}
-                <span>اعتماد تسكين ({selectedEmployeeIds.length}) موظف</span>
-              </button>
-            </div>
+            <button
+              onClick={handleAssignEmployees}
+              disabled={actionLoading || selectedEmployeeIds.length === 0}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
+            >
+              <Check className="w-4 h-4" />
+              <span>اعتماد تسكين ({selectedEmployeeIds.length}) موظف</span>
+            </button>
           </div>
 
-          {/* الفلاتر والبحث */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-500 absolute top-3.5 right-3.5" />
+          {/* فلاتر البحث والتصفية */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
               <input
                 type="text"
                 placeholder="ابحث باسم الموظف أو الرقم الوظيفي..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pr-9 pl-4 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
               />
             </div>
 
             <select
               value={deptFilter}
               onChange={(e) => setDeptFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-2xl px-4 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-sky-500"
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
             >
-              <option value="">جميع الأقسام</option>
-              {departmentsList.map((d) => (
+              <option value="">جميع الأقسام ({departmentsList.length})</option>
+              {departmentsList.map((d: any) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
                 </option>
@@ -379,66 +463,56 @@ export default function AdminShiftsPage() {
 
             <button
               onClick={toggleSelectAll}
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-200 border border-slate-700 flex items-center justify-center gap-2 transition-all"
             >
-              {selectedEmployeeIds.length === filteredEmployees.length && filteredEmployees.length > 0 ? (
-                <CheckSquare className="w-4 h-4 text-sky-400" />
-              ) : (
-                <Square className="w-4 h-4 text-slate-400" />
-              )}
+              {selectedEmployeeIds.length === filteredEmployees.length ? <CheckSquare className="w-4 h-4 text-sky-400" /> : <Square className="w-4 h-4" />}
               <span>تحديد الكل ({filteredEmployees.length})</span>
             </button>
           </div>
 
           {/* جدول الموظفين */}
           <div className="overflow-x-auto border border-slate-800 rounded-2xl">
-            <table className="w-full text-right text-xs">
+            <table className="w-full text-right text-xs text-slate-300">
               <thead className="bg-slate-950 text-slate-400 font-bold border-b border-slate-800">
                 <tr>
-                  <th className="p-4 w-12 text-center">اختيار</th>
-                  <th className="p-4">الموظف</th>
-                  <th className="p-4">القسم</th>
-                  <th className="p-4">الفرع الرئيسي</th>
-                  <th className="p-4">الوردية الحالية</th>
+                  <th className="p-3 w-10 text-center">اختيار</th>
+                  <th className="p-3">الموظف</th>
+                  <th className="p-3">القسم</th>
+                  <th className="p-3">الفرع الرئيسي</th>
+                  <th className="p-3">الوردية الحالية</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+              <tbody className="divide-y divide-slate-800/60">
                 {filteredEmployees.map((emp) => {
                   const isSelected = selectedEmployeeIds.includes(emp.id);
-                  const currentShift = emp.employeeShifts[0]?.shift;
+                  const currentShift = emp.employeeShifts?.[0]?.shift;
 
                   return (
                     <tr
                       key={emp.id}
                       onClick={() => toggleSelectEmployee(emp.id)}
-                      className={`hover:bg-slate-800/40 transition-all cursor-pointer ${
+                      className={`hover:bg-slate-800/40 transition-colors cursor-pointer ${
                         isSelected ? 'bg-sky-500/10' : ''
                       }`}
                     >
-                      <td className="p-4 text-center">
-                        {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-sky-400 inline" />
-                        ) : (
-                          <Square className="w-4 h-4 text-slate-600 inline" />
-                        )}
+                      <td className="p-3 text-center">
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-sky-400 inline" /> : <Square className="w-4 h-4 text-slate-600 inline" />}
                       </td>
-                      <td className="p-4">
-                        <div className="font-bold text-white">
-                          {emp.firstName} {emp.lastName}
-                        </div>
-                        <div className="text-[10px] text-slate-400">{emp.employeeNumber}</div>
+                      <td className="p-3 font-bold text-white">
+                        {emp.firstName} {emp.lastName}
+                        <span className="text-[10px] text-slate-400 font-mono block font-normal">
+                          {emp.employeeNumber}
+                        </span>
                       </td>
-                      <td className="p-4 text-slate-300">{emp.department?.name || 'غير محدد'}</td>
-                      <td className="p-4 text-slate-300">{emp.primaryBranch?.name || 'الفرع الرئيسي'}</td>
-                      <td className="p-4">
+                      <td className="p-3">{emp.department?.name || 'غير محدد'}</td>
+                      <td className="p-3">{emp.primaryBranch?.name || 'الفرع الرئيسي'}</td>
+                      <td className="p-3">
                         {currentShift ? (
-                          <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold text-[11px]">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
                             {currentShift.name} ({currentShift.startTime} - {currentShift.endTime})
                           </span>
                         ) : (
-                          <span className="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[11px]">
-                            لم يتم التسكين
-                          </span>
+                          <span className="text-[10px] text-slate-500">غير مسكن</span>
                         )}
                       </td>
                     </tr>
@@ -448,111 +522,226 @@ export default function AdminShiftsPage() {
             </table>
           </div>
         </div>
-      </main>
 
-      {/* مودال إنشاء / تعديل الوردية */}
-      {showShiftModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5">
-            <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-              <Clock className="w-5 h-5 text-sky-400" />
-              <span>{editingShiftId ? 'تعديل بيانات الوردية' : 'إضافة وردية دوام جديدة'}</span>
-            </h3>
-
-            <form onSubmit={handleSaveShift} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">اسم الوردية:</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="مثل: الوردية الصباحية"
-                  value={shiftForm.name}
-                  onChange={(e) => setShiftForm({ ...shiftForm, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">وقت البداية (HH:mm):</label>
-                  <input
-                    type="time"
-                    required
-                    value={shiftForm.startTime}
-                    onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">وقت النهاية (HH:mm):</label>
-                  <input
-                    type="time"
-                    required
-                    value={shiftForm.endTime}
-                    onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">فترة السماح (بالدقائق):</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={shiftForm.gracePeriodMins}
-                    onChange={(e) => setShiftForm({ ...shiftForm, gracePeriodMins: Number(e.target.value) })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">الحد الأقصى للاستراحات:</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={shiftForm.maxBreaksPerShift}
-                    onChange={(e) => setShiftForm({ ...shiftForm, maxBreaksPerShift: Number(e.target.value) })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-sky-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 bg-slate-950/80 rounded-2xl border border-slate-800">
-                <input
-                  type="checkbox"
-                  id="isNightShift"
-                  checked={shiftForm.isNightShift}
-                  onChange={(e) => setShiftForm({ ...shiftForm, isNightShift: e.target.checked })}
-                  className="w-4 h-4 text-sky-500 rounded focus:ring-0"
-                />
-                <label htmlFor="isNightShift" className="text-slate-300 font-bold cursor-pointer">
-                  وردية ليلية تتجاوز منتصف الليل (مثال: 23:00 إلى 07:00)
-                </label>
-              </div>
-
-              <div className="flex items-center gap-3 pt-3 border-t border-slate-800">
+        {/* Modal إضافة/تعديل الوردية العصري */}
+        {showShiftModal && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-800 w-full max-w-xl rounded-3xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 className="font-bold text-white text-base flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-sky-400" />
+                  <span>{editingShiftId ? 'تعديل بيانات الوردية' : 'تعريف وردية عمل جديدة (2026)'}</span>
+                </h3>
                 <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="flex-1 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2"
-                >
-                  {actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  <span>حفظ الوردية</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setShowShiftModal(false)}
-                  className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl text-xs font-bold transition-all"
+                  className="text-slate-400 hover:text-white p-1 rounded-lg"
                 >
-                  إلغاء
+                  ✕
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSaveShift} className="space-y-4 text-xs">
+                {/* اسم ونوع الوردية */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-bold">اسم الوردية</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="مثل: الوردية الصباحية / الفنية"
+                      value={shiftForm.name}
+                      onChange={(e) => setShiftForm({ ...shiftForm, name: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-bold">نوع الوردية</label>
+                    <select
+                      value={shiftForm.type}
+                      onChange={(e) => setShiftForm({ ...shiftForm, type: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
+                    >
+                      <option value="FIXED">⏱️ وردية ثابتة (ساعات محددة)</option>
+                      <option value="FLEXIBLE">⚡ وردية مرنة (ساعات دوام حر)</option>
+                      <option value="SPLIT">✂️ وردية فترتين (مقسومة)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* اختيار أيام الأسبوع التفاعلي */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-slate-400 font-bold">أيام العمل الأسبوعية للوردية</label>
+                    <div className="flex items-center gap-2 text-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => selectPresetDays('OFFICIAL')}
+                        className="text-sky-400 hover:underline"
+                      >
+                        رسمي (أحد-خميس)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => selectPresetDays('ALL')}
+                        className="text-amber-400 hover:underline"
+                      >
+                        كل الأيام
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {WEEK_DAYS.map((day) => {
+                      const isSelected = shiftForm.selectedDays.includes(day.id);
+                      return (
+                        <button
+                          key={day.id}
+                          type="button"
+                          onClick={() => toggleDay(day.id)}
+                          className={`py-2 rounded-xl border font-bold transition-all text-center ${
+                            isSelected
+                              ? 'bg-sky-600 text-white border-sky-500 shadow-md shadow-sky-600/20'
+                              : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* توقيتات الدوام */}
+                {shiftForm.type === 'FIXED' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-slate-400 mb-1 font-bold">وقت الحضور (البداية)</label>
+                      <input
+                        type="time"
+                        required
+                        value={shiftForm.startTime}
+                        onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-400 mb-1 font-bold">وقت الانصراف (النهاية)</label>
+                      <input
+                        type="time"
+                        required
+                        value={shiftForm.endTime}
+                        onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {shiftForm.type === 'FLEXIBLE' && (
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-bold">عدد ساعات الدوام المطلوبة يومياً</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      required
+                      value={shiftForm.requiredHours}
+                      onChange={(e) => setShiftForm({ ...shiftForm, requiredHours: Number(e.target.value) })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-sky-500"
+                    />
+                  </div>
+                )}
+
+                {shiftForm.type === 'SPLIT' && (
+                  <div className="space-y-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-slate-400 mb-1 font-bold">بداية الفترة الأولى</label>
+                        <input
+                          type="time"
+                          value={shiftForm.startTime}
+                          onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 mb-1 font-bold">نهاية الفترة الأولى</label>
+                        <input
+                          type="time"
+                          value={shiftForm.endTime}
+                          onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-slate-400 mb-1 font-bold">بداية الفترة الثانية</label>
+                        <input
+                          type="time"
+                          value={shiftForm.splitStartTime}
+                          onChange={(e) => setShiftForm({ ...shiftForm, splitStartTime: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 mb-1 font-bold">نهاية الفترة الثانية</label>
+                        <input
+                          type="time"
+                          value={shiftForm.splitEndTime}
+                          onChange={(e) => setShiftForm({ ...shiftForm, splitEndTime: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* فترة السماح والاستراحة */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-bold">فترة السماح (بالدقائق)</label>
+                    <input
+                      type="number"
+                      value={shiftForm.gracePeriodMins}
+                      onChange={(e) => setShiftForm({ ...shiftForm, gracePeriodMins: Number(e.target.value) })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 mb-1 font-bold">أقصى استراحة مسموحة (دقائق)</label>
+                    <input
+                      type="number"
+                      value={shiftForm.maxBreakMins}
+                      onChange={(e) => setShiftForm({ ...shiftForm, maxBreakMins: Number(e.target.value) })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-sky-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowShiftModal(false)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={actionLoading}
+                    className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-600/20"
+                  >
+                    {actionLoading ? 'جاري الحفظ...' : 'حفظ الوردية'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 }
