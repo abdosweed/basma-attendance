@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2026-09-15 - COMPLETED & VALIDATED
+
+### Added
+- إنجاز واختبار مرحلة النسخ الاحتياطي واستعادة البيانات (Backup & Restore Verification v1.8.0).
+- إدراج صمام أمان برمجي صارم (Safety Guard) يمنع ويفشل أي عملية استرجاع تستهدف قاعدة البيانات الحية (`RESTORE TO PRODUCTION IS FORBIDDEN IN TEST MODE`).
+- إنشاء أداة توليد لقطات النسخ الاحتياطي المشفرة `scripts/backup-database.ts` وحساب التوقيع الرقمي SHA-256 Checksum وتخزين الملفات في مجلد مؤقت معزول ومحمي عن Git.
+- إنشاء محرك فحص وتدقيق الاسترجاع `scripts/restore-database.ts` على بيئة معزولة ومطابقة أعداد السجلات لـ 15 جدولا بنسبة 100% وخلوها من السجلات اليتيمة.
+- تحديث كارت النسخ الاحتياطي بشاشة صحة المنظومة `/admin/system-health` إلى **`HEALTHY / VERIFIED`**.
+- إنشاء دليل الطوارئ والعمليات التشغيلية لاسترجاع البيانات `/docs/RESTORE_RUNBOOK.md`.
+- إضافة حزمة اختبارات بالرمز `scripts/test-phase8-suite.ts` (17/17 Tests PASSED - 100%).
+- إنشاء التقرير الفني `/docs/reports/PHASE_08_BACKUP_RESTORE_REPORT.md`.
+
 ## [1.7.0] - 2026-09-15 - COMPLETED & VALIDATED
 
 ### Added

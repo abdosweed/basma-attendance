@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export type HealthStatus = 'HEALTHY' | 'DEGRADED' | 'ERROR' | 'UNKNOWN';
 export type SeverityLevel = 'INFO' | 'WARNING' | 'CRITICAL';
@@ -320,19 +322,41 @@ export async function getSystemHealthReport(): Promise<SystemHealthReport> {
     },
   });
 
-  // 11. Backup & Restore Status Check (EXPLICITLY NOT VERIFIED)
+  // 11. Backup & Restore Status Check (Phase 8 Verified Status)
+  let backupState = 'NOT VERIFIED';
+  let lastVerifiedBackup: any = null;
+  try {
+    const backupsDir = path.join(process.cwd(), 'prisma', 'backups');
+    if (fs.existsSync(backupsDir)) {
+      const metaFiles = fs.readdirSync(backupsDir).filter((f) => f.endsWith('.meta.json'));
+      if (metaFiles.length > 0) {
+        metaFiles.sort().reverse();
+        const latestMeta = JSON.parse(fs.readFileSync(path.join(backupsDir, metaFiles[0]), 'utf-8'));
+        if (latestMeta.status === 'VERIFIED') {
+          backupState = 'VERIFIED';
+          lastVerifiedBackup = latestMeta;
+        }
+      }
+    }
+  } catch (err) {}
+
   checks.push({
     id: 'backup_restore',
     name: 'النسخ الاحتياطي واستعادة البيانات (Backup & Restore)',
     category: 'BACKUP',
-    status: 'DEGRADED',
-    severity: 'WARNING',
-    message: 'NOT VERIFIED (النسخ الاحتياطي في انتظار الفحص والتوثيق المباشر في المرحلة 8 Phase 8)',
+    status: backupState === 'VERIFIED' ? 'HEALTHY' : 'DEGRADED',
+    severity: backupState === 'VERIFIED' ? 'INFO' : 'WARNING',
+    message: backupState === 'VERIFIED'
+      ? `تم فحص واختبار النسخ والاسترجاع بنجاح (BACKUP & RESTORE VERIFIED) | SHA-256 Verified`
+      : 'NOT VERIFIED (النسخ الاحتياطي في انتظار الفحص والتوثيق المباشر)',
     checkedAt,
     metadata: {
-      backupState: 'NOT VERIFIED',
-      targetPhase: 'Phase 8 - Backup & Restore Verification',
-      provider: 'Supabase Cloud Automated Snapshots',
+      backupState,
+      provider: 'Supabase Cloud Automated Snapshots + JSON Encryption Snapshot',
+      rpo: '24 Hours (Daily Automated Snapshots)',
+      rto: lastVerifiedBackup ? `${(lastVerifiedBackup.durationMs / 1000).toFixed(2)}s` : '< 2 Minutes',
+      lastVerifiedDate: lastVerifiedBackup?.createdAt || 'NOT VERIFIED',
+      checksum: lastVerifiedBackup?.checksum ? `${lastVerifiedBackup.checksum.substring(0, 16)}...` : 'N/A',
     },
   });
 

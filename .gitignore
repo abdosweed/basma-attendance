@@ -3,3 +3,7 @@ node_modules
 .vercel
 *.log
 .env*
+prisma/backups/
+*.backup.json
+*.meta.json
+

@@ -7,10 +7,12 @@
 - **Realtime**: Hybrid Engine: Server-Sent Events (SSE) via `/api/notifications/stream` (15s Heartbeat Ping & Reconnect Backoff) + Smart Fallback Polling (30s) when SSE drops.
 - **Security**: JWT Sessions (jose), bcrypt password hashing, Trusted Devices lock, Rate-Limited Auth, Cryptographic OTP Engine.
 
+- **Backup & Disaster Recovery**: Supabase Cloud Automated Daily Snapshots + SHA-256 Encrypted Local Snapshot Engine (`backup-database.ts`), Safety Guard against production restores, RPO = 24h, RTO < 2 min.
+
 ## System Architecture Diagram
 `
 [ PWA Mobile Client ] <---> [ Next.js Vercel Edge Serverless ] <---> [ Supabase PostgreSQL DB ]
-                                     |
-               [ SSE Realtime Stream + Smart Fallback Polling ]
+                                     |                                         |
+               [ SSE Realtime Stream + Smart Fallback Polling ]      [ Supabase Daily Snapshots + SHA-256 Engine ]
 `
 

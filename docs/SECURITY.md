@@ -15,8 +15,10 @@
 - حد أقصى 3 محاولات خاطئة قبل إبطال الكود.
 - لا يتم تسريب الكود في السجلات المفتوحة (Logs).
 
-## 5. System Health Dashboard & Diagnostics Security
-- **RBAC**: حماية مسار الصفحة `/admin/system-health` والـ API `/api/admin/system-health` بشرط صريح `SUPER_ADMIN` أو `ADMIN` مع حظر `EMPLOYEE` بـ HTTP 403 Forbidden.
-- **Zero Secrets Exposure**: حظر وتصفية مخرجات التشخيص من أي كلمات مرور، مفاتيح JWT، أكواد OTP، أو سلاسل اتصال `DATABASE_URL`.
+## 6. Backup & Disaster Recovery Security
+- **Production Safety Guard**: حظر برمجياً بتاتاً تنفيذ أي عملية استرجاع (Restore) تستهدف قاعدة البيانات الحية لمنع مسح أو تدمير البيانات.
+- **SHA-256 Checksum**: تشفير التوقيع الرقمي لجميع لقطات النسخ الاحتياطي ومطابقته قبل أي استرجاع.
+- **Git & Public Exclusion**: حظر وتضمين مجلد `prisma/backups/` في `.gitignore` لمنع تسريب لقطات البيانات في مستودعات الكود أو الويب.
+
 
 

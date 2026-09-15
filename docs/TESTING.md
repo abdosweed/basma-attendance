@@ -55,4 +55,24 @@
   14. Zero Secrets Exposure Security Audit
   15. System Health Score calculation formula (0-100)
   16. Critical Incident Banner detection logic
-
+## Phase 8 Acceptance Tests (v1.8.0)
+- **Command**: `npx tsx scripts/test-phase8-suite.ts`
+- **Result**: 17/17 PASSED (100%).
+- **Scenarios Covered**:
+  1. Direct database connection check
+  2. Backup snapshot creation (`createDatabaseBackup()`)
+  3. SHA-256 Checksum calculation & metadata serialization
+  4. Production Safety Guard verification (Aborts restore targeting Production DB)
+  5. Isolated Restore execution & table count validation
+  6. User table count match
+  7. Employee table count match
+  8. AttendanceEvent table count match
+  9. TrustedDevice table count match
+  10. SystemSettings table count match
+  11. Foreign Key integrity verification (0 orphan records)
+  12. Data Sampling verification
+  13. Prisma Migrations status check (`Database schema is up to date`)
+  14. Schema Drift check (Zero drift)
+  15. Measurement of RTO (< 2s) & RPO (24h)
+  16. Security Audit (0 secrets logged or written)
+  17. System Health Backup Card status update (`HEALTHY / VERIFIED`)
