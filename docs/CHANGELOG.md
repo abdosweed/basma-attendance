@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-09-15 - COMPLETED & VALIDATED
+
+### Added
+- إطلاق واختبار اعتمادية نظام الإشعارات اللحظية SSE Production Reliability (النسخة 1.6.0).
+- إضافة نبضات القلب (15s Heartbeat Ping) في خادم الـ SSE للحفاظ على استمرارية الاتصال على Vercel Serverless.
+- دعم إعادة التشغيل التلقائي بالأحداث المفقودة (Last-Event-ID Replay Support) من قاعدة البيانات عند إعادة الاتصال.
+- إضافة التراجع التنازلي الموزون (Exponential Backoff 1s to 30s max with jitter) عند انقطاع الشبكة.
+- إضافة حماية منع التكرار البرمجي (Duplicate Protection) وتصفية الـ `eventId` / `notificationId`.
+- إطلاق محرك الاستعلام المتردد التلقائي المزدوج (Smart Fallback Polling كل 30s) والذي ينشط فقط عند انقطاع الـ SSE ويتوقف فور عودته.
+- إضافة الإغلاق والتنظيف المباشر لـ EventSource فور تسجبل الخروج Logout.
+- إضافة حزمة اختبارات آليية شاملة `scripts/test-phase6-suite.ts` (18/18 Tests PASSED - 100%).
+- إنشاء تقرير المرحلة الفني `/docs/reports/PHASE_06_REALTIME_RELIABILITY_REPORT.md`.
+
 ## [1.5.0] - 2026-09-14 - COMPLETED & VALIDATED
 
 ### Added

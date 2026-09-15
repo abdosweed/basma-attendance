@@ -52,37 +52,158 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
     setUnreadCount(unread);
   }, [notifications]);
 
-  // الاتصال بقناة البث المباشر للإشعارات Real-Time SSE Stream
+  // الاتصال بقناة البث المباشر للإشعارات Real-Time SSE Stream مع دعم التعافي والـ Fallback Polling
+  const processedIdsRef = React.useRef<Set<string>>(new Set());
+  const eventSourceRef = React.useRef<EventSource | null>(null);
+  const reconnectTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const backoffDelayRef = React.useRef<number>(1000);
+  const [sseConnected, setSseConnected] = useState<boolean>(false);
+
   useEffect(() => {
     if (!user) return;
 
-    let eventSource: EventSource | null = null;
-    try {
-      eventSource = new EventSource('/api/notifications/stream');
+    let isUnmounted = false;
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.id || data.title) {
-            setItems((prev) => [data, ...prev]);
-            setUnreadCount((c) => c + 1);
+    const connectSSE = () => {
+      if (isUnmounted || document.hidden) return;
 
-            // عرض Toast فوري للمستخدم
-            setToastNotif(data);
-            setTimeout(() => setToastNotif(null), 5000);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
 
-            if (onRefreshNotifications) onRefreshNotifications();
+      try {
+        const es = new EventSource('/api/notifications/stream');
+        eventSourceRef.current = es;
+
+        es.onopen = () => {
+          setSseConnected(true);
+          backoffDelayRef.current = 1000; // Reset backoff on success
+        };
+
+        const handleNotificationPayload = (eventData: any) => {
+          if (!eventData || (!eventData.id && !eventData.title)) return;
+
+          // Duplicate protection check using eventId / notificationId
+          const eventId = String(eventData.id || `${eventData.title}_${eventData.createdAt}`);
+          if (processedIdsRef.current.has(eventId)) {
+            return;
           }
-        } catch (e) {}
-      };
-    } catch (e) {}
+          processedIdsRef.current.add(eventId);
+          if (processedIdsRef.current.size > 200) {
+            const firstItem = processedIdsRef.current.values().next().value;
+            if (firstItem) processedIdsRef.current.delete(firstItem);
+          }
+
+          // Latency logging
+          if (eventData.createdAt) {
+            const latency = Date.now() - new Date(eventData.createdAt).getTime();
+            if (latency > 0) {
+              console.log(`[SSE Latency] Received notification in ${latency}ms`);
+            }
+          }
+
+          setItems((prev) => {
+            if (prev.some((item) => String(item.id) === eventId)) return prev;
+            return [eventData, ...prev];
+          });
+          setUnreadCount((c) => c + 1);
+
+          // Toast preview for live notification
+          setToastNotif(eventData);
+          setTimeout(() => setToastNotif(null), 5000);
+
+          if (onRefreshNotifications) onRefreshNotifications();
+        };
+
+        es.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleNotificationPayload(data);
+          } catch (e) {}
+        };
+
+        // Event listener for typed notification events
+        es.addEventListener('notification', (event: MessageEvent) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleNotificationPayload(data);
+          } catch (e) {}
+        });
+
+        es.addEventListener('ping', () => {
+          setSseConnected(true);
+        });
+
+        es.onerror = () => {
+          setSseConnected(false);
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+            eventSourceRef.current = null;
+          }
+
+          if (!isUnmounted && !document.hidden) {
+            // Reconnect Backoff with Jitter (1s -> 2s -> 5s -> 10s -> 30s max)
+            const currentDelay = backoffDelayRef.current;
+            const nextDelay = Math.min(currentDelay * 2, 30000);
+            backoffDelayRef.current = nextDelay;
+            const jitter = Math.random() * 500;
+
+            if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = setTimeout(connectSSE, currentDelay + jitter);
+          }
+        };
+      } catch (e) {
+        setSseConnected(false);
+      }
+    };
+
+    connectSSE();
+
+    // Visibility Listener: Resume SSE stream on focus if disconnected
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !sseConnected && !eventSourceRef.current) {
+        backoffDelayRef.current = 1000;
+        connectSSE();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Smart Fallback Polling (30s interval): Runs only when SSE stream is disconnected
+    const fallbackInterval = setInterval(async () => {
+      if (!eventSourceRef.current || eventSourceRef.current.readyState !== EventSource.OPEN) {
+        try {
+          const res = await fetch('/api/notifications');
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.notifications)) {
+              setItems(data.notifications);
+              const unread = data.notifications.filter((n: any) => !n.readAt && !n.isRead).length;
+              setUnreadCount(unread);
+            }
+          }
+        } catch (err) {}
+      }
+    }, 30000);
 
     return () => {
-      if (eventSource) eventSource.close();
+      isUnmounted = true;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(fallbackInterval);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
   }, [user]);
 
   const handleLogout = async () => {
+    // Immediate teardown of active SSE stream
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    setSseConnected(false);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');

@@ -1,5 +1,11 @@
 # 🎯 DECISIONS.md - القرارات الفنية المعمارية
 
+## Decision 9: اعتماد النمط الهجين لإشعارات SSE مع الـ Smart Fallback Polling (Production Realtime Reliability)
+* **Date**: 2026-09-15
+* **Reason**: بيئة Vercel Serverless تتسم بعدم الاحتفاظ بالحالة (Stateless) وانقطاع اتصالات البث الطويلة (30s-60s max execution limit) وعزل الذاكرة بين الـ Lambdas المختلفة.
+* **Solution**: الاحتفاظ بنظام الـ SSE كمسار أساسي وتطعيمه بـ 15s Heartbeat Ping وتراجع تنازلي Exponential Backoff، مع دمج محرك Smart Fallback Polling (كل 30s) يعمل فقط عند انقطاع الـ SSE ويتوقف آلياً عند عودته. في حال توسع المنظومة لأكثر من 500 موظف متزامن، يوصى بالانتقال الكامل لـ Supabase Realtime / WebSockets.
+* **Status**: Accepted (Rating: `SSE DEGRADED - STABILIZED WITH SMART FALLBACK POLLING`).
+
 ## Decision 8: إطلاق محرك تأكيدات الـ OTP المشفر والتكامل مع نظام الهجرة الرسمي (Cryptographic OTP Engine)
 * **Date**: 2026-09-14
 * **Reason**: تأمين العمليات الحساسة في المنظومة ضد التخمين والتلاعب دون تسريب أكواد الـ OTP في السجلات أو التخزين الصريح.
