@@ -1,5 +1,11 @@
 # 🎯 DECISIONS.md - القرارات الفنية المعمارية
 
+## Decision 10: بناء محرك فحص صحة المنظومة الموحد (System Health Telemetry & Operations Dashboard)
+* **Date**: 2026-09-15
+* **Reason**: ضرورة امتلاك الإدارة والمطورين أداة تشخيص فوري تمنع الأعطال المفاجئة وتوفر مؤشرات الأداء والأمان دون إضافة تعقيدات أو عبء على قاعدة البيانات.
+* **Solution**: إنشاء محرك التشخيص `src/lib/system-health.ts` والصفحة `/admin/system-health` لفحص 12 محركاً تشغيلياً مع حظر شامل لتسريب أي بيانات سرية أو مفاتيح، وتأطير حالة النسخ الاحتياطي صراحة كـ `NOT VERIFIED` في انتظار المرحلة 8.
+* **Status**: Accepted.
+
 ## Decision 9: اعتماد النمط الهجين لإشعارات SSE مع الـ Smart Fallback Polling (Production Realtime Reliability)
 * **Date**: 2026-09-15
 * **Reason**: بيئة Vercel Serverless تتسم بعدم الاحتفاظ بالحالة (Stateless) وانقطاع اتصالات البث الطويلة (30s-60s max execution limit) وعزل الذاكرة بين الـ Lambdas المختلفة.

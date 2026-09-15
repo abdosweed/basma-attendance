@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck, Sun, Moon } from 'lucide-react';
+import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck, Sun, Moon, Activity } from 'lucide-react';
 
 interface NavbarProps {
   user?: any;
@@ -278,6 +278,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
                 className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
               >
                 <span>الأجهزة</span>
+              </a>
+
+              <a
+                href="/admin/system-health"
+                className="px-2.5 py-1.5 bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-400 hover:text-emerald-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-emerald-800/60 flex items-center gap-1"
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">صحة النظام</span>
               </a>
 
               <a

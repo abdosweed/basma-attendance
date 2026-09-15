@@ -10,3 +10,6 @@
    - **Status**: MITIGATED WITH HYBRID FALLBACK ENGINE.
    - **الوصف**: بيئة Vercel Serverless تفصل ذاكرة الـ Lambdas المتعددة ومحدودة بـ 30-60 ثانية لجمود الاتصال.
    - **الحل المطبق**: تفعيل نبضات القلب Ping كل 15 ثانية، والدمج الذكي مع الـ Fallback Polling (كل 30 ثانية عند انقطاع SSE) لضمان عدم ضياع أي إشعار.
+6. **Backup & Restore Verification Status**:
+   - **Status**: NOT VERIFIED (PENDING PHASE 8).
+   - **الوصف**: حالة النسخ الاحتياطي معروضة صراحة بـ NOT VERIFIED في شاشة صحة المنظومة في انتظار الفحص والتوثيق الميداني الشامل المخصص في المرحلة 8 Phase 8.

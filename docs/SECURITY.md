@@ -1,4 +1,4 @@
-﻿# 🛡️ SECURITY.md - التوثيق الأمني
+# 🛡️ SECURITY.md - التوثيق الأمني
 
 ## 1. Authentication & Password Policy
 - **Hashing**: bcrypt مع salt round = 10.
@@ -15,7 +15,8 @@
 - حد أقصى 3 محاولات خاطئة قبل إبطال الكود.
 - لا يتم تسريب الكود في السجلات المفتوحة (Logs).
 
-## 4. Trusted Device & Geofence
-- ربط الحساب بجهاز معتمد (Approved Device).
-- فحص الجغرافي الخادم (Server-side Geofencing) بدقة 50-80m وتوثيق المحاولات المشبوهة.
+## 5. System Health Dashboard & Diagnostics Security
+- **RBAC**: حماية مسار الصفحة `/admin/system-health` والـ API `/api/admin/system-health` بشرط صريح `SUPER_ADMIN` أو `ADMIN` مع حظر `EMPLOYEE` بـ HTTP 403 Forbidden.
+- **Zero Secrets Exposure**: حظر وتصفية مخرجات التشخيص من أي كلمات مرور، مفاتيح JWT، أكواد OTP، أو سلاسل اتصال `DATABASE_URL`.
+
 

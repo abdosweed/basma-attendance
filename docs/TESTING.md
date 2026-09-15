@@ -35,6 +35,24 @@
   13. Read notification DB sync
   14. Mark All as Read DB sync
   15. 20 Concurrent clients simulation
-  16. Reconnect storm backoff simulation
-  17. Fallback polling activation on SSE drop
-  18. Fallback polling deactivation on SSE reconnect
+## Phase 7 Acceptance Tests (v1.7.0)
+- **Command**: `npx tsx scripts/test-phase7-suite.ts`
+- **Result**: 16/16 PASSED (100%).
+- **Scenarios Covered**:
+  1. System Health Report generation (`getSystemHealthReport()`)
+  2. Version update check (v1.7.0)
+  3. Database health & latency check (`SELECT 1`)
+  4. Realtime status check (SSE + Fallback Polling)
+  5. Notification telemetry metrics
+  6. Trusted Devices telemetry metrics
+  7. GPS & Geofence Confidence Engine metrics
+  8. Cryptographic OTP Engine status
+  9. Auth Security & Account Lockout metrics
+  10. Attendance Engine & Shift Rotation metrics
+  11. Database Integrity Checks (Orphan/Anomaly checks)
+  12. Backup Status explicitly returns `NOT VERIFIED`
+  13. Known Limitations Cards list (5 items)
+  14. Zero Secrets Exposure Security Audit
+  15. System Health Score calculation formula (0-100)
+  16. Critical Incident Banner detection logic
+

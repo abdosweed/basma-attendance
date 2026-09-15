@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-09-15 - COMPLETED & VALIDATED
+
+### Added
+- إطلاق شاشة ومحرك صحة المنظومة التشغيلية (System Health & Operations Dashboard v1.7.0) في المسار المحمي `/admin/system-health`.
+- بناء محرك التشخيص الفني `src/lib/system-health.ts` لفحص 12 محركاً تشغيلياً (PostgreSQL Query Latency, Supabase Cloud, SSE Realtime, Trusted Devices, Geofence Engine, OTP, Auth Security, Attendance, Integrity, Backup).
+- تطبيق حماية RBAC صارمة على مسار الـ API `/api/admin/system-health` (السماح للإدارة وحظر حسابات الموظفين HTTP 403 Forbidden).
+- التزام تام بحماية الأسرار (Zero Secrets Exposure) وخلو مخرجات الـ API من كلمات المرور أو التوكنات أو سلاسل DATABASE_URL.
+- عرض حالة النسخ الاحتياطي بصراحة كـ `NOT VERIFIED` مع التوجيه للمرحلة 8 Phase 8.
+- إضافة حزمة اختبارات بالرمز `scripts/test-phase7-suite.ts` (16/16 Tests PASSED - 100%).
+- إنشاء التقرير الفني `/docs/reports/PHASE_07_SYSTEM_HEALTH_REPORT.md`.
+
 ## [1.6.0] - 2026-09-15 - COMPLETED & VALIDATED
 
 ### Added
