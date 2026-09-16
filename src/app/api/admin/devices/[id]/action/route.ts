@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { broadcastNotificationToUser } from '@/lib/sse-notifications';
+import { sendPushToUser } from '@/lib/push-notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -123,6 +124,11 @@ export async function POST(
             },
           });
           broadcastNotificationToUser(targetDevice.employeeId, notifNew);
+          sendPushToUser(targetDevice.employee.userId, {
+            title: '✅ تم اعتماد جهازك الجديد',
+            body: `تم اعتماد جهازك الجديد (${targetDevice.deviceName || 'المعتمد'}) كجهاز رئيسي.`,
+            data: { url: '/', notificationId: notifNew.id, type: 'DEVICE_APPROVED' },
+          }).catch(() => {});
         } catch (e) {}
 
         await prisma.auditLog.create({
@@ -173,6 +179,11 @@ export async function POST(
           },
         });
         broadcastNotificationToUser(targetDevice.employeeId, notif);
+        sendPushToUser(targetDevice.employee.userId, {
+          title: '✅ تم اعتماد جهازك',
+          body: `يمكنك الآن استخدام هذا الجهاز لتسجيل الحضور والانصراف.`,
+          data: { url: '/', notificationId: notif.id, type: 'DEVICE_APPROVED' },
+        }).catch(() => {});
       } catch (e) {}
 
       await prisma.auditLog.create({

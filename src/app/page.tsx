@@ -6,6 +6,12 @@ import Navbar from '@/components/Navbar';
 import InstallPWAPrompt from '@/components/InstallPWAPrompt';
 import LeaveRequestModal from '@/components/LeaveRequestModal';
 import CorrectionRequestModal from '@/components/CorrectionRequestModal';
+import { EmployeeHeroCard } from '@/components/ui/EmployeeHeroCard';
+import { AttendanceActionCard } from '@/components/employee/attendance-action-card';
+import { BottomNav, TabType } from '@/components/ui/BottomNav';
+import { NotificationSheet } from '@/components/ui/NotificationSheet';
+import { BasmaCard } from '@/components/ui/BasmaCard';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
 import {
   Fingerprint,
@@ -23,6 +29,7 @@ import {
   PlusCircle,
   Smartphone,
   Ban,
+  User as UserIcon,
 } from 'lucide-react';
 
 export default function EmployeePortalPage() {
@@ -32,6 +39,8 @@ export default function EmployeePortalPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showCorrectionModal, setShowCorrectionModal] = useState(false);
 
@@ -402,24 +411,22 @@ export default function EmployeePortalPage() {
   const todayRecord = todayData?.todayRecord;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <Navbar user={user} />
 
-      <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-6">
-        {/* بطاقة الترحيب واليوم والتاريخ */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none" />
-
-          <div className="flex items-center justify-between mb-4">
+      <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-5 pb-28 md:pb-6">
+        {/* Header greeting card */}
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <span className="text-[11px] text-slate-400 font-medium">مرحباً بعودتك 👋</span>
-              <h2 className="text-lg font-black text-white">{todayData?.employee?.name || user?.name}</h2>
-              <p className="text-xs text-sky-400 font-medium">{todayData?.employee?.jobTitle || 'موظف'}</p>
+              <span className="text-xs text-slate-500 font-medium">مرحباً بعودتك 👋</span>
+              <h2 className="text-xl font-bold text-slate-900">{todayData?.employee?.name || user?.name}</h2>
+              <p className="text-xs text-blue-700 font-semibold mt-0.5">{todayData?.employee?.jobTitle || 'موظف'}</p>
             </div>
-            <div className="text-left bg-slate-800/80 px-3 py-1.5 rounded-2xl border border-slate-700/60">
-              <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-sky-400" />
-                {new Date().toLocaleDateString('ar-EG', { weekday: 'short', day: 'numeric', month: 'short' })}
+            <div className="text-left bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200/80">
+              <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-blue-700" />
+                {new Date().toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short' })}
               </div>
             </div>
           </div>
@@ -509,140 +516,76 @@ export default function EmployeePortalPage() {
           </div>
         )}
 
+        {/* Trusted Device Status Banner (Pending / Blocked guidance) */}
+        {deviceStatusState === 'PENDING' && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>هذا الهاتف غير معتمد بعد. يرجى طلب الاعتماد من المسؤول.</span>
+            </div>
+            <button
+              onClick={handleRequestDeviceApproval}
+              disabled={actionLoading}
+              className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs font-bold shrink-0 transition-all disabled:opacity-50"
+            >
+              طلب الاعتماد
+            </button>
+          </div>
+        )}
+
         {deviceStatusState === 'BLOCKED' && (
-          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-slate-300 flex items-center gap-3 shadow-lg">
-            <Ban className="w-6 h-6 text-slate-400 shrink-0" />
-            <div>
-              <span className="font-bold block text-sm">⚫ هذا الجهاز محظور من قبل المنظومة</span>
-              <span className="text-xs text-slate-400">تمنع سياسة الشركة تسجيل الحضور والانصراف من هذا الجهاز.</span>
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-3 shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-600" />
+            <div className="text-xs">
+              <span className="font-bold block">هذا الجهاز محظور من المنظومة</span>
+              <span className="text-slate-500 font-normal">تمنع السياسة تسجيل الحضور والانصراف من هذا الهاتف.</span>
             </div>
           </div>
         )}
 
-        {deviceStatusState === 'APPROVED' && (
-          <div className="p-2.5 px-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>📱 جهازك معتمد ومقترن بـ Basma</span>
-            </div>
-            <span className="text-[10px] text-emerald-400/80 font-mono">APPROVED</span>
-          </div>
-        )}
+        {/* Hero Attendance Card (Master Action & Zero Raw GPS Noise) */}
+        <AttendanceActionCard
+          checkInAt={todayRecord?.checkInAt ? new Date(todayRecord.checkInAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : null}
+          checkOutAt={todayRecord?.checkOutAt ? new Date(todayRecord.checkOutAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : null}
+          activeBreak={todayData?.activeBreak}
+          shiftName={todayData?.shift?.name || 'الوردية العادية'}
+          scheduledStart={todayData?.shift?.startTime || '08:00'}
+          scheduledEnd={todayData?.shift?.endTime || '16:00'}
+          locationStatusMessage={geoStatus.message}
+          locationStatusType={geoStatus.type}
+          actionLoading={actionLoading}
+          onCheckIn={() => handleAttendanceAction('check-in')}
+          onCheckOut={() => handleAttendanceAction('check-out')}
+          onBreakStart={() => handleAttendanceAction('break-start')}
+          onBreakEnd={() => handleAttendanceAction('break-end')}
+          onRequestCorrection={() => setShowCorrectionModal(true)}
+        />
 
-        {/* رسالة حالة الـ GPS والـ Geofence الحالية مع محرك ثقة الموقع Location Confidence Engine */}
-        <div
-          className={`p-4 rounded-2xl text-xs border flex items-start justify-between gap-3 transition-all ${
-            geoStatus.type === 'error'
-              ? 'bg-red-500/10 border-red-500/30 text-red-300'
-              : geoStatus.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-              : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <span className="font-bold block mb-0.5 flex items-center gap-1.5">
-                <span>حالة الموقع الجغرافي (Location Confidence Engine):</span>
-              </span>
-              <span>{geoStatus.message}</span>
-            </div>
-          </div>
-
-          {verifiedAccuracy !== null && (
-            <div className="text-left shrink-0 bg-slate-950/80 px-2.5 py-1 rounded-xl border border-slate-800">
-              <span className="text-[10px] block text-slate-400 font-mono">الدقة المقاسة</span>
-              <span className="font-bold text-white text-xs font-mono">±{verifiedAccuracy}م</span>
-              <span className="text-[9px] block text-sky-400 font-mono">{lastVerifiedTime}</span>
-            </div>
-          )}
-        </div>
-
-        {/* أزرار الحضور والانصراف الكبيرة للاستخدام المباشر من الهاتف */}
-        <div className="space-y-3">
-          {statusCode === 'NOT_CHECKED_IN' && (
-            <button
-              onClick={() => handleAttendanceAction('check-in')}
-              disabled={actionLoading}
-              className="w-full py-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-3xl shadow-2xl shadow-emerald-600/30 flex items-center justify-center gap-3 text-base active:scale-98 transition-all disabled:opacity-50"
-            >
-              {actionLoading ? (
-                <span className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Fingerprint className="w-7 h-7 animate-pulse" />
-                  <span>تسجيل الحضور الآن</span>
-                </>
-              )}
-            </button>
-          )}
-
-          {(statusCode === 'PRESENT' || statusCode === 'LATE') && (
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleAttendanceAction('break-start')}
-                disabled={actionLoading}
-                className="py-4 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold rounded-2xl border border-amber-500/30 flex items-center justify-center gap-2 text-xs transition-all active:scale-95"
-              >
-                <Coffee className="w-5 h-5" />
-                <span>بدء الاستراحة</span>
-              </button>
-
-              <button
-                onClick={() => handleAttendanceAction('check-out')}
-                disabled={actionLoading}
-                className="py-4 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold rounded-2xl shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 text-xs transition-all active:scale-95"
-              >
-                <LogOut className="w-5 h-5" />
-                <span>تسجيل الانصراف</span>
-              </button>
-            </div>
-          )}
-
-          {statusCode === 'ON_BREAK' && (
-            <button
-              onClick={() => handleAttendanceAction('break-end')}
-              disabled={actionLoading}
-              className="w-full py-5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black rounded-3xl shadow-xl flex items-center justify-center gap-3 text-sm active:scale-98 transition-all"
-            >
-              <Coffee className="w-6 h-6" />
-              <span>إنهاء الاستراحة والعوّدة للعمل</span>
-            </button>
-          )}
-
-          {statusCode === 'CHECKED_OUT' && (
-            <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-center text-xs text-emerald-400 flex items-center justify-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
-              <span>تم إكمال يوم الدوام بنجاح. شكراً لك!</span>
-            </div>
-          )}
-        </div>
-
-        {/* أزرار الخدمات السريعة (طلب إجازة / تصحيح بصمة) */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Quick Action Grid (3 Primary Actions) */}
+        <div className="grid grid-cols-2 gap-3 pt-2">
           <button
             onClick={() => setShowLeaveModal(true)}
-            className="p-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-colors"
+            className="p-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-[0.99]"
           >
-            <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold shrink-0">
-              <Calendar className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold shrink-0">
+              <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-xs text-white block">طلب إجازة</span>
-              <span className="text-[10px] text-slate-400">تقديم طلب إجازة سنوية أو مرضية</span>
+              <span className="font-bold text-xs text-slate-900 block">طلب إجازة</span>
+              <span className="text-[10px] text-slate-500 font-medium">تقديم طلب إجازة سنوية</span>
             </div>
           </button>
 
           <button
             onClick={() => setShowCorrectionModal(true)}
-            className="p-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-colors"
+            className="p-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-[0.99]"
           >
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shrink-0">
-              <Clock className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
+              <Clock className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-xs text-white block">تصحيح بصمة</span>
-              <span className="text-[10px] text-slate-400">تصحيح وقت حضور/انصراف مفقود</span>
+              <span className="font-bold text-xs text-slate-900 block">تصحيح بصمة</span>
+              <span className="text-[10px] text-slate-500 font-medium">طلب تصحيح وقت سابق</span>
             </div>
           </button>
         </div>
@@ -799,6 +742,27 @@ export default function EmployeePortalPage() {
       )}
 
       <InstallPWAPrompt />
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'notifications') {
+            setShowNotificationSheet(true);
+          }
+        }}
+        unreadNotificationsCount={0}
+      />
+
+      {/* Notification Sheet Drawer */}
+      <NotificationSheet
+        isOpen={showNotificationSheet}
+        onClose={() => setShowNotificationSheet(false)}
+        notifications={[]}
+        onMarkRead={() => {}}
+        onMarkAllRead={() => {}}
+      />
     </div>
   );
 }

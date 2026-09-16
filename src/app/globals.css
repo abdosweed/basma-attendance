@@ -3,26 +3,60 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --font-sans: 'IBM Plex Sans Arabic', 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  
+  html {
+    font-family: var(--font-sans);
+  }
+
   body {
+    font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 
-/* تخصيص شريط التمرير */
+/* Safe Area Insets for iOS & Android */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 16px);
+}
+
+/* Custom Minimal Shadow & Glass Utility */
+.minimal-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+.minimal-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Scrollbar customization */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0284c7;
+  background: #1e40af;
 }
 
 /* دعم النمط الفاتح (Light Mode Theme) */

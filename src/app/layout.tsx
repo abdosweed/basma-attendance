@@ -30,27 +30,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className="h-full bg-slate-950 text-slate-100 antialiased selection:bg-sky-500 selection:text-white">
+    <html lang="ar" dir="rtl" className="h-full bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className="h-full flex flex-col font-sans bg-slate-950">
+      <body className="h-full flex flex-col bg-slate-50 font-sans text-slate-900 antialiased">
         {children}
 
-        {/* تسجيل الـ Service Worker لـ PWA */}
-        <Script id="register-sw" strategy="afterInteractive">
+        <Script id="sw-register" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').then(
                   function(registration) {
-                    console.log('Basma PWA ServiceWorker registered with scope: ', registration.scope);
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
                   },
                   function(err) {
-                    console.log('Basma PWA ServiceWorker registration failed: ', err);
+                    console.log('ServiceWorker registration failed: ', err);
                   }
                 );
               });
