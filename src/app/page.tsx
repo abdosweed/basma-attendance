@@ -412,6 +412,9 @@ export default function EmployeePortalPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+      <div className="w-full bg-emerald-600 text-white text-center py-2 text-xs font-bold shadow-md z-50">
+        ⚡ تم تفعيل واجهة بصمة الحديثة v1.14.0 (Live UI Update)
+      </div>
       <Navbar user={user} />
 
       <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-5 pb-28 md:pb-6">
