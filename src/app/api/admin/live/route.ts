@@ -39,7 +39,7 @@ export async function GET() {
       let statusLabel = '🔴 غائب';
       let statusBadge = 'bg-red-100 text-red-700';
       let geofenceStatus = '⚪ تعذر التحقق من الموقع';
-      let geofenceBadge = 'bg-slate-800 text-slate-400';
+      let geofenceBadge = 'bg-slate-100 text-slate-600 border border-slate-200';
 
       if (activeBreak) {
         statusLabel = '🟠 في استراحة';
@@ -51,14 +51,14 @@ export async function GET() {
         if (activeViolation) {
           if (activeViolation.authorized) {
             geofenceStatus = '🟡 خروج بإذن رسمي';
-            geofenceBadge = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+            geofenceBadge = 'bg-amber-100 text-amber-800 border border-amber-300 font-semibold';
           } else {
             geofenceStatus = `🔴 خارج نطاق العمل (${Math.round(activeViolation.maxDistanceMeters)}م)`;
-            geofenceBadge = 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+            geofenceBadge = 'bg-rose-100 text-rose-800 border border-rose-300 font-semibold';
           }
         } else {
           geofenceStatus = '🟢 داخل نطاق العمل';
-          geofenceBadge = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          geofenceBadge = 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold';
         }
 
         if (todayRec.status === 'LATE') {

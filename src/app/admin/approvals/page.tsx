@@ -137,33 +137,33 @@ export default function AdminApprovalsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 pb-20">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 pb-20">
       <Navbar user={user} />
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* ترويسة المركز */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 p-5 rounded-3xl backdrop-blur-md shadow-sm dark:shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/90 p-5 rounded-2xl shadow-sm">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg shadow-sky-500/20 shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-sky-600 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 مركز الاعتماد السريع للمدير
                 {counts.total > 0 && (
-                  <span className="bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs px-2.5 py-0.5 rounded-full border border-rose-500/20 font-bold animate-pulse">
+                  <span className="bg-rose-50 text-rose-700 text-xs px-2.5 py-0.5 rounded-full border border-rose-200 font-bold animate-pulse">
                     {counts.total} طلب معلق
                   </span>
                 )}
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">اتخاذ القرارات المباشرة على طلبات الإجازات والاستئذان والتصحيح والأجهزة</p>
+              <p className="text-xs text-slate-600 mt-0.5">اتخاذ القرارات المباشرة على طلبات الإجازات والاستئذان والتصحيح والأجهزة</p>
             </div>
           </div>
 
           <button
             onClick={fetchApprovals}
             disabled={loading}
-            className="self-start sm:self-auto px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-2xl flex items-center gap-2 transition-all border border-slate-200 dark:border-slate-700/80"
+            className="self-start sm:self-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-2 transition-all border border-slate-200"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span>تحديث البيانات</span>
@@ -175,29 +175,29 @@ export default function AdminApprovalsPage() {
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             <button
               onClick={() => setActiveFilter('ALL')}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
                 activeFilter === 'ALL'
-                  ? 'bg-sky-600 text-white border-sky-400 shadow-md'
-                  : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
               }`}
             >
               <span>الكل</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                 {counts.total}
               </span>
             </button>
 
             <button
               onClick={() => setActiveFilter('LEAVE')}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
                 activeFilter === 'LEAVE'
-                  ? 'bg-amber-600 text-white border-amber-400 shadow-md'
-                  : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
               }`}
             >
               <Calendar className="w-4 h-4" />
               <span>الإجازات 📅</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'LEAVE' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'LEAVE' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                 {counts.leave}
               </span>
             </button>
@@ -207,12 +207,12 @@ export default function AdminApprovalsPage() {
               className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
                 activeFilter === 'HOURLY_PERMISSION'
                   ? 'bg-purple-600 text-white border-purple-400 shadow-md'
-                  : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
             >
               <Clock className="w-4 h-4" />
               <span>الاستئذان الساعي ⏱️</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'HOURLY_PERMISSION' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'HOURLY_PERMISSION' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                 {counts.hourlyPermission}
               </span>
             </button>
@@ -222,12 +222,12 @@ export default function AdminApprovalsPage() {
               className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
                 activeFilter === 'CORRECTION'
                   ? 'bg-emerald-600 text-white border-emerald-400 shadow-md'
-                  : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
             >
               <Edit3 className="w-4 h-4" />
               <span>تصحيح البصمة ✍️</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'CORRECTION' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'CORRECTION' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                 {counts.correction}
               </span>
             </button>
@@ -237,12 +237,12 @@ export default function AdminApprovalsPage() {
               className={`px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all border ${
                 activeFilter === 'DEVICE'
                   ? 'bg-blue-600 text-white border-blue-400 shadow-md'
-                  : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
             >
               <Smartphone className="w-4 h-4" />
               <span>اعتماد الأجهزة 📱</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'DEVICE' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeFilter === 'DEVICE' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
                 {counts.device}
               </span>
             </button>
@@ -255,34 +255,34 @@ export default function AdminApprovalsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="البحث باسم الموظف أو الفرع أو نوع الطلب..."
-              className="w-full pr-10 pl-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-sky-500 transition-colors"
+              className="w-full pr-10 pl-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-sky-500 transition-colors"
             />
           </div>
         </div>
 
         {/* قائمة الطلبات بنظام البطاقات المتجاوبة Mobile Card Feed */}
         {loading ? (
-          <div className="p-12 text-center bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-3xl space-y-3">
+          <div className="p-12 text-center bg-white border border-slate-200/80 rounded-3xl space-y-3">
             <RefreshCw className="w-8 h-8 text-sky-500 animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold">جاري جلب الطلبات المعلقة...</p>
+            <p className="text-xs text-slate-500 font-bold">جاري جلب الطلبات المعلقة...</p>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="p-12 text-center bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800/80 rounded-3xl space-y-3">
+          <div className="p-12 text-center bg-white border border-slate-200/80 rounded-3xl space-y-3">
             <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto opacity-80" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">لا توجد طلبات معلقة حالياً!</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">تم الانتهاء من مراجعة واعتماد جميع الطلبات بنجاح 🎉</p>
+            <h3 className="text-sm font-bold text-slate-900">لا توجد طلبات معلقة حالياً!</h3>
+            <p className="text-xs text-slate-500">تم الانتهاء من مراجعة واعتماد جميع الطلبات بنجاح 🎉</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700/80 p-5 rounded-3xl shadow-sm dark:shadow-xl flex flex-col justify-between transition-all space-y-4 animate-in fade-in duration-200"
+                className="bg-white border border-slate-200/80 hover:border-slate-300 p-5 rounded-3xl shadow-sm flex flex-col justify-between transition-all space-y-4 animate-in fade-in duration-200"
               >
                 {/* رأس البطاقة: بيانات الموظف والنوع */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 text-sky-600 dark:text-sky-400 font-bold flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700/60 text-sm overflow-hidden">
+                    <div className="w-11 h-11 rounded-2xl bg-slate-100 text-sky-600 font-bold flex items-center justify-center shrink-0 border border-slate-200 text-sm overflow-hidden">
                       {item.avatarUrl ? (
                         <img src={item.avatarUrl} alt={item.employeeName} className="w-full h-full object-cover" />
                       ) : (
@@ -290,8 +290,8 @@ export default function AdminApprovalsPage() {
                       )}
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{item.employeeName}</h4>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                      <h4 className="text-sm font-bold text-slate-900 leading-tight">{item.employeeName}</h4>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
                         <span className="flex items-center gap-1">
                           <Building className="w-3 h-3 text-slate-400" />
                           {item.branchName}
@@ -305,12 +305,12 @@ export default function AdminApprovalsPage() {
                   <span
                     className={`px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 border ${
                       item.category === 'LEAVE'
-                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
                         : item.category === 'HOURLY_PERMISSION'
-                        ? 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20'
+                        ? 'bg-purple-50 text-purple-700 border-purple-200'
                         : item.category === 'CORRECTION'
-                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
-                        : 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-sky-50 text-sky-700 border-sky-200'
                     }`}
                   >
                     {item.typeLabel}
@@ -318,14 +318,14 @@ export default function AdminApprovalsPage() {
                 </div>
 
                 {/* تفاصيل الطلب والملاحظة */}
-                <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800/80 p-3.5 rounded-2xl space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-bold">
-                    <Clock className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold">
+                    <Clock className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                     <span>{item.details}</span>
                   </div>
 
                   {item.reason && (
-                    <div className="flex items-start gap-2 text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-200 dark:border-slate-800/60 pt-2">
+                    <div className="flex items-start gap-2 text-slate-600 leading-relaxed border-t border-slate-200 pt-2">
                       <MessageSquare className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                       <span>{item.reason}</span>
                     </div>
@@ -356,7 +356,7 @@ export default function AdminApprovalsPage() {
                   <button
                     onClick={() => setRejectModalItem(item)}
                     disabled={processingId === item.id}
-                    className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-rose-500/20 active:scale-95 transition-all"
+                    className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-rose-200 active:scale-95 transition-all"
                   >
                     <X className="w-4 h-4" />
                     <span>رفض</span>
@@ -370,32 +370,32 @@ export default function AdminApprovalsPage() {
 
       {/* نافذة الرفض المنبثقة لكتابة السبب */}
       {rejectModalItem && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 w-full max-w-md shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-slate-900 dark:text-white">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 w-full max-w-md shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-500" />
                 رفض طلب {rejectModalItem.employeeName}
               </h3>
-              <button onClick={() => setRejectModalItem(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+              <button onClick={() => setRejectModalItem(null)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">سبب الرفض (ملاحظة للموظف) *</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">سبب الرفض (ملاحظة للموظف) *</label>
               <textarea
                 required
                 rows={3}
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="اكتب سبب الرفض بوضوح ليتم إرساله في الإشعار..."
-                className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-rose-500 transition-colors"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-rose-500 transition-colors"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-              <button onClick={() => setRejectModalItem(null)} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button onClick={() => setRejectModalItem(null)} className="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200">
                 إلغاء
               </button>
               <button

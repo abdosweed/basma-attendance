@@ -112,29 +112,29 @@ export default function AdminTrustedDevicesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white dir-rtl">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-900 dir-rtl">
         <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-sky-400 animate-spin" />
-          <p className="text-xs text-slate-400">جاري تحميل واجهة أجهزة الموظفين الموثوقة...</p>
+          <RefreshCw className="w-8 h-8 text-sky-600 animate-spin" />
+          <p className="text-xs text-slate-500">جاري تحميل واجهة أجهزة الموظفين الموثوقة...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col dir-rtl">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col dir-rtl">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* العنوان والترويسة */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl text-sky-400">
+            <div className="p-4 bg-sky-50 border border-sky-200 rounded-2xl text-sky-600">
               <Smartphone className="w-7 h-7" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">اعتماد وتقييد أجهزة الموظفين المقترنة</h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <h1 className="text-xl font-bold text-slate-900">اعتماد وتقييد أجهزة الموظفين المقترنة</h1>
+              <p className="text-xs text-slate-500 mt-1">
                 منع التبصيم من أي هاتف آخر والتحكم في اقتران أجهزة الموظفين (Trusted Device Lock)
               </p>
             </div>
@@ -146,76 +146,76 @@ export default function AdminTrustedDevicesPage() {
           <div
             className={`p-4 rounded-2xl border text-xs font-medium flex items-center gap-2 ${
               statusMsg.type === 'success'
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}
           >
-            {statusMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+            {statusMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <AlertCircle className="w-4 h-4 text-rose-600" />}
             <span>{statusMsg.text}</span>
           </div>
         )}
 
         {/* بطاقات المؤشرات السريعة */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-2 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500">
               <span>الأجهزة المعتمدة والمقترنة</span>
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <ShieldCheck className="w-5 h-5 text-emerald-600" />
             </div>
-            <div className="text-2xl font-black text-white">{trustedDevices.filter((d) => d.isApproved).length}</div>
+            <div className="text-2xl font-black text-slate-900">{trustedDevices.filter((d) => d.isApproved).length}</div>
             <p className="text-[10px] text-slate-500">هواتف موثوقة تعمل بدون عوائق</p>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-2 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500">
               <span>الأجهزة المحظورة</span>
-              <ShieldAlert className="w-5 h-5 text-rose-400" />
+              <ShieldAlert className="w-5 h-5 text-rose-600" />
             </div>
-            <div className="text-2xl font-black text-rose-400">
+            <div className="text-2xl font-black text-rose-600">
               {trustedDevices.filter((d) => !d.isApproved).length}
             </div>
             <p className="text-[10px] text-slate-500">هواتف تم حظرها من التبصيم</p>
           </div>
 
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-2 shadow-sm">
+            <div className="flex items-center justify-between text-xs text-slate-500">
               <span>موظفون ينظرون الاقتران الأول</span>
-              <Users className="w-5 h-5 text-amber-400" />
+              <Users className="w-5 h-5 text-amber-600" />
             </div>
-            <div className="text-2xl font-black text-amber-400">{unboundEmployees.length}</div>
+            <div className="text-2xl font-black text-amber-600">{unboundEmployees.length}</div>
             <p className="text-[10px] text-slate-500">سيقترن هاتفهم تلقائياً عند أول تبصيم</p>
           </div>
         </div>
 
         {/* شاشة الأجهزة المقترنة */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 space-y-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-sky-400" />
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-sky-600" />
                 <span>قائمة هواتف الموظفين المقترنة بـ Basma</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 يمكنك إعادة ضبط أو فك اقتران الجهاز لمنح الموظف إمكانية اقتران هاتف جديد عند الاستبدال
               </p>
             </div>
 
             <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 text-slate-500 absolute top-3.5 right-3.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute top-3.5 right-3.5" />
               <input
                 type="text"
                 placeholder="ابحث باسم الموظف، الرقم الوظيفي..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500"
               />
             </div>
           </div>
 
           {/* جدول أجهزة الموظفين */}
-          <div className="overflow-x-auto border border-slate-800 rounded-2xl">
+          <div className="overflow-x-auto border border-slate-200 rounded-2xl">
             <table className="w-full text-right text-xs">
-              <thead className="bg-slate-950 text-slate-400 font-bold border-b border-slate-800">
+              <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                 <tr>
                   <th className="p-4">الموظف</th>
                   <th className="p-4">الفرع والقسم</th>
@@ -225,10 +225,10 @@ export default function AdminTrustedDevicesPage() {
                   <th className="p-4 text-center">الإجراءات والتحكم</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+              <tbody className="divide-y divide-slate-200">
                 {filteredDevices.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-slate-500">
+                    <td colSpan={6} className="p-8 text-center text-slate-400">
                       لا توجد أجهزة موثوقة مطابقة للبحث حالياً.
                     </td>
                   </tr>
@@ -241,36 +241,36 @@ export default function AdminTrustedDevicesPage() {
                     });
 
                     return (
-                      <tr key={dev.id} className="hover:bg-slate-800/40 transition-all">
+                      <tr key={dev.id} className="hover:bg-slate-50 transition-all">
                         <td className="p-4">
-                          <div className="font-bold text-white">
+                          <div className="font-bold text-slate-900">
                             {emp?.firstName} {emp?.lastName}
                           </div>
-                          <div className="text-[10px] text-slate-400">{emp?.employeeNumber}</div>
+                          <div className="text-[10px] text-slate-500 font-mono">{emp?.employeeNumber}</div>
                         </td>
                         <td className="p-4">
-                          <div className="text-slate-300">{emp?.primaryBranch?.name || 'الفرع الرئيسي'}</div>
+                          <div className="text-slate-800 font-medium">{emp?.primaryBranch?.name || 'الفرع الرئيسي'}</div>
                           <div className="text-[10px] text-slate-500">{emp?.department?.name || 'غير محدد'}</div>
                         </td>
                         <td className="p-4">
-                          <div className="font-bold text-sky-400 flex items-center gap-1.5">
-                            <Monitor className="w-3.5 h-3.5" />
+                          <div className="font-bold text-sky-700 flex items-center gap-1.5">
+                            <Monitor className="w-3.5 h-3.5 text-sky-600" />
                             <span>{dev.deviceName || 'هاتف محمول'}</span>
                           </div>
-                          <div className="text-[10px] text-slate-500 dir-ltr text-right">
+                          <div className="text-[10px] text-slate-500 dir-ltr text-right font-mono">
                             {dev.os} | {dev.browser}
                           </div>
                         </td>
-                        <td className="p-4 text-slate-400 text-[11px]">{lastSeen}</td>
+                        <td className="p-4 text-slate-500 text-[11px] font-mono">{lastSeen}</td>
                         <td className="p-4">
                           {dev.isApproved ? (
-                            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold text-[11px] flex items-center gap-1 w-fit">
-                              <ShieldCheck className="w-3.5 h-3.5" />
+                            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-bold text-[11px] flex items-center gap-1 w-fit">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                               <span>معتمد ومقترن</span>
                             </span>
                           ) : (
-                            <span className="px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full font-bold text-[11px] flex items-center gap-1 w-fit">
-                              <ShieldAlert className="w-3.5 h-3.5" />
+                            <span className="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-full font-bold text-[11px] flex items-center gap-1 w-fit">
+                              <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
                               <span>محظور</span>
                             </span>
                           )}
@@ -281,9 +281,9 @@ export default function AdminTrustedDevicesPage() {
                               onClick={() => handleResetDevice(dev.id, `${emp?.firstName} ${emp?.lastName}`)}
                               disabled={actionLoading}
                               title="فك اقتران الجهاز لتمكين الموظف من ربط هاتف جديد"
-                              className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 disabled:opacity-50"
+                              className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 disabled:opacity-50"
                             >
-                              <Unlock className="w-3.5 h-3.5" />
+                              <Unlock className="w-3.5 h-3.5 text-amber-600" />
                               <span>فك الاقتران (اعادة ضبط)</span>
                             </button>
 
@@ -293,8 +293,8 @@ export default function AdminTrustedDevicesPage() {
                               title={dev.isApproved ? 'حظر هذا الجهاز' : 'إلغاء حظر الجهاز'}
                               className={`p-1.5 rounded-xl border text-[11px] font-bold transition-all disabled:opacity-50 ${
                                 dev.isApproved
-                                  ? 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400'
-                                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                                  ? 'bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700'
                               }`}
                             >
                               <Ban className="w-4 h-4" />

@@ -16,65 +16,65 @@ export function getStatusBadgeStyle(status: ReportingStatus): {
     case 'ON_TIME':
       return {
         label: 'حاضر (في الوقت)',
-        bgClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
-        textClass: 'text-emerald-700 dark:text-emerald-400',
-        borderClass: 'border-emerald-200 dark:border-emerald-800',
+        bgClass: 'bg-emerald-50 text-emerald-700',
+        textClass: 'text-emerald-700',
+        borderClass: 'border-emerald-200',
       };
     case 'LATE':
       return {
         label: 'متأخر',
-        bgClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
-        textClass: 'text-amber-700 dark:text-amber-400',
-        borderClass: 'border-amber-200 dark:border-amber-800',
+        bgClass: 'bg-amber-50 text-amber-700',
+        textClass: 'text-amber-700',
+        borderClass: 'border-amber-200',
       };
     case 'ABSENT':
       return {
         label: 'غائب',
-        bgClass: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400',
-        textClass: 'text-rose-700 dark:text-rose-400',
-        borderClass: 'border-rose-200 dark:border-rose-800',
+        bgClass: 'bg-rose-50 text-rose-700',
+        textClass: 'text-rose-700',
+        borderClass: 'border-rose-200',
       };
     case 'ON_LEAVE':
       return {
         label: 'في إجازة',
-        bgClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400',
-        textClass: 'text-blue-700 dark:text-blue-400',
-        borderClass: 'border-blue-200 dark:border-blue-800',
+        bgClass: 'bg-blue-50 text-blue-700',
+        textClass: 'text-blue-700',
+        borderClass: 'border-blue-200',
       };
     case 'NOT_SCHEDULED':
       return {
         label: 'غير مجدول',
-        bgClass: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-        textClass: 'text-slate-600 dark:text-slate-400',
-        borderClass: 'border-slate-200 dark:border-slate-700',
+        bgClass: 'bg-slate-100 text-slate-600',
+        textClass: 'text-slate-600',
+        borderClass: 'border-slate-200',
       };
     case 'INCOMPLETE_ATTENDANCE':
       return {
         label: 'بصمة غير مكتملة',
-        bgClass: 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400',
-        textClass: 'text-purple-700 dark:text-purple-400',
-        borderClass: 'border-purple-200 dark:border-purple-800',
+        bgClass: 'bg-purple-50 text-purple-700',
+        textClass: 'text-purple-700',
+        borderClass: 'border-purple-200',
       };
     case 'WORK_HOURS_DEFICIT':
       return {
         label: 'عجز ساعات عمل',
-        bgClass: 'bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400',
-        textClass: 'text-orange-700 dark:text-orange-400',
-        borderClass: 'border-orange-200 dark:border-orange-800',
+        bgClass: 'bg-orange-50 text-orange-700',
+        textClass: 'text-orange-700',
+        borderClass: 'border-orange-200',
       };
     case 'HOLIDAY':
       return {
         label: 'عطلة رسمية',
-        bgClass: 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-400',
-        textClass: 'text-teal-700 dark:text-teal-400',
-        borderClass: 'border-teal-200 dark:border-teal-800',
+        bgClass: 'bg-teal-50 text-teal-700',
+        textClass: 'text-teal-700',
+        borderClass: 'border-teal-200',
       };
     default:
       return {
         label: status,
-        bgClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-        textClass: 'text-slate-700 dark:text-slate-300',
-        borderClass: 'border-slate-200 dark:border-slate-700',
+        bgClass: 'bg-slate-100 text-slate-700',
+        textClass: 'text-slate-700',
+        borderClass: 'border-slate-200',
       };
   }
 }

@@ -3,7 +3,7 @@
 import React, { ButtonHTMLAttributes, ReactNode } from 'react';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: ReactNode;
@@ -13,25 +13,23 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses = {
   primary:
-    'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20 active:scale-[0.98]',
+    'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20',
   secondary:
-    'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 shadow-sm active:scale-[0.98]',
+    'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 shadow-sm',
   outline:
-    'border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 active:scale-[0.98]',
+    'border border-slate-300 bg-white hover:bg-slate-50 text-slate-700',
   ghost:
-    'bg-transparent hover:bg-slate-100 text-slate-700 active:scale-[0.98]',
+    'bg-transparent hover:bg-slate-100 text-slate-700',
   danger:
-    'bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-600/20 active:scale-[0.98]',
+    'bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-600/20',
   success:
-    'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20 active:scale-[0.98]',
-  warning:
-    'bg-amber-600 hover:bg-amber-700 text-white shadow-sm shadow-amber-600/20 active:scale-[0.98]',
+    'bg-teal-600 hover:bg-teal-700 text-white shadow-sm shadow-teal-600/20',
 };
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-xs rounded-xl gap-1.5 min-h-[36px]',
-  md: 'px-4 py-2.5 text-xs font-semibold rounded-xl gap-2 min-h-[44px]',
-  lg: 'px-6 py-3.5 text-sm font-semibold rounded-2xl gap-2.5 min-h-[48px]',
+  sm: 'px-3 py-1.5 text-xs rounded-xl gap-1.5 min-h-[34px]',
+  md: 'px-4 py-2 text-xs font-semibold rounded-xl gap-2 min-h-[40px]',
+  lg: 'px-6 py-3 text-sm font-semibold rounded-2xl gap-2.5 min-h-[48px]',
 };
 
 export function Button({
@@ -51,7 +49,7 @@ export function Button({
   return (
     <button
       disabled={isButtonDisabled}
-      className={`inline-flex items-center justify-center font-medium transition-all duration-150 select-none disabled:opacity-60 disabled:pointer-events-none disabled:active:scale-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30 ${
+      className={`inline-flex items-center justify-center font-medium transition-all duration-150 select-none active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none disabled:active:scale-100 ${
         variantClasses[variant]
       } ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       dir="rtl"
@@ -60,7 +58,7 @@ export function Button({
       {isLoading ? (
         <>
           <svg
-            className="animate-spin -ml-1 h-4 w-4 text-current shrink-0"
+            className="animate-spin -ml-1 h-4 w-4 text-current"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"

@@ -54,7 +54,7 @@ export default function TodayLiveReportPage() {
       header: 'الموظف',
       render: (row) => (
         <div>
-          <div className="font-bold text-slate-900 dark:text-white">{row.employeeName}</div>
+          <div className="font-bold text-slate-900">{row.employeeName}</div>
           <div className="text-[10px] text-slate-400 font-mono">{row.employeeNumber}</div>
         </div>
       ),
@@ -64,7 +64,7 @@ export default function TodayLiveReportPage() {
       header: 'الفرع / القسم',
       render: (row) => (
         <div>
-          <div className="font-medium text-slate-800 dark:text-slate-200">{row.departmentName}</div>
+          <div className="font-medium text-slate-800">{row.departmentName}</div>
           <div className="text-[10px] text-slate-400">{row.branchName}</div>
         </div>
       ),
@@ -74,7 +74,7 @@ export default function TodayLiveReportPage() {
       header: 'الوردية',
       render: (row) => (
         <div>
-          <div className="font-medium text-slate-800 dark:text-slate-200">{row.shiftName}</div>
+          <div className="font-medium text-slate-800">{row.shiftName}</div>
           {row.scheduledStart && (
             <div className="text-[10px] text-slate-400">
               {row.scheduledStart} - {row.scheduledEnd}
@@ -87,7 +87,7 @@ export default function TodayLiveReportPage() {
       key: 'checkInAt',
       header: 'وقت الدخول',
       render: (row) => (
-        <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+        <span className="font-mono font-semibold text-slate-800">
           {row.checkInAt || '—'}
         </span>
       ),
@@ -103,7 +103,7 @@ export default function TodayLiveReportPage() {
       render: (row) => (
         <span
           className={`font-semibold ${
-            row.lateMinutes > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'
+            row.lateMinutes > 0 ? 'text-amber-600' : 'text-slate-400'
           }`}
         >
           {row.lateMinutes > 0 ? `${row.lateMinutes} دقيقة` : '—'}
@@ -114,7 +114,7 @@ export default function TodayLiveReportPage() {
       key: 'checkOutAt',
       header: 'وقت الخروج',
       render: (row) => (
-        <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+        <span className="font-mono font-semibold text-slate-800">
           {row.checkOutAt || (row.checkInAt ? 'في العمل' : '—')}
         </span>
       ),
@@ -123,7 +123,7 @@ export default function TodayLiveReportPage() {
       key: 'workedMinutes',
       header: 'ساعات العمل',
       render: (row) => (
-        <span className="font-bold text-slate-700 dark:text-slate-300">
+        <span className="font-bold text-slate-700">
           {row.workedMinutes ? `${Math.floor(row.workedMinutes / 60)}س ${row.workedMinutes % 60}د` : '—'}
         </span>
       ),
@@ -136,7 +136,7 @@ export default function TodayLiveReportPage() {
           {row.flags.map((f, idx) => (
             <span
               key={idx}
-              className="px-1.5 py-0.5 text-[9px] rounded font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+              className="px-1.5 py-0.5 text-[9px] rounded font-medium bg-slate-100 text-slate-700 border border-slate-200"
             >
               {f}
             </span>
@@ -151,10 +151,10 @@ export default function TodayLiveReportPage() {
       {/* Executive Header & Export Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
             <span>🔴</span> التقرير المباشر لحضور اليوم (Today Live)
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             لوحة متابعة لحظية ومباشرة لدوام الموظفين والتأخير والاستراحات بتوقيت طرابلس.
           </p>
         </div>

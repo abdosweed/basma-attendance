@@ -1,4 +1,19 @@
 import React from 'react';
+import {
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Clock,
+  ShieldCheck,
+  ShieldAlert,
+  Ban,
+  HelpCircle,
+  Loader2,
+  Info,
+  Building2,
+  Coffee,
+  Calendar,
+} from 'lucide-react';
 
 export type LocationStatusType =
   | 'INSIDE_CONFIRMED'
@@ -10,88 +25,164 @@ export type LocationStatusType =
 
 export type DeviceStatusType = 'APPROVED' | 'PENDING' | 'REVOKED' | 'BLOCKED' | 'NOT_FOUND';
 
-interface StatusBadgeProps {
-  type: 'location' | 'device';
-  status: LocationStatusType | DeviceStatusType | string;
+export type GeneralStatusType =
+  | 'PRESENT'
+  | 'ON_TIME'
+  | 'LATE'
+  | 'ABSENT'
+  | 'ON_LEAVE'
+  | 'ON_BREAK'
+  | 'CHECKED_OUT'
+  | 'SUCCESS'
+  | 'WARNING'
+  | 'ERROR'
+  | 'INFO';
+
+export interface StatusBadgeProps {
+  type?: 'location' | 'device' | 'general';
+  status: LocationStatusType | DeviceStatusType | GeneralStatusType | string;
+  label?: string;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ type, status, className = '' }) => {
-  if (type === 'location') {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({
+  type,
+  status,
+  label,
+  className = '',
+  size = 'md',
+}) => {
+  const sizeClasses = {
+    sm: 'px-2 py-0.5 text-[10px] gap-1',
+    md: 'px-2.5 py-1 text-xs gap-1.5',
+    lg: 'px-3 py-1.5 text-sm gap-2',
+  }[size];
+
+  // Location Badge Dispatcher
+  if (type === 'location' || ['INSIDE_CONFIRMED', 'UNCERTAIN', 'OUTSIDE_CONFIRMED', 'LOCATION_UNAVAILABLE', 'CHECKING', 'AUTHORIZED_OUTSIDE'].includes(status)) {
     switch (status) {
       case 'INSIDE_CONFIRMED':
       case 'AUTHORIZED_OUTSIDE':
         return (
-          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 ${className}`}>
-            <span className="relative flex h-2 w-2">
+          <span className={`inline-flex items-center rounded-full font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 ${sizeClasses} ${className}`} dir="rtl">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span>أنت داخل نطاق العمل</span>
-          </div>
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>{label || (status === 'AUTHORIZED_OUTSIDE' ? 'خروج بإذن رسمي' : 'أنت داخل نطاق العمل')}</span>
+          </span>
         );
       case 'UNCERTAIN':
         return (
-          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 ${className}`}>
-            <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-            <span>الموقع يحتاج لحظات إضافية للتثبيت</span>
-          </div>
+          <span className={`inline-flex items-center rounded-full font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 ${sizeClasses} ${className}`} dir="rtl">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>{label || 'الموقع يحتاج لحظات للتثبيت'}</span>
+          </span>
         );
       case 'OUTSIDE_CONFIRMED':
         return (
-          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 ${className}`}>
-            <span className="h-2 w-2 rounded-full bg-rose-500"></span>
-            <span>أنت خارج نطاق الفرع</span>
-          </div>
+          <span className={`inline-flex items-center rounded-full font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 ${sizeClasses} ${className}`} dir="rtl">
+            <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span>{label || 'أنت خارج نطاق الفرع'}</span>
+          </span>
         );
       case 'LOCATION_UNAVAILABLE':
         return (
-          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 ${className}`}>
-            <span className="h-2 w-2 rounded-full bg-slate-400"></span>
-            <span>تعذر تحديد موقعك</span>
-          </div>
+          <span className={`inline-flex items-center rounded-full font-semibold bg-slate-100 text-slate-700 border border-slate-200 ${sizeClasses} ${className}`} dir="rtl">
+            <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+            <span>{label || 'تعذر تحديد موقعك'}</span>
+          </span>
         );
       case 'CHECKING':
       default:
         return (
-          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/80 ${className}`}>
-            <span className="animate-spin h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full"></span>
-            <span>جارٍ التحقق من موقعك...</span>
-          </div>
+          <span className={`inline-flex items-center rounded-full font-semibold bg-sky-50 text-sky-700 border border-sky-200/80 ${sizeClasses} ${className}`} dir="rtl">
+            <Loader2 className="w-3.5 h-3.5 text-sky-600 animate-spin shrink-0" />
+            <span>{label || 'جارٍ التحقق من موقعك...'}</span>
+          </span>
         );
     }
   }
 
-  // Device status badge
+  // Device Badge Dispatcher
+  if (type === 'device' || ['APPROVED', 'PENDING', 'REVOKED', 'BLOCKED'].includes(status)) {
+    switch (status) {
+      case 'APPROVED':
+        return (
+          <span className={`inline-flex items-center rounded-full font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 ${sizeClasses} ${className}`} dir="rtl">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>{label || 'جهاز موثق ومعتمد'}</span>
+          </span>
+        );
+      case 'PENDING':
+        return (
+          <span className={`inline-flex items-center rounded-full font-medium bg-amber-50 text-amber-700 border border-amber-200 ${sizeClasses} ${className}`} dir="rtl">
+            <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>{label || 'في انتظار اعتماد الإدارة'}</span>
+          </span>
+        );
+      case 'REVOKED':
+      case 'BLOCKED':
+      default:
+        return (
+          <span className={`inline-flex items-center rounded-full font-medium bg-rose-50 text-rose-700 border border-rose-200 ${sizeClasses} ${className}`} dir="rtl">
+            <Ban className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span>{label || (status === 'BLOCKED' ? 'جهاز محظور' : 'ملغى الاعتماد')}</span>
+          </span>
+        );
+    }
+  }
+
+  // General Attendance / System Status Dispatcher
   switch (status) {
-    case 'APPROVED':
+    case 'PRESENT':
+    case 'ON_TIME':
+    case 'SUCCESS':
       return (
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 ${className}`}>
-          <svg className="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>جهاز موثق ومعتمد</span>
-        </div>
+        <span className={`inline-flex items-center rounded-full font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 ${sizeClasses} ${className}`} dir="rtl">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>{label || 'حاضر'}</span>
+        </span>
       );
-    case 'PENDING':
+    case 'LATE':
+    case 'WARNING':
       return (
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 ${className}`}>
-          <svg className="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span>جهازك في انتظار اعتماد الإدارة</span>
-        </div>
+        <span className={`inline-flex items-center rounded-full font-medium bg-amber-50 text-amber-700 border border-amber-200 ${sizeClasses} ${className}`} dir="rtl">
+          <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <span>{label || 'متأخر'}</span>
+        </span>
       );
-    case 'REVOKED':
-    case 'BLOCKED':
+    case 'ABSENT':
+    case 'ERROR':
+      return (
+        <span className={`inline-flex items-center rounded-full font-medium bg-rose-50 text-rose-700 border border-rose-200 ${sizeClasses} ${className}`} dir="rtl">
+          <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+          <span>{label || 'غائب'}</span>
+        </span>
+      );
+    case 'ON_BREAK':
+      return (
+        <span className={`inline-flex items-center rounded-full font-medium bg-sky-50 text-sky-700 border border-sky-200 ${sizeClasses} ${className}`} dir="rtl">
+          <Coffee className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+          <span>{label || 'في استراحة'}</span>
+        </span>
+      );
+    case 'ON_LEAVE':
+      return (
+        <span className={`inline-flex items-center rounded-full font-medium bg-blue-50 text-blue-700 border border-blue-200 ${sizeClasses} ${className}`} dir="rtl">
+          <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+          <span>{label || 'في إجازة'}</span>
+        </span>
+      );
+    case 'INFO':
     default:
       return (
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 ${className}`}>
-          <svg className="w-3.5 h-3.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-          </svg>
-          <span>تم إلغاء اعتماد الجهاز</span>
-        </div>
+        <span className={`inline-flex items-center rounded-full font-medium bg-slate-100 text-slate-700 border border-slate-200 ${sizeClasses} ${className}`} dir="rtl">
+          <Info className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+          <span>{label || String(status)}</span>
+        </span>
       );
   }
 };

@@ -149,31 +149,31 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
   return (
     <div className="space-y-6">
       {/* 1. شريط الفلاتر المتقدمة المدمج Multi-Dimensional Filter Bar */}
-      <div className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 p-5 rounded-3xl shadow-sm dark:shadow-xl space-y-4">
+      <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-sky-600" />
               <span>محرك التقارير المتقدمة ومسيرات الرواتب (Payroll Engine)</span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               تتبع تفصيلي لساعات العمل الفعلية والتأخير والإضافي وتصدير الملفات المعتمدة للأنظمة المحاسبية
             </p>
           </div>
 
           {/* أزرار النطاق الزمني السريع */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-xs">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs">
             <button
               type="button"
               onClick={() => applyPresetDate('today')}
-              className="px-3 py-1.5 rounded-xl font-bold transition-all hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 active:scale-95"
+              className="px-3 py-1.5 rounded-xl font-bold transition-all hover:bg-white text-slate-700 active:scale-95"
             >
               اليوم
             </button>
             <button
               type="button"
               onClick={() => applyPresetDate('week')}
-              className="px-3 py-1.5 rounded-xl font-bold transition-all hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 active:scale-95"
+              className="px-3 py-1.5 rounded-xl font-bold transition-all hover:bg-white text-slate-700 active:scale-95"
             >
               هذا الأسبوع
             </button>
@@ -187,7 +187,7 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
             <button
               type="button"
               onClick={() => applyPresetDate('prevMonth')}
-              className="px-3 py-1.5 rounded-xl font-bold transition-all hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 active:scale-95"
+              className="px-3 py-1.5 rounded-xl font-bold transition-all hover:bg-white text-slate-700 active:scale-95"
             >
               الشهر السابق
             </button>
@@ -195,36 +195,36 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
         </div>
 
         {/* حقول الفلاتر المتعددة الأبعاد */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-slate-100">
           {/* من تاريخ */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">من تاريخ</label>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">من تاريخ</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white outline-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-sky-500"
             />
           </div>
 
           {/* إلى تاريخ */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">إلى تاريخ</label>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">إلى تاريخ</label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white outline-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-sky-500"
             />
           </div>
 
           {/* فلتر الفروع */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">الفرع</label>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">الفرع</label>
             <select
               value={selectedBranchId}
               onChange={(e) => setSelectedBranchId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white outline-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-sky-500"
             >
               <option value="ALL">جميع الفروع (الكل)</option>
               {branches.map((b) => (
@@ -237,11 +237,11 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
 
           {/* فلتر الموظفين */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">الموظف</label>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">الموظف</label>
             <select
               value={selectedEmployeeId}
               onChange={(e) => setSelectedEmployeeId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white outline-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-sky-500"
             >
               <option value="ALL">كافة الموظفين</option>
               {employees.map((emp) => (
@@ -254,11 +254,11 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
 
           {/* فلتر الحالة */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">حالة السجل</label>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">حالة السجل</label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white outline-none"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:border-sky-500"
             >
               <option value="ALL">الكل</option>
               <option value="PRESENT">حاضر / مكتمل 🟢</option>
@@ -272,41 +272,41 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
 
       {/* 2. بطاقات الإحصائيات الذكية السريعة (Summary KPI Cards) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 p-4 rounded-3xl shadow-sm dark:shadow-xl">
-          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2 font-medium">
+        <div className="bg-white border border-slate-200/80 p-4 rounded-3xl shadow-sm">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
             <span>إجمالي ساعات العمل</span>
-            <Clock className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+            <Clock className="w-4 h-4 text-sky-600" />
           </div>
-          <span className="text-2xl font-black text-slate-900 dark:text-white">{summary.totalWorkedHours}</span>
+          <span className="text-2xl font-black text-slate-900">{summary.totalWorkedHours}</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900/90 border border-amber-500/30 p-4 rounded-3xl shadow-sm dark:shadow-xl">
-          <div className="flex items-center justify-between text-xs text-amber-600 dark:text-amber-400 mb-2 font-medium">
+        <div className="bg-white border border-amber-200 p-4 rounded-3xl shadow-sm">
+          <div className="flex items-center justify-between text-xs text-amber-700 mb-2 font-medium">
             <span>التأخير الصباحي</span>
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
           </div>
-          <span className="text-2xl font-black text-amber-600 dark:text-amber-400">{summary.totalLateMinutes} دقيقة</span>
+          <span className="text-2xl font-black text-amber-700">{summary.totalLateMinutes} دقيقة</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900/90 border border-emerald-500/30 p-4 rounded-3xl shadow-sm dark:shadow-xl">
-          <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400 mb-2 font-medium">
+        <div className="bg-white border border-emerald-200 p-4 rounded-3xl shadow-sm">
+          <div className="flex items-center justify-between text-xs text-emerald-700 mb-2 font-medium">
             <span>الساعات الإضافية</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
-          <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{summary.totalOvertimeHours}</span>
+          <span className="text-2xl font-black text-emerald-700">{summary.totalOvertimeHours}</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900/90 border border-red-500/30 p-4 rounded-3xl shadow-sm dark:shadow-xl">
-          <div className="flex items-center justify-between text-xs text-red-600 dark:text-red-400 mb-2 font-medium">
+        <div className="bg-white border border-red-200 p-4 rounded-3xl shadow-sm">
+          <div className="flex items-center justify-between text-xs text-red-700 mb-2 font-medium">
             <span>الغياب غير المبرر</span>
-            <Users className="w-4 h-4 text-red-500" />
+            <Users className="w-4 h-4 text-red-600" />
           </div>
-          <span className="text-2xl font-black text-red-600 dark:text-red-400">{summary.totalAbsenceDays} يوم</span>
+          <span className="text-2xl font-black text-red-700">{summary.totalAbsenceDays} يوم</span>
         </div>
       </div>
 
       {/* 3. جدول تفاصيل السجلات وأزرار التصدير (Payroll Table & Export Controls) */}
-      <div className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-sm dark:shadow-xl">
+      <div className="bg-white border border-slate-200/80 rounded-3xl p-5 space-y-4 shadow-sm">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute top-3 right-3" />
@@ -315,7 +315,7 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="تصفية بالاسم، رقم الموظف، أو الفرع..."
-              className="w-full pr-10 pl-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none"
+              className="w-full pr-10 pl-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-sky-500"
             />
           </div>
 
@@ -343,7 +343,7 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
             <button
               onClick={() => handleExport('csv')}
               disabled={exportingFormat !== null}
-              className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 active:scale-95 disabled:opacity-50"
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 border border-slate-200 active:scale-95 disabled:opacity-50"
             >
               {exportingFormat === 'csv' ? (
                 <>
@@ -352,7 +352,7 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
                 </>
               ) : (
                 <>
-                  <FileSpreadsheet className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                  <FileSpreadsheet className="w-4 h-4 text-sky-600" />
                   <span>تصدير CSV (ERP)</span>
                 </>
               )}
@@ -364,7 +364,7 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-slate-100/90 dark:bg-slate-950/60">
+              <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-100/90">
                 <th className="p-3">رقم الموظف</th>
                 <th className="p-3">اسم الموظف</th>
                 <th className="p-3">الفرع</th>
@@ -378,7 +378,7 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
                 <th className="p-3">الملاحظات والإجازات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
+            <tbody className="divide-y divide-slate-200/80">
               {loading ? (
                 <tr>
                   <td colSpan={11} className="p-8 text-center text-slate-400 text-xs">
@@ -390,34 +390,34 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
                 </tr>
               ) : filteredRows.length > 0 ? (
                 filteredRows.map((r: any, idx: number) => (
-                  <tr key={`${r.employeeId}-${r.date}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="p-3 font-mono font-bold text-sky-600 dark:text-sky-400">{r.employeeNumber}</td>
-                    <td className="p-3 font-bold text-slate-900 dark:text-white">{r.employeeName}</td>
-                    <td className="p-3 text-slate-600 dark:text-slate-300">{r.branchName}</td>
-                    <td className="p-3 text-center font-mono text-slate-600 dark:text-slate-300">{r.date}</td>
-                    <td className="p-3 text-center font-mono text-emerald-600 dark:text-emerald-400">{r.checkInAt || '--:--'}</td>
-                    <td className="p-3 text-center font-mono text-rose-600 dark:text-rose-400">{r.checkOutAt || '--:--'}</td>
-                    <td className="p-3 text-center font-bold text-slate-900 dark:text-white">{r.workedHoursStr}</td>
-                    <td className="p-3 text-center font-mono text-amber-600 dark:text-amber-400">
+                  <tr key={`${r.employeeId}-${r.date}-${idx}`} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-3 font-mono font-bold text-sky-700">{r.employeeNumber}</td>
+                    <td className="p-3 font-bold text-slate-900">{r.employeeName}</td>
+                    <td className="p-3 text-slate-700">{r.branchName}</td>
+                    <td className="p-3 text-center font-mono text-slate-700">{r.date}</td>
+                    <td className="p-3 text-center font-mono text-emerald-700">{r.checkInAt || '--:--'}</td>
+                    <td className="p-3 text-center font-mono text-rose-700">{r.checkOutAt || '--:--'}</td>
+                    <td className="p-3 text-center font-bold text-slate-900">{r.workedHoursStr}</td>
+                    <td className="p-3 text-center font-mono text-amber-700">
                       {r.lateMinutes > 0 ? `${r.lateMinutes}د` : '0'}
                     </td>
-                    <td className="p-3 text-center font-mono text-emerald-600 dark:text-emerald-400">{r.overtimeHoursStr}</td>
+                    <td className="p-3 text-center font-mono text-emerald-700">{r.overtimeHoursStr}</td>
                     <td className="p-3 text-center">
                       <span
                         className={`px-2.5 py-1 rounded-xl text-[10px] font-bold ${
                           r.status === 'PRESENT'
-                            ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : r.status === 'LATE'
-                            ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
                             : r.status === 'ABSENT'
-                            ? 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30'
-                            : 'bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                            : 'bg-sky-50 text-sky-700 border border-sky-200'
                         }`}
                       >
                         {r.statusLabel}
                       </span>
                     </td>
-                    <td className="p-3 text-slate-500 dark:text-slate-400 text-[11px]">{r.notes || '-'}</td>
+                    <td className="p-3 text-slate-500 text-[11px]">{r.notes || '-'}</td>
                   </tr>
                 ))
               ) : (
