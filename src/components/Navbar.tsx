@@ -256,33 +256,33 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
         </a>
 
         {/* الروابط وأزرار التحكم */}
-        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-none py-1">
+        <div className="flex items-center gap-1.5 sm:gap-3 py-1">
           {isAdminOrManager && (
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="hidden md:flex items-center gap-1 shrink-0">
               <a
                 href="/admin/shifts"
-                className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
+                className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-200 dark:border-slate-700"
               >
                 <span>الورديات</span>
               </a>
 
               <a
                 href="/admin/tasks"
-                className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-amber-400 hover:text-amber-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
+                className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-200 dark:border-slate-700"
               >
                 <span>المهام</span>
               </a>
 
               <a
                 href="/admin/devices"
-                className="px-2.5 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-700/80"
+                className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-200 dark:border-slate-700"
               >
                 <span>الأجهزة</span>
               </a>
 
               <a
                 href="/admin/system-health"
-                className="px-2.5 py-1.5 bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-400 hover:text-emerald-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-emerald-800/60 flex items-center gap-1"
+                className="px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 dark:hover:bg-emerald-900/90 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1"
               >
                 <Activity className="w-3.5 h-3.5" />
                 <span className="hidden lg:inline">صحة النظام</span>
@@ -290,7 +290,7 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
 
               <a
                 href="/admin"
-                className="px-2.5 py-1.5 bg-sky-950/80 hover:bg-sky-900/90 text-sky-400 hover:text-sky-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-sky-800/60 flex items-center gap-1"
+                className="px-2.5 py-1.5 bg-sky-50 dark:bg-sky-950/80 hover:bg-sky-100 dark:hover:bg-sky-900/90 text-sky-700 dark:text-sky-400 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-sky-200 dark:border-sky-800/60 flex items-center gap-1"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 <span className="hidden md:inline">لوحة الإدارة</span>
