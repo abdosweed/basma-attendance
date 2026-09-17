@@ -256,10 +256,10 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
             <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
               بصمة
               <span className="text-[9px] bg-sky-500/20 text-sky-700 dark:text-sky-400 font-semibold px-1.5 py-0.2 rounded-full border border-sky-500/30">
-                PWA
+                v2.0.0
               </span>
             </h1>
-            <p className="text-[10px] text-slate-400 hidden sm:block">Basma Attendance</p>
+            <p className="text-[10px] text-slate-400 hidden sm:block">Basma Enterprise v2.0.0</p>
           </div>
         </a>
 
