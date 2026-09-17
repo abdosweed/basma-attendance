@@ -81,9 +81,11 @@ export function AttendanceActionCard({
       {/* Central Pulsing Biometric Action Area */}
       <div className="relative p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-sm text-center space-y-6">
         {/* Shift Time Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300">
-          <span>⏰ الوردية: {shiftName}</span>
-          <span className="text-slate-400">({scheduledStart} - {scheduledEnd})</span>
+        <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-xs md:text-sm font-medium text-slate-700 dark:text-slate-200">
+          <span>⏰ {shiftName}:</span>
+          <span dir="ltr" className="font-mono font-semibold text-slate-900 dark:text-white">
+            {scheduledStart} - {scheduledEnd}
+          </span>
         </div>
 
         {/* Action Buttons Render */}

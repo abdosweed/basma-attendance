@@ -298,11 +298,11 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
             </div>
           )}
 
-          {/* جرس الإشعارات المباشر */}
-          <div className="relative shrink-0">
+          {/* جرس الإشعارات المباشر (يظهر فقط على الشاشات الكبيرة لمنع الازدواجية مع الشريط السفلي للجوال) */}
+          <div className="hidden md:block relative shrink-0">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="p-1.5 text-slate-300 hover:text-white rounded-xl bg-slate-800/70 border border-slate-700/60 relative"
+              className="p-1.5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 relative"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
@@ -314,16 +314,16 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
 
             {/* قائمة الإشعارات المنسدلة */}
             {showDropdown && (
-              <div className="absolute left-0 sm:right-auto mt-2 w-72 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-3.5 z-50 text-xs animate-in fade-in zoom-in-95">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    <Bell className="w-4 h-4 text-sky-400" />
+              <div className="absolute left-0 sm:right-auto mt-2 w-72 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3.5 z-50 text-xs animate-in fade-in zoom-in-95">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2 mb-2">
+                  <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Bell className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                     الإشعارات {unreadCount > 0 && `(${unreadCount})`}
                   </span>
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-[10px] text-sky-400 hover:underline flex items-center gap-1 font-semibold"
+                      className="text-[10px] text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-semibold"
                     >
                       <CheckCheck className="w-3 h-3" />
                       تحديد الكل كمقروء
@@ -338,49 +338,51 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
                         key={item.id || Math.random()}
                         className={`p-2.5 rounded-xl border text-xs leading-relaxed ${
                           !item.readAt && !item.isRead
-                            ? 'bg-sky-500/10 border-sky-500/30 text-sky-200'
-                            : 'bg-slate-950/60 border-slate-800/80 text-slate-300'
+                            ? 'bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/30 text-sky-900 dark:text-sky-200'
+                            : 'bg-slate-50 dark:bg-slate-950/60 border-slate-100 dark:border-slate-800/80 text-slate-700 dark:text-slate-300'
                         }`}
                       >
-                        <div className="font-bold text-white mb-0.5">{item.title}</div>
-                        <p className="text-[11px] text-slate-400 mb-1">{item.message}</p>
-                        <span className="text-[9px] text-slate-500 font-mono">
+                        <div className="font-bold text-slate-900 dark:text-white mb-0.5">{item.title}</div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-400 mb-1">{item.message}</p>
+                        <span className="text-[9px] text-slate-400 font-mono">
                           {item.createdAt ? new Date(item.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'الآن'}
                         </span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-slate-500 py-3">لا توجد إشعارات حالية.</p>
+                    <p className="text-center text-slate-400 py-3">لا توجد إشعارات حالية.</p>
                   )}
                 </div>
               </div>
             )}
           </div>
 
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 rounded-xl border border-slate-800 text-xs shrink-0">
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-800 text-xs shrink-0">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-slate-300 font-medium max-w-[120px] truncate">{user?.name || user?.email}</span>
-            <span className="text-[9px] text-sky-400 bg-sky-950/60 px-1 py-0.5 rounded font-mono">
+            <span className="text-slate-700 dark:text-slate-300 font-medium max-w-[120px] truncate">{user?.name || user?.email}</span>
+            <span className="text-[9px] text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-950/60 px-1 py-0.5 rounded font-mono">
               {user?.role}
             </span>
           </div>
 
-          {/* زر التبديل بين الوضع الداكن والفاتح */}
-          <button
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'التحويل للوضع الفاتح ☀️' : 'التحويل للوضع الداكن 🌙'}
-            className="p-1.5 rounded-xl transition-all border border-slate-700/80 bg-slate-800/80 text-amber-400 hover:bg-slate-700 active:scale-95 shrink-0"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-sky-400" />}
-          </button>
+          {/* أزرار الثيم والخروج تظهر على الشاشات الكبيرة فقط (تنقل للحساب الشخصي في الجوال) */}
+          <div className="hidden md:flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'التحويل للوضع الفاتح ☀️' : 'التحويل للوضع الداكن 🌙'}
+              className="p-1.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800/80 text-amber-500 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 shrink-0"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-sky-500" />}
+            </button>
 
-          <button
-            onClick={handleLogout}
-            title="تسجيل الخروج"
-            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all shrink-0"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleLogout}
+              title="تسجيل الخروج"
+              className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all shrink-0"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </header>
