@@ -265,10 +265,10 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center text-slate-900 dark:text-white">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-sky-500/30 border-t-sky-500 rounded-full animate-spin" />
-          <p className="text-xs text-slate-400">جاري فتح لوحة التحكم الإدارية...</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">جاري فتح لوحة التحكم الإدارية...</p>
         </div>
       </div>
     );
@@ -290,26 +290,26 @@ export default function AdminDashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar user={user} />
 
       <main className="flex-1 max-w-[98%] w-full mx-auto p-3 sm:p-6 space-y-6">
         {/* الترويسة الرئيسية للوحة الإدارة */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-slate-900/80 to-slate-950/90 border border-slate-800/80 p-5 rounded-3xl shadow-xl backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 p-5 rounded-3xl shadow-sm dark:shadow-xl backdrop-blur-md">
           <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
+            <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
               لوحة التحكم الإدارية
               <span
                 className={`text-xs font-bold px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 ${
                   envMode === 'LIVE'
-                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                    : 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-lg shadow-amber-500/20 animate-pulse'
+                    ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30 animate-pulse'
                 }`}
               >
                 {envMode === 'LIVE' ? '🟢 وضع الإنتاج الحقيقي' : '🧪 بيئة التجربة والاختبار'}
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">متابعة الحضور والانصراف، وإدارة فريق العمل، والفروع، والمطابقة المركزية</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">متابعة الحضور والانصراف، وإدارة فريق العمل، والفروع، والمطابقة المركزية</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
@@ -340,7 +340,7 @@ export default function AdminDashboardPage() {
 
                 <button
                   onClick={handleExportCSV}
-                  className="px-3.5 py-2.5 bg-slate-800/90 hover:bg-slate-700/90 text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-1.5 transition-all border border-slate-700/80 active:scale-95"
+                  className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700/90 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-1.5 transition-all border border-slate-200 dark:border-slate-700/80 active:scale-95"
                   title="تصدير سجلات وكشوف الحضور"
                 >
                   <Download className="w-4 h-4" />
@@ -351,7 +351,7 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={() => fetchAdminData()}
-              className="p-2.5 bg-slate-800/90 hover:bg-slate-700/90 text-xs font-bold rounded-2xl flex items-center justify-center transition-all border border-slate-700/80 text-sky-400 active:scale-95"
+              className="p-2.5 bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700/90 text-xs font-bold rounded-2xl flex items-center justify-center transition-all border border-slate-200 dark:border-slate-700/80 text-sky-600 dark:text-sky-400 active:scale-95"
               title="تحديث البيانات"
             >
               <RefreshCw className="w-4 h-4" />
@@ -363,79 +363,79 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <button
             onClick={() => setActiveTab('team')}
-            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/90 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
+            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/90 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs mb-2 font-medium">
               <span>إجمالي الموظفين</span>
-              <Users className="w-4 h-4 text-sky-400" />
+              <Users className="w-4 h-4 text-sky-600 dark:text-sky-400" />
             </div>
-            <span className="text-2xl font-black text-white">{summary.totalEmployees || 0}</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">{summary.totalEmployees || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-emerald-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
+            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-emerald-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-emerald-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs mb-2 font-medium">
               <span>🟢 حاضر الآن</span>
               <CheckCircle2 className="w-4 h-4" />
             </div>
-            <span className="text-2xl font-black text-emerald-400">{summary.presentCount || 0}</span>
+            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{summary.presentCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-yellow-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
+            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-yellow-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-yellow-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-yellow-600 dark:text-yellow-400 text-xs mb-2 font-medium">
               <span>🟡 متأخر</span>
               <Clock className="w-4 h-4" />
             </div>
-            <span className="text-2xl font-black text-yellow-400">{summary.lateCount || 0}</span>
+            <span className="text-2xl font-black text-yellow-600 dark:text-yellow-400">{summary.lateCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-red-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
+            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-red-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-red-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-red-600 dark:text-red-400 text-xs mb-2 font-medium">
               <span>🔴 غائب</span>
               <XCircle className="w-4 h-4" />
             </div>
-            <span className="text-2xl font-black text-red-400">{summary.absentCount || 0}</span>
+            <span className="text-2xl font-black text-red-600 dark:text-red-400">{summary.absentCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-orange-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
+            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-orange-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-orange-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-orange-600 dark:text-orange-400 text-xs mb-2 font-medium">
               <span>🟠 في استراحة</span>
               <Coffee className="w-4 h-4" />
             </div>
-            <span className="text-2xl font-black text-orange-400">{summary.onBreakCount || 0}</span>
+            <span className="text-2xl font-black text-orange-600 dark:text-orange-400">{summary.onBreakCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-rose-500/40 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
+            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-rose-500/40 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-rose-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 text-xs mb-2 font-medium">
               <span>⚠️ محاولات مشبوهة</span>
               <ShieldAlert className="w-4 h-4" />
             </div>
-            <span className="text-2xl font-black text-rose-400">{summary.suspiciousAttemptsCount || 0}</span>
+            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">{summary.suspiciousAttemptsCount || 0}</span>
           </button>
         </div>
 
         {/* شريط التبويبات الأربعة الموحدة (Consolidated 4 Tabs Navigation) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-slate-800/80 pb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-3">
           <button
             onClick={() => setActiveTab('live_activity')}
             className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
               activeTab === 'live_activity'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
+                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
             }`}
           >
             <Activity className="w-4 h-4" />
@@ -446,8 +446,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab('team')}
             className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
               activeTab === 'team'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
+                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -458,8 +458,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab('structure')}
             className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
               activeTab === 'structure'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
+                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
             }`}
           >
             <Building className="w-4 h-4" />
@@ -470,8 +470,8 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab('reports')}
             className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
               activeTab === 'reports'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
-                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
+                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
             }`}
           >
             <FileSpreadsheet className="w-4 h-4" />
@@ -483,44 +483,44 @@ export default function AdminDashboardPage() {
         {activeTab === 'live_activity' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-sm">
-                <h3 className="text-sm font-bold text-white mb-4 flex items-center justify-between">
+              <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm dark:shadow-xl backdrop-blur-sm">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-sky-400" />
+                    <Clock className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                     آخر عمليات الحضور والانصراف المسجلة
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono">مباشر ⚡</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">مباشر ⚡</span>
                 </h3>
 
                 <div className="space-y-3">
                   {dashData?.recentEvents?.map((evt: any) => (
                     <div
                       key={evt.id}
-                      className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-700/80 transition-all"
+                      className="p-3.5 bg-slate-50 dark:bg-slate-950/80 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-300 dark:hover:border-slate-700/80 transition-all"
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
                             evt.type === 'CHECK_IN'
-                              ? 'bg-emerald-500/20 text-emerald-400'
+                              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                               : evt.type === 'CHECK_OUT'
-                              ? 'bg-rose-500/20 text-rose-400'
-                              : 'bg-orange-500/20 text-orange-400'
+                              ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+                              : 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
                           }`}
                         >
                           {evt.type === 'CHECK_IN' ? 'حضر' : evt.type === 'CHECK_OUT' ? 'خرج' : 'استراحة'}
                         </div>
                         <div>
-                          <span className="font-bold text-white block">
+                          <span className="font-bold text-slate-900 dark:text-white block">
                             {evt.employee?.firstName} {evt.employee?.lastName}
                           </span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400">
                             {evt.branch?.name || 'الفرع الرئيسي'} • المسافة:{' '}
                             {evt.distanceFromBranch ? `${Math.round(evt.distanceFromBranch)}m` : '0m'}
                           </span>
                         </div>
                       </div>
-                      <span className="text-[11px] font-mono text-sky-400 font-bold">
+                      <span className="text-[11px] font-mono text-sky-600 dark:text-sky-400 font-bold">
                         {new Date(evt.serverTimestamp).toLocaleTimeString('en-US', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -533,20 +533,20 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* جدولة الحضور اللحظي */}
-              <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-sm space-y-4">
+              <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm dark:shadow-xl backdrop-blur-sm space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     <span>جدول الحضور والغياب اللحظي اليوم</span>
                   </h3>
                   <div className="relative w-48">
-                    <Search className="w-3.5 h-3.5 text-slate-500 absolute top-2.5 right-2.5" />
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute top-2.5 right-2.5" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="بحث سريع..."
-                      className="w-full pr-8 pl-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 outline-none"
+                      className="w-full pr-8 pl-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none"
                     />
                   </div>
                 </div>
@@ -554,19 +554,19 @@ export default function AdminDashboardPage() {
                 <div className="overflow-x-auto max-h-80 overflow-y-auto">
                   <table className="w-full text-right text-xs">
                     <thead>
-                      <tr className="border-b border-slate-800 text-slate-400 font-bold sticky top-0 bg-slate-950">
+                      <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold sticky top-0 bg-slate-100/90 dark:bg-slate-950">
                         <th className="p-2.5">الموظف</th>
                         <th className="p-2.5">حضر</th>
                         <th className="p-2.5">انصرف</th>
                         <th className="p-2.5">الحالة</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
                       {filteredLive.slice(0, 15).map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="p-2.5 font-bold text-white">{item.name}</td>
-                          <td className="p-2.5 font-mono text-emerald-400">{item.checkInTime}</td>
-                          <td className="p-2.5 font-mono text-rose-400">{item.checkOutTime}</td>
+                        <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="p-2.5 font-bold text-slate-900 dark:text-white">{item.name}</td>
+                          <td className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400">{item.checkInTime}</td>
+                          <td className="p-2.5 font-mono text-rose-600 dark:text-rose-400">{item.checkOutTime}</td>
                           <td className="p-2.5">
                             <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${item.statusBadge}`}>
                               {item.statusLabel}
@@ -581,25 +581,25 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* سجل المحاولات المشبوهة High-Clarity Audit Log */}
-            <div className="bg-slate-900/80 border border-rose-500/30 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+            <div className="bg-white dark:bg-slate-900/80 border border-rose-500/30 rounded-3xl p-5 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <ShieldAlert className="w-5 h-5 text-rose-400" />
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <ShieldAlert className="w-5 h-5 text-rose-600 dark:text-rose-400" />
                     <span>تقرير المحاولات المشبوهة وخروقات الموقع الجغرافي (Suspicious Audit Log)</span>
                   </h3>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     رصد تفصيلي لجميع محاولات التبصيم من أجهزة غير معتمدة أو خارج النطاق الجغرافي المحدد للفروع.
                   </p>
                 </div>
-                <span className="px-3 py-1 bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-rose-500/30">
+                <span className="px-3 py-1 bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs rounded-xl border border-rose-500/30">
                   المحاولات المحظورة: {dashData?.suspiciousAttempts?.length || 0}
                 </span>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-right text-xs text-slate-300">
-                  <thead className="bg-slate-950/80 text-slate-400 text-[11px] font-bold border-b border-slate-800">
+                <table className="w-full text-right text-xs text-slate-700 dark:text-slate-300">
+                  <thead className="bg-slate-100/90 dark:bg-slate-950/80 text-slate-600 dark:text-slate-400 text-[11px] font-bold border-b border-slate-200 dark:border-slate-800">
                     <tr>
                       <th className="p-3">الموظف</th>
                       <th className="p-3">السبب والتشخيص</th>
@@ -609,21 +609,21 @@ export default function AdminDashboardPage() {
                       <th className="p-3">التوقيت والتاريخ</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
                     {dashData?.suspiciousAttempts?.length > 0 ? (
                       dashData.suspiciousAttempts.map((item: any) => (
-                        <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="p-3 font-bold text-white">
+                        <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="p-3 font-bold text-slate-900 dark:text-white">
                             <div>
                               <span>{item.employee ? `${item.employee.firstName} ${item.employee.lastName}` : 'غير معروف'}</span>
-                              <span className="block text-[10px] text-slate-400 font-mono">
+                              <span className="block text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                                 #{item.employee?.employeeNumber || item.employeeId || 'N/A'}
                               </span>
                             </div>
                           </td>
-                          <td className="p-3 text-rose-300 font-medium">
+                          <td className="p-3 text-rose-600 dark:text-rose-300 font-medium">
                             <div className="flex items-center gap-1.5">
-                              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                              <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                               <span>
                                 {item.reason === 'GPS_OUT_OF_BOUNDS' || item.reason?.includes('خارج')
                                   ? '📍 محاولة تبصيم من خارج النطاق الجغرافي المصرح'
@@ -639,35 +639,35 @@ export default function AdminDashboardPage() {
                             <span
                               className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                                 item.riskLevel === 'HIGH'
-                                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                                  ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/40'
                                   : item.riskLevel === 'MEDIUM'
-                                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                                  : 'bg-slate-800 text-slate-400 border-slate-700'
+                                  ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/40'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                               }`}
                             >
                               {item.riskLevel === 'HIGH' ? '⚠️ عالي الخطورة' : item.riskLevel === 'MEDIUM' ? '⚡ متوسط' : item.riskLevel}
                             </span>
                           </td>
-                          <td className="p-3 text-[11px] font-mono text-slate-400">
+                          <td className="p-3 text-[11px] font-mono text-slate-500 dark:text-slate-400">
                             {item.latitude && item.longitude ? (
                               <div>
-                                <span className="text-sky-400">
+                                <span className="text-sky-600 dark:text-sky-400">
                                   Lat: {Number(item.latitude).toFixed(4)} | Lng: {Number(item.longitude).toFixed(4)}
                                 </span>
-                                <span className="block text-[10px] text-slate-500">
+                                <span className="block text-[10px] text-slate-400 dark:text-slate-500">
                                   الدقة: {Math.round(item.accuracy || 0)}m
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-slate-500">غ/م</span>
+                              <span className="text-slate-400">غ/م</span>
                             )}
                           </td>
                           <td className="p-3">
-                            <span className="px-2.5 py-1 bg-red-500/20 text-red-400 font-bold rounded-xl text-[10px] border border-red-500/30">
+                            <span className="px-2.5 py-1 bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 font-bold rounded-xl text-[10px] border border-red-500/30">
                               🛡️ حظر التبصيم (BLOCKED)
                             </span>
                           </td>
-                          <td className="p-3 font-mono text-[11px] text-slate-400">
+                          <td className="p-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
                             {new Date(item.createdAt || item.timestamp).toLocaleString('ar-EG', {
                               dateStyle: 'short',
                               timeStyle: 'short',
@@ -677,7 +677,7 @@ export default function AdminDashboardPage() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
+                        <td colSpan={6} className="p-8 text-center text-slate-400 text-xs">
                           🎉 ممتاز! لا توجد أي محاولات مشبوهة أو خروقات موقع سجلت مؤخراً.
                         </td>
                       </tr>
@@ -691,23 +691,23 @@ export default function AdminDashboardPage() {
 
         {/* 2. فريق العمل (team) */}
         {activeTab === 'team' && (
-          <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-500 absolute top-3 right-3" />
+                <Search className="w-4 h-4 text-slate-400 absolute top-3 right-3" />
                 <input
                   type="text"
                   value={empSearchQuery}
                   onChange={(e) => setEmpSearchQuery(e.target.value)}
                   placeholder="ابحث باسم الموظف، الرقم الوظيفي، أو البريد الإلكتروني..."
-                  className="w-full pr-10 pl-4 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-500 outline-none focus:border-sky-500"
+                  className="w-full pr-10 pl-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => router.push('/admin/devices')}
-                  className="px-3.5 py-2.5 bg-slate-800/80 hover:bg-slate-700/80 text-emerald-400 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 border border-slate-700/80"
+                  className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700/80"
                 >
                   <Smartphone className="w-4 h-4" />
                   <span>الأجهزة المعتمدة</span>
@@ -725,7 +725,7 @@ export default function AdminDashboardPage() {
 
                     <button
                       onClick={() => setShowImportEmployeesModal(true)}
-                      className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 border border-slate-700"
+                      className="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
                     >
                       <Upload className="w-4 h-4" />
                       <span>استيراد CSV</span>
@@ -738,7 +738,7 @@ export default function AdminDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-right text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-bold bg-slate-950/60">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-slate-100/90 dark:bg-slate-950/60">
                     <th className="p-3">رقم الموظف</th>
                     <th className="p-3">الاسم والوظيفة</th>
                     <th className="p-3">البريد الإلكتروني</th>
@@ -748,20 +748,20 @@ export default function AdminDashboardPage() {
                     <th className="p-3 text-left">إجراءات</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
                   {filteredEmployees.map((emp) => (
-                    <tr key={emp.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3 font-mono font-bold text-sky-400">{emp.employeeNumber}</td>
+                    <tr key={emp.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="p-3 font-mono font-bold text-sky-600 dark:text-sky-400">{emp.employeeNumber}</td>
                       <td className="p-3">
-                        <div className="font-bold text-white">
+                        <div className="font-bold text-slate-900 dark:text-white">
                           {emp.firstName} {emp.lastName}
                         </div>
-                        <div className="text-[10px] text-slate-400">{emp.jobTitle || 'موظف'}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">{emp.jobTitle || 'موظف'}</div>
                       </td>
-                      <td className="p-3 text-slate-300 font-mono text-[11px]">{emp.user?.email}</td>
-                      <td className="p-3 text-slate-300">{emp.primaryBranch?.name || 'الفرع الرئيسي'}</td>
+                      <td className="p-3 text-slate-600 dark:text-slate-300 font-mono text-[11px]">{emp.user?.email}</td>
+                      <td className="p-3 text-slate-600 dark:text-slate-300">{emp.primaryBranch?.name || 'الفرع الرئيسي'}</td>
                       <td className="p-3">
-                        <span className="px-2 py-0.5 bg-sky-500/20 text-sky-400 font-mono font-bold text-[10px] rounded-lg border border-sky-500/30">
+                        <span className="px-2 py-0.5 bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400 font-mono font-bold text-[10px] rounded-lg border border-sky-500/30">
                           {emp.user?.role}
                         </span>
                       </td>
@@ -769,8 +769,8 @@ export default function AdminDashboardPage() {
                         <span
                           className={`px-2.5 py-1 rounded-xl text-[10px] font-bold ${
                             emp.status === 'ACTIVE'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                              ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                              : 'bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30'
                           }`}
                         >
                           {emp.status === 'ACTIVE' ? '🟢 مفعّل' : '🔴 معطّل'}
@@ -780,7 +780,7 @@ export default function AdminDashboardPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setSelectedEmployeeForEdit(emp)}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg text-xs"
+                            className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sky-600 dark:text-sky-400 rounded-lg text-xs"
                             title="تعديل الموظف"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -789,8 +789,8 @@ export default function AdminDashboardPage() {
                             onClick={() => handleDisableEmployee(emp.id, emp.status)}
                             className={`p-1.5 rounded-lg text-xs ${
                               emp.status === 'ACTIVE'
-                                ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400'
-                                : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400'
+                                ? 'bg-red-500/10 dark:bg-red-500/20 hover:bg-red-500/20 dark:hover:bg-red-500/30 text-red-600 dark:text-red-400'
+                                : 'bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-600 dark:text-emerald-400'
                             }`}
                             title={emp.status === 'ACTIVE' ? 'تعطيل الحساب' : 'إعادة تفعيل'}
                           >
@@ -809,11 +809,11 @@ export default function AdminDashboardPage() {
         {/* 3. الهيكل والمواعيد (structure) */}
         {activeTab === 'structure' && (
           <div className="space-y-6">
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-white">إدارة الورديات ومواعيد العمل</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">تحديد مواعيد الورديات الثابتة والمرنة ورسوم الحضور</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">إدارة الورديات ومواعيد العمل</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">تحديد مواعيد الورديات الثابتة والمرنة ورسوم الحضور</p>
                 </div>
                 <button
                   onClick={() => router.push('/admin/shifts')}
@@ -825,15 +825,15 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
-              <h3 className="text-base font-bold text-white">إدارة وتعديل موقع الفرع ونطاق الحضور الجغرافي (Geofence)</h3>
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-sm dark:shadow-xl backdrop-blur-sm">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">إدارة وتعديل موقع الفرع ونطاق الحضور الجغرافي (Geofence)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {dashData?.branches?.map((branch: any) => (
-                  <div key={branch.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                  <div key={branch.id} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-3">
                     <div>
-                      <h4 className="text-sm font-bold text-white">{branch.name}</h4>
-                      <p className="text-xs text-slate-400">{branch.address || 'العنوان غير محدد'}</p>
-                      <div className="text-[10px] text-sky-400 font-mono mt-1">Lat: {branch.latitude} | Lng: {branch.longitude}</div>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{branch.name}</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{branch.address || 'العنوان غير محدد'}</p>
+                      <div className="text-[10px] text-sky-600 dark:text-sky-400 font-mono mt-1">Lat: {branch.latitude} | Lng: {branch.longitude}</div>
                     </div>
                     <button
                       onClick={() => setSelectedBranchForEdit(branch)}
@@ -852,18 +852,18 @@ export default function AdminDashboardPage() {
         {/* 4. التقارير والمطابقة (reports) */}
         {activeTab === 'reports' && (
           <div className="space-y-6">
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-5 shadow-xl backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 space-y-5 shadow-sm dark:shadow-xl backdrop-blur-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-bold text-white">كشف الحضور والغياب الشهري للموظفين</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">مطابقة الساعات الفعلية والإضافية والتأخيرات لكل موظف</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">كشف الحضور والغياب الشهري للموظفين</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">مطابقة الساعات الفعلية والإضافية والتأخيرات لكل موظف</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="month"
                     value={monthFilter}
                     onChange={(e) => setMonthFilter(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
                   />
                   <button onClick={handleExportCSV} className="px-3.5 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20">
                     <Download className="w-4 h-4" />
@@ -875,7 +875,7 @@ export default function AdminDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-right text-xs">
                   <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 font-bold bg-slate-950/60">
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-slate-100/90 dark:bg-slate-950/60">
                       <th className="p-3">رقم الموظف</th>
                       <th className="p-3">اسم الموظف</th>
                       <th className="p-3 text-center">أيام الحضور</th>
@@ -885,16 +885,16 @@ export default function AdminDashboardPage() {
                       <th className="p-3 text-center">الإضافي</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
                     {reportData?.reportRows?.map((row: any) => (
-                      <tr key={row.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="p-3 font-mono font-bold text-sky-400">{row.employeeNumber}</td>
-                        <td className="p-3 font-bold text-white">{row.name}</td>
-                        <td className="p-3 text-center font-bold text-emerald-400">{row.attendanceDays}</td>
-                        <td className="p-3 text-center font-bold text-rose-400">{row.absenceDays}</td>
-                        <td className="p-3 text-center font-mono text-yellow-400">{row.lateStr}</td>
-                        <td className="p-3 text-center font-bold text-slate-200">{row.workedHoursStr}</td>
-                        <td className="p-3 text-center font-mono text-sky-400">{row.overtimeStr}</td>
+                      <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="p-3 font-mono font-bold text-sky-600 dark:text-sky-400">{row.employeeNumber}</td>
+                        <td className="p-3 font-bold text-slate-900 dark:text-white">{row.name}</td>
+                        <td className="p-3 text-center font-bold text-emerald-600 dark:text-emerald-400">{row.attendanceDays}</td>
+                        <td className="p-3 text-center font-bold text-rose-600 dark:text-rose-400">{row.absenceDays}</td>
+                        <td className="p-3 text-center font-mono text-yellow-600 dark:text-yellow-400">{row.lateStr}</td>
+                        <td className="p-3 text-center font-bold text-slate-700 dark:text-slate-200">{row.workedHoursStr}</td>
+                        <td className="p-3 text-center font-mono text-sky-600 dark:text-sky-400">{row.overtimeStr}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -903,7 +903,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* إعدادات المنظومة والمطابقة الحسابية */}
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm dark:shadow-xl backdrop-blur-sm">
               <SystemSettingsTab />
             </div>
           </div>
