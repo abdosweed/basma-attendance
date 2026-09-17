@@ -69,16 +69,16 @@ export default function EditEmployeeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold">
               <Edit className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">تعديل بيانات الموظف</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-lg font-bold text-slate-900">تعديل بيانات الموظف</h3>
+              <p className="text-xs text-slate-500 font-mono">
                 {employee.firstName} {employee.lastName} ({employee.employeeNumber})
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function EditEmployeeModal({
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800/60"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -94,7 +94,7 @@ export default function EditEmployeeModal({
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs">
           {errorMsg && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 flex items-center gap-2">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
@@ -102,42 +102,42 @@ export default function EditEmployeeModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">الاسم الأول</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">الاسم الأول</label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">الاسم الأخير</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">الاسم الأخير</label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">المسمى الوظيفي</label>
+            <label className="block text-slate-800 font-bold text-xs mb-1.5">المسمى الوظيفي</label>
             <input
               type="text"
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none"
+              className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">الدور (Role)</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">الدور (Role)</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none font-bold"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-semibold rounded-lg px-3.5 py-2.5 text-sm focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none"
               >
                 <option value="EMPLOYEE">👤 موظف</option>
                 <option value="SUPERVISOR">🔍 مشرف</option>
@@ -148,11 +148,11 @@ export default function EditEmployeeModal({
             </div>
 
             <div>
-              <label className="block font-bold text-slate-300 mb-1">حالة الحساب</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">حالة الحساب</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none font-bold"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-semibold rounded-lg px-3.5 py-2.5 text-sm focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none"
               >
                 <option value="ACTIVE">🟢 مفعّل (ACTIVE)</option>
                 <option value="INACTIVE">⚪ معطّل (INACTIVE)</option>
@@ -162,11 +162,11 @@ export default function EditEmployeeModal({
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">الفرع الرئيسي</label>
+            <label className="block text-slate-800 font-bold text-xs mb-1.5">الفرع الرئيسي</label>
             <select
               value={primaryBranchId}
               onChange={(e) => setPrimaryBranchId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none font-bold"
+              className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-semibold rounded-lg px-3.5 py-2.5 text-sm focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none"
             >
               {branches.map((b) => (
                 <option key={b.id} value={b.id}>
@@ -176,41 +176,41 @@ export default function EditEmployeeModal({
             </select>
           </div>
 
-          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
             <div>
-              <span className="font-bold text-white block">السماح بالعمل خارج نطاق الفروع</span>
+              <span className="text-slate-800 font-bold text-xs block">السماح بالعمل خارج نطاق الفروع</span>
             </div>
             <input
               type="checkbox"
               checked={allowOutsideBranch}
               onChange={(e) => setAllowOutsideBranch(e.target.checked)}
-              className="w-4 h-4 text-sky-600 bg-slate-900 border-slate-700"
+              className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
             />
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">تغيير كلمة المرور (اتركه فارغاً إذا لم ترد التغيير)</label>
+            <label className="block text-slate-800 font-bold text-xs mb-1.5">تغيير كلمة المرور (اتركه فارغاً إذا لم ترد التغيير)</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="كلمة مرور جديدة..."
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none"
+              className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+          <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-lg border border-slate-200 transition-colors text-sm"
             >
               إلغاء
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-lg shadow-sky-600/20"
+              className="bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all text-sm flex items-center gap-2 disabled:opacity-50"
             >
               {saving ? (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

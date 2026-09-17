@@ -271,39 +271,39 @@ export default function BranchLocationPickerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
         {/* الترويسة */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold">
               <MapPin className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">تعديل موقع الفرع ونطاق الحضور</h3>
-              <p className="text-xs text-slate-400">إدارة الإحداثيات الجغرافية ودائرة الـ Geofence لـ: {branch.name}</p>
+              <h3 className="text-lg font-bold text-slate-900">تعديل موقع الفرع ونطاق الحضور</h3>
+              <p className="text-xs text-slate-500 font-mono">إدارة الإحداثيات الجغرافية ودائرة الـ Geofence لـ: {branch.name}</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* جسم المودال الخيارات والخريطة */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 text-xs">
           {errorMsg && (
-            <div className="p-3.5 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-xs flex items-center gap-2">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {statusMsg && (
-            <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 text-xs flex items-center gap-2">
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-medium text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{statusMsg}</span>
             </div>
@@ -312,22 +312,22 @@ export default function BranchLocationPickerModal({
           {/* اسم وعنوان الفرع */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">اسم الفرع</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">اسم الفرع</label>
               <input
                 type="text"
                 value={branchName}
                 onChange={(e) => setBranchName(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-sky-500"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">العنوان الوصفي</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">العنوان الوصفي</label>
               <input
                 type="text"
                 value={branchAddress}
                 onChange={(e) => setBranchAddress(e.target.value)}
                 placeholder="مثال: طرابلس - وسط المدينة"
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white outline-none focus:border-sky-500"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
               />
             </div>
           </div>
@@ -335,18 +335,18 @@ export default function BranchLocationPickerModal({
           {/* شريط البحث و زر استخدام موقعي الحالي */}
           <div className="flex flex-col sm:flex-row gap-2">
             <form onSubmit={handleSearchLocation} className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-500 absolute top-3 right-3" />
+              <Search className="w-4 h-4 text-slate-400 absolute top-3 right-3" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث عن موقع أو عنوان على الخريطة..."
-                className="w-full pr-10 pl-20 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-sky-500"
+                className="w-full pr-10 pl-20 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
               />
               <button
                 type="submit"
                 disabled={searching}
-                className="absolute left-1.5 top-1.5 bottom-1.5 px-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg text-[11px] transition-colors"
+                className="absolute left-1.5 top-1.5 bottom-1.5 px-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-md text-[11px] transition-colors"
               >
                 {searching ? 'جاري البحث...' : 'بحث'}
               </button>
@@ -355,7 +355,7 @@ export default function BranchLocationPickerModal({
             <button
               type="button"
               onClick={handleUseCurrentLocation}
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 transition-all shrink-0 active:scale-95"
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-sky-700 font-bold rounded-lg text-xs flex items-center justify-center gap-2 border border-slate-200 transition-all shrink-0 active:scale-95"
             >
               <Navigation className="w-4 h-4" />
               <span>استخدام موقعي الحالي</span>
@@ -364,13 +364,13 @@ export default function BranchLocationPickerModal({
 
           {/* قائمة نتائج البحث إن وجدت */}
           {searchResults.length > 0 && (
-            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-2 max-h-40 overflow-y-auto space-y-1 text-xs">
-              <div className="text-[10px] text-slate-400 font-bold px-2 py-1">نتائج البحث المتاحة:</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 max-h-40 overflow-y-auto space-y-1 text-xs">
+              <div className="text-[10px] text-slate-500 font-bold px-2 py-1">نتائج البحث المتاحة:</div>
               {searchResults.map((item, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelectSearchResult(item)}
-                  className="w-full p-2 hover:bg-slate-800 text-right rounded-lg text-slate-300 text-xs transition-colors block truncate"
+                  className="w-full p-2 hover:bg-white border border-transparent hover:border-slate-200 text-right rounded-lg text-slate-800 text-xs transition-colors block truncate"
                 >
                   📍 {item.display_name}
                 </button>
@@ -379,39 +379,39 @@ export default function BranchLocationPickerModal({
           )}
 
           {/* حاوية الخريطة التفاعلية Leaflet */}
-          <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-inner h-64 sm:h-80 bg-slate-950">
+          <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-inner h-64 sm:h-80 bg-slate-100">
             <div ref={mapContainerRef} className="w-full h-full z-0" />
-            <div className="absolute top-3 left-3 z-10 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] text-slate-300">
+            <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-800 font-medium shadow-sm">
               💡 اضغط على أي نقطة أو اسحب الـ Marker لتغيير الموقع
             </div>
           </div>
 
           {/* خيارات نطاق الـ Geofence والإحداثيات والمعاينة */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">خط العرض (Latitude)</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">خط العرض (Latitude)</label>
               <input
                 type="number"
                 step="any"
                 value={lat}
                 onChange={(e) => setLat(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-sky-400 outline-none"
+                className="w-full bg-white border border-slate-300 text-sky-700 font-mono font-bold rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-sky-100"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">خط الطول (Longitude)</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">خط الطول (Longitude)</label>
               <input
                 type="number"
                 step="any"
                 value={lng}
                 onChange={(e) => setLng(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-sky-400 outline-none"
+                className="w-full bg-white border border-slate-300 text-sky-700 font-mono font-bold rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-sky-100"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">نطاق السماح (Geofence Radius)</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">نطاق السماح (Geofence Radius)</label>
               <div className="space-y-2">
                 <input
                   type="number"
@@ -419,7 +419,7 @@ export default function BranchLocationPickerModal({
                   max="5000"
                   value={radius}
                   onChange={(e) => setRadius(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-emerald-400 outline-none font-bold"
+                  className="w-full bg-white border border-slate-300 text-emerald-700 font-mono font-bold rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-sky-100"
                 />
                 <div className="flex items-center gap-1.5">
                   {[30, 50, 100, 200].map((rVal) => (
@@ -427,10 +427,10 @@ export default function BranchLocationPickerModal({
                       key={rVal}
                       type="button"
                       onClick={() => setRadius(rVal)}
-                      className={`flex-1 py-1 rounded-lg text-[10px] font-bold border transition-colors ${
+                      className={`flex-1 py-1 rounded-md text-[10px] font-bold border transition-colors ${
                         radius === rVal
-                          ? 'bg-sky-600 text-white border-sky-500'
-                          : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                          ? 'bg-sky-600 text-white border-sky-600'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
                       }`}
                     >
                       {rVal}m
@@ -442,23 +442,23 @@ export default function BranchLocationPickerModal({
           </div>
 
           {/* بطاقة المعاينة النهائية */}
-          <div className="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-slate-300 font-bold">الحالة: تم تحديد إحداثيات الفرع والدائرة بنجاح</span>
+              <span className="text-slate-800 font-bold">الحالة: تم تحديد إحداثيات الفرع والدائرة بنجاح</span>
             </div>
-            <div className="font-mono text-slate-400 text-[11px]">
+            <div className="font-mono text-slate-600 text-[11px] font-bold">
               {lat.toFixed(5)}, {lng.toFixed(5)} ({radius}m)
             </div>
           </div>
         </div>
 
         {/* أزرار الحفظ والإغلاق في الأسفل */}
-        <div className="p-4 sm:p-5 border-t border-slate-800 bg-slate-950/60 flex items-center justify-end gap-3">
+        <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-all"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-lg border border-slate-200 transition-colors text-sm"
           >
             إلغاء
           </button>
@@ -467,7 +467,7 @@ export default function BranchLocationPickerModal({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-sky-600/25 active:scale-95 transition-all disabled:opacity-50"
+            className="bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all text-sm flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -97,20 +97,20 @@ export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">تقديم طلب إجازة</h3>
-              <p className="text-xs text-slate-400">إرسال الطلب للمراجعة والموافقة من الإدارة</p>
+              <h3 className="text-lg font-bold text-slate-900">تقديم طلب إجازة</h3>
+              <p className="text-xs text-slate-500">إرسال الطلب للمراجعة والموافقة من الإدارة</p>
             </div>
           </div>
 
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800/60">
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -118,27 +118,27 @@ export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestMo
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           {/* Leave Balance Banner */}
           {balances && (
-            <div className="p-3 bg-sky-950/60 border border-sky-500/30 rounded-2xl flex items-center justify-between text-xs">
-              <span className="text-slate-300 font-medium">الرصيد المتبقي لك:</span>
-              <span className="font-bold text-sky-400">
+            <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl flex items-center justify-between text-xs">
+              <span className="text-slate-700 font-medium">الرصيد المتبقي لك:</span>
+              <span className="font-bold text-sky-700">
                 {balances.annualRemaining} يوم سنوي | {balances.sickRemaining} يوم مرضي
               </span>
             </div>
           )}
 
           {errorMsg && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 flex items-center gap-2">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">نوع الإجازة</label>
+            <label className="block text-slate-800 font-bold text-xs mb-1.5">نوع الإجازة</label>
             <select
               value={leaveTypeId}
               onChange={(e) => setLeaveTypeId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none font-bold"
+              className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-semibold rounded-lg px-3.5 py-2.5 text-sm focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none"
             >
               {leaveTypes.length > 0 ? (
                 leaveTypes.map((type) => (
@@ -159,48 +159,48 @@ export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestMo
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">من تاريخ</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">من تاريخ</label>
               <input
                 type="date"
                 required
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-slate-300 mb-1">إلى تاريخ</label>
+              <label className="block text-slate-800 font-bold text-xs mb-1.5">إلى تاريخ</label>
               <input
                 type="date"
                 required
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none"
+                className="w-full bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg px-3.5 py-2.5 text-sm focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none transition-all"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">سبب الإجازة والملاحظات *</label>
+            <label className="block text-slate-800 font-bold text-xs mb-1.5">سبب الإجازة والملاحظات *</label>
             <textarea
               required
               rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="اكتب سبب طلب الإجازة باختصار..."
-              className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white outline-none placeholder-slate-500"
+              className="w-full p-3 bg-slate-50 border border-slate-300 text-slate-900 font-medium rounded-lg text-sm placeholder:text-slate-400 focus:bg-white focus:border-sky-600 focus:ring-2 focus:ring-sky-100 focus:outline-none"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-xl">
+          <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
+            <button type="button" onClick={onClose} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2.5 rounded-lg border border-slate-200 transition-colors text-sm">
               إلغاء
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-sky-600/20 active:scale-95 disabled:opacity-50"
+              className="bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all text-sm flex items-center gap-2 disabled:opacity-50"
             >
               {saving ? (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
