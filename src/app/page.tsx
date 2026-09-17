@@ -15,6 +15,7 @@ import { BasmaCard } from '@/components/ui/BasmaCard';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
 import { setupOfflineAutoSync, saveOfflineAttendance } from '@/lib/offline-sync';
+import { validateClientLocationQuality, detectImpossibleSpeed } from '@/lib/geo-security';
 import {
   Fingerprint,
   MapPin,
@@ -327,6 +328,28 @@ export default function EmployeePortalPage() {
       // اختيار القراءة ذات أفضل (أدنى) accuracy وتصفية القراءات القديمة والشاذة
       readings.sort((a, b) => a.accuracy - b.accuracy);
       const bestReading = readings[0];
+
+      // 1. فحص كشف تزييف المواقع ودقة القراءة الحلية (Client Anti-Spoofing Check)
+      const qualityCheck = validateClientLocationQuality({
+        latitude: bestReading.latitude,
+        longitude: bestReading.longitude,
+        accuracy: bestReading.accuracy,
+        isMock: (bestReading as any).isMock || (bestReading as any).mocked,
+      });
+
+      if (!qualityCheck.isValid) {
+        setGeoStatus({ message: qualityCheck.reason || 'تم رفض البصمة لعدم استيفاء معايير أمان الموقع 🛑', type: 'error' });
+        setActionLoading(false);
+        return;
+      }
+
+      // 2. كشف السرعات والتنقل المستحيل (Impossible Speed / Jump Guard)
+      const speedCheck = detectImpossibleSpeed(bestReading.latitude, bestReading.longitude);
+      if (speedCheck.isSuspicious) {
+        setGeoStatus({ message: speedCheck.reason || 'تم تجميد البصمة بسبب رصد تنقل غير منطقي بسرعة عالية ⚠️', type: 'error' });
+        setActionLoading(false);
+        return;
+      }
 
       setVerifiedAccuracy(Math.round(bestReading.accuracy));
       const nowTimeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { evaluateLocationConfidence, validateEmployeeLocation } from '@/lib/geofence';
-import { evaluateDeviceTrust } from '@/lib/device';
+import { evaluateDeviceTrust, evaluateAntiBuddyPunching } from '@/lib/device';
 
 export async function POST(request: Request) {
   try {
@@ -61,6 +61,18 @@ export async function POST(request: Request) {
           error: deviceEval.reason || 'هذا الجهاز غير معتمد.',
           code: 'UNAUTHORIZED_DEVICE',
           deviceStatus: deviceEval.status,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 0.1 فحص حماية البصمة النيابية ومكافحة تبادل الأجهزة (Anti-Buddy Punching Guard)
+    const buddyPunchingCheck = await evaluateAntiBuddyPunching(employee.id, rawDevId);
+    if (!buddyPunchingCheck.isAllowed) {
+      return NextResponse.json(
+        {
+          error: buddyPunchingCheck.reason,
+          code: 'DEVICE_SHARING_VIOLATION',
         },
         { status: 403 }
       );
@@ -126,6 +138,25 @@ export async function POST(request: Request) {
             reason: confidenceAssessment.reason || 'GPS_OUT_OF_BOUNDS',
             riskLevel: accuracy > maxAccuracy ? 'MEDIUM' : 'HIGH',
             actionTaken: 'BLOCKED',
+          },
+        });
+
+        // 2.2 تسجيل محاولة الخروج عن النطاق الإداري في سجل التدقيق AuditLog
+        const clientIp = request.headers.get('x-forwarded-for') || 'UNKNOWN_IP';
+        await prisma.auditLog.create({
+          data: {
+            userId: employee.userId,
+            action: 'OUT_OF_BOUNDS_ATTEMPT',
+            entity: 'ATTENDANCE',
+            reason: confidenceAssessment.reason || 'محاولة تسجيل حضور خارج النطاق المسموح للفرع',
+            ipAddress: clientIp,
+            details: {
+              employeeId: employee.id,
+              employeeName: `${employee.firstName} ${employee.lastName}`,
+              nearestBranch: confidenceAssessment.nearestBranch,
+              medianDistance: confidenceAssessment.medianDistance,
+              coords: { latitude, longitude, accuracy },
+            },
           },
         });
       }

@@ -250,3 +250,65 @@ export async function evaluateDeviceTrust(
     device: newDevice,
   };
 }
+
+/**
+ * 3. حماية البصمة النيابية وتبادل الأجهزة (Anti-Buddy Punching Guard)
+ * حظر تسجيل حضور أكثر من موظف من نفس الجهاز الموثق خلال اليوم الواحد
+ */
+export async function evaluateAntiBuddyPunching(
+  employeeId: string,
+  rawDeviceId: string
+): Promise<{ isAllowed: boolean; reason?: string }> {
+  if (!rawDeviceId || rawDeviceId === 'UNKNOWN_DEV') {
+    return { isAllowed: true };
+  }
+
+  const deviceHash = hashDeviceToken(rawDeviceId);
+  const lookupKey = deviceHash || rawDeviceId;
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  // البحث عن حركات حضور تمت بنفس الجهاز لموظفين آخرين اليوم
+  const sharedUsageEvent = await prisma.attendanceEvent.findFirst({
+    where: {
+      employeeId: { not: employeeId },
+      OR: [
+        { deviceId: lookupKey },
+        { deviceId: rawDeviceId },
+      ],
+      createdAt: { gte: startOfToday },
+    },
+    include: { employee: true },
+  });
+
+  if (sharedUsageEvent) {
+    const currentEmp = await prisma.employee.findUnique({ where: { id: employeeId } });
+    const otherEmpName = sharedUsageEvent.employee
+      ? `${sharedUsageEvent.employee.firstName} ${sharedUsageEvent.employee.lastName}`
+      : 'موظف آخر';
+
+    await prisma.auditLog.create({
+      data: {
+        userId: currentEmp?.userId || 'SYSTEM',
+        action: 'DEVICE_SHARING_VIOLATION',
+        entity: 'AttendanceEvent',
+        entityId: sharedUsageEvent.id,
+        reason: `حظر محاولة بصمة نيابية من نفس الجهاز المستعمل اليوم من قبل (${otherEmpName})`,
+        details: {
+          attemptedEmployeeId: employeeId,
+          otherEmployeeId: sharedUsageEvent.employeeId,
+          otherEmployeeName: otherEmpName,
+          deviceId: lookupKey,
+        },
+      },
+    });
+
+    return {
+      isAllowed: false,
+      reason: `⚠️ تمنع سياسة المنظومة البصمة النيابية أو تبادل الهواتف. تم تسجيل حضور للموظف (${otherEmpName}) من نفس هذا الجهاز اليوم.`,
+    };
+  }
+
+  return { isAllowed: true };
+}

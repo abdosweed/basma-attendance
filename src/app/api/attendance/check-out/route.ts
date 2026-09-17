@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { validateEmployeeLocation } from '@/lib/geofence';
-import { evaluateDeviceTrust } from '@/lib/device';
+import { evaluateDeviceTrust, evaluateAntiBuddyPunching } from '@/lib/device';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +53,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // 0.1 فحص حماية البصمة النيابية ومكافحة تبادل الأجهزة (Anti-Buddy Punching Guard)
+    const buddyPunchingCheck = await evaluateAntiBuddyPunching(employee.id, rawDevId);
+    if (!buddyPunchingCheck.isAllowed) {
+      return NextResponse.json(
+        {
+          error: buddyPunchingCheck.reason,
+          code: 'DEVICE_SHARING_VIOLATION',
+        },
+        { status: 403 }
+      );
+    }
+
     const nowServerTime = new Date();
 
     // 1. البحث عن آخر سجل حضور مفتوح (لم يتم انصرافه بعد) للتعامل الصحيح مع الورديات الليلية الناتجة بعد منتصف الليل
@@ -95,6 +107,24 @@ export async function POST(request: Request) {
     );
 
     if (!geofenceResult.isAllowed) {
+      const clientIp = request.headers.get('x-forwarded-for') || 'UNKNOWN_IP';
+      await prisma.auditLog.create({
+        data: {
+          userId: employee.userId,
+          action: 'OUT_OF_BOUNDS_ATTEMPT',
+          entity: 'ATTENDANCE',
+          reason: geofenceResult.reason || 'محاولة تسجيل انصراف خارج نطاق الفرع المسموح',
+          ipAddress: clientIp,
+          details: {
+            employeeId: employee.id,
+            employeeName: `${employee.firstName} ${employee.lastName}`,
+            nearestBranch: geofenceResult.nearestBranch,
+            distanceMeters: geofenceResult.distanceMeters,
+            coords: { latitude, longitude, accuracy },
+          },
+        },
+      });
+
       return NextResponse.json(
         {
           error: geofenceResult.reason || 'أنت خارج نطاق موقع العمل المسموح لتسجيل الانصراف.',
