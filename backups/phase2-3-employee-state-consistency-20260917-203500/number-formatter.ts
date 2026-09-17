@@ -10,16 +10,14 @@ export function toWesternNumerals(input: string | number | null | undefined): st
 }
 
 export function formatWesternTime(
-  dateInput: Date | string | number | null | undefined,
+  dateInput: Date | string | null | undefined,
   includeSeconds: boolean = false
 ): string {
   if (!dateInput) return '—';
 
-  // Handle HH:mm or HH:mm:ss raw string input (e.g. "08:00" or "08:00:00")
-  if (typeof dateInput === 'string' && /^\d{1,2}:\d{2}(:\d{2})?$/.test(dateInput.trim())) {
-    const parts = dateInput.trim().split(':').map(Number);
-    const h = parts[0];
-    const m = parts[1];
+  // Handle HH:mm raw string input (e.g. "08:00")
+  if (typeof dateInput === 'string' && /^\d{2}:\d{2}$/.test(dateInput)) {
+    const [h, m] = dateInput.split(':').map(Number);
     const period = h >= 12 ? 'م' : 'ص';
     const formattedH = h % 12 === 0 ? 12 : h % 12;
     const padH = formattedH < 10 ? `0${formattedH}` : `${formattedH}`;
@@ -27,24 +25,7 @@ export function formatWesternTime(
     return `${padH}:${padM} ${period}`;
   }
 
-  let date: Date;
-  if (dateInput instanceof Date) {
-    date = dateInput;
-  } else if (typeof dateInput === 'number') {
-    date = new Date(dateInput);
-  } else {
-    // String parsing
-    const rawStr = String(dateInput).trim();
-    date = new Date(rawStr);
-    if (isNaN(date.getTime())) {
-      // Try stripping leading/trailing garbage if ISO string was corrupted
-      const isoMatch = rawStr.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-      if (isoMatch) {
-        date = new Date(isoMatch[0]);
-      }
-    }
-  }
-
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
   if (isNaN(date.getTime())) return '—';
 
   const opts: Intl.DateTimeFormatOptions = {
@@ -54,16 +35,13 @@ export function formatWesternTime(
     ...(includeSeconds ? { second: '2-digit' } : {}),
   };
 
-  let formatted = '';
   try {
     const timeStr = date.toLocaleTimeString('en-US', { ...opts, timeZone: 'Africa/Tripoli' });
-    formatted = timeStr.replace('AM', 'ص').replace('PM', 'م');
+    return timeStr.replace('AM', 'ص').replace('PM', 'م');
   } catch (e) {
     const timeStr = date.toLocaleTimeString('en-US', opts);
-    formatted = timeStr.replace('AM', 'ص').replace('PM', 'م');
+    return timeStr.replace('AM', 'ص').replace('PM', 'م');
   }
-
-  return toWesternNumerals(formatted);
 }
 
 export function formatWesternDate(dateInput: Date | string | null | undefined): string {

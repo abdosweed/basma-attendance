@@ -148,18 +148,6 @@ export function PushNotificationManager({ showCardOnly = false }: { showCardOnly
     return null;
   }
 
-  const [actionError, setActionError] = useState<boolean>(false);
-
-  const handleSubscribeWithState = async () => {
-    setActionError(false);
-    try {
-      await handleSubscribe();
-    } catch (e) {
-      setActionError(true);
-      setTimeout(() => setActionError(false), 4000);
-    }
-  };
-
   return (
     <>
       {/* Secondary Compact Prompt Banner */}
@@ -175,8 +163,6 @@ export function PushNotificationManager({ showCardOnly = false }: { showCardOnly
                 <p className="text-[10px] text-slate-500 leading-tight">
                   {permission === 'denied'
                     ? 'غير مفعّلة من إعدادات الجهاز'
-                    : actionError
-                    ? 'تعذر تفعيل الإشعارات، حاول لاحقاً'
                     : 'استلم تنبيهات الحضور والطلبات'}
                 </p>
               </div>
@@ -184,11 +170,11 @@ export function PushNotificationManager({ showCardOnly = false }: { showCardOnly
 
             {permission !== 'denied' && (
               <button
-                onClick={handleSubscribeWithState}
+                onClick={handleSubscribe}
                 disabled={loading}
                 className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition-all shrink-0 shadow-2xs disabled:opacity-50"
               >
-                {loading ? 'جاري التفعيل...' : actionError ? 'تعذر التفعيل' : 'تفعيل'}
+                {loading ? 'جاري...' : 'تفعيل'}
               </button>
             )}
           </div>

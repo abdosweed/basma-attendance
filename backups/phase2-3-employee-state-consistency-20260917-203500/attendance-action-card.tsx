@@ -74,9 +74,6 @@ export function AttendanceActionCard({
   const formattedCheckOut = formatWesternTime(checkOutAt);
   const formattedDuration = formatWesternDuration(calculatedDurationMinutes);
 
-  const rawBreakStart = activeBreak?.startTime || activeBreak?.startedAt || activeBreak?.createdAt || null;
-  const formattedBreakStart = rawBreakStart ? formatWesternTime(rawBreakStart) : null;
-
   if (isCheckedOut) {
     currentStatus = 'CHECKED_OUT';
     statusArabicLabel = 'انتهى الدوام';
@@ -86,8 +83,8 @@ export function AttendanceActionCard({
     currentStatus = 'ON_BREAK';
     statusArabicLabel = 'في استراحة';
     heroTitle = 'أنت في استراحة حالياً ☕';
-    heroSubtitle = formattedBreakStart && formattedBreakStart !== '—'
-      ? `بدأت الاستراحة الساعة ${formattedBreakStart}`
+    heroSubtitle = activeBreak?.startTime
+      ? `بدأت الاستراحة الساعة ${formatWesternTime(activeBreak.startTime)}`
       : 'يمكنك إنهاء الاستراحة والعودة للدوام عند الاستعداد.';
   } else if (isCheckedIn) {
     currentStatus = 'PRESENT';
@@ -95,16 +92,6 @@ export function AttendanceActionCard({
     heroTitle = 'أنت في الدوام الآن 🟢';
     heroSubtitle = `سجلت الحضور الساعة ${formattedCheckIn} • ${branchName}`;
   }
-
-  // Suppress persistent action confirmation text (e.g. "تم بدء الاستراحة بنجاح") in top bar to avoid duplication
-  const isActionConfirmation =
-    locationStatusMessage.includes('تم بدء') ||
-    locationStatusMessage.includes('تم تسجيل') ||
-    locationStatusMessage.includes('تمت العملية');
-
-  const displayLocationMessage = (isOnBreak || isActionConfirmation) && locationStatusType === 'success'
-    ? `الموقع الجغرافي مؤكد ومطابق للفرع (${branchName}) 📍`
-    : locationStatusMessage;
 
   // State D: COMPLETED DAY (Calm, single completed hero without GPS prompts or duplicated pills)
   if (isCheckedOut) {
@@ -156,7 +143,7 @@ export function AttendanceActionCard({
             }`}
           />
           <span className="text-slate-700 truncate font-medium text-[11px]">
-            {toWesternNumerals(displayLocationMessage)}
+            {toWesternNumerals(locationStatusMessage)}
           </span>
         </div>
         <div className="shrink-0">

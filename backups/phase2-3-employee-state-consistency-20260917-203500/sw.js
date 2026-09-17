@@ -1,4 +1,4 @@
-const CACHE_NAME = 'basma-pwa-cache-v2.3.0';
+const CACHE_NAME = 'basma-pwa-cache-v2.2.0';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
