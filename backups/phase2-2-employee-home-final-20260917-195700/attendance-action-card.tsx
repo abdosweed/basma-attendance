@@ -3,13 +3,11 @@
 import React from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { Clock, Coffee, Fingerprint, CheckCircle2, LogOut } from 'lucide-react';
-import { formatWesternTime, formatWesternDuration, toWesternNumerals } from '@/lib/number-formatter';
+import { Clock, Coffee, Fingerprint, CheckCircle2, LogOut, MapPin } from 'lucide-react';
 
 export interface AttendanceActionCardProps {
   checkInAt?: string | null;
   checkOutAt?: string | null;
-  totalWorkedMinutes?: number | null;
   activeBreak?: any | null;
   shiftName?: string;
   scheduledStart?: string;
@@ -29,7 +27,6 @@ export interface AttendanceActionCardProps {
 export function AttendanceActionCard({
   checkInAt,
   checkOutAt,
-  totalWorkedMinutes,
   activeBreak,
   shiftName = 'الوردية العادية',
   scheduledStart = '08:00',
@@ -53,26 +50,7 @@ export function AttendanceActionCard({
   let currentStatus: 'PRESENT' | 'ON_BREAK' | 'CHECKED_OUT' | 'ABSENT' = 'ABSENT';
   let statusArabicLabel = 'لم تسجل حضورك بعد';
   let heroTitle = 'لم تسجل حضورك بعد';
-
-  const formattedShiftStart = formatWesternTime(scheduledStart);
-  const formattedShiftEnd = formatWesternTime(scheduledEnd);
-  let heroSubtitle = `وردية اليوم: ${shiftName} (${formattedShiftStart} - ${formattedShiftEnd})`;
-
-  // Calculate worked duration if not directly provided but check-in and check-out exist
-  let calculatedDurationMinutes = totalWorkedMinutes;
-  if ((calculatedDurationMinutes === null || calculatedDurationMinutes === undefined) && checkInAt && checkOutAt) {
-    try {
-      const inTime = new Date(checkInAt).getTime();
-      const outTime = new Date(checkOutAt).getTime();
-      if (!isNaN(inTime) && !isNaN(outTime) && outTime > inTime) {
-        calculatedDurationMinutes = Math.floor((outTime - inTime) / (1000 * 60));
-      }
-    } catch (e) {}
-  }
-
-  const formattedCheckIn = formatWesternTime(checkInAt);
-  const formattedCheckOut = formatWesternTime(checkOutAt);
-  const formattedDuration = formatWesternDuration(calculatedDurationMinutes);
+  let heroSubtitle = `وردية اليوم: ${shiftName} (${scheduledStart} - ${scheduledEnd})`;
 
   if (isCheckedOut) {
     currentStatus = 'CHECKED_OUT';
@@ -84,13 +62,13 @@ export function AttendanceActionCard({
     statusArabicLabel = 'في استراحة';
     heroTitle = 'أنت في استراحة حالياً ☕';
     heroSubtitle = activeBreak?.startTime
-      ? `بدأت الاستراحة الساعة ${formatWesternTime(activeBreak.startTime)}`
+      ? `بدأت الاستراحة الساعة ${activeBreak.startTime}`
       : 'يمكنك إنهاء الاستراحة والعودة للدوام عند الاستعداد.';
   } else if (isCheckedIn) {
     currentStatus = 'PRESENT';
     statusArabicLabel = 'في الدوام';
     heroTitle = 'أنت في الدوام الآن 🟢';
-    heroSubtitle = `سجلت الحضور الساعة ${formattedCheckIn} • ${branchName}`;
+    heroSubtitle = `سجلت الحضور الساعة ${checkInAt} • ${branchName}`;
   }
 
   // State D: COMPLETED DAY (Calm, single completed hero without GPS prompts or duplicated pills)
@@ -106,21 +84,15 @@ export function AttendanceActionCard({
             <p className="text-xs text-slate-500">{heroSubtitle}</p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-xs">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
             <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
               <span className="text-[10px] text-slate-500 font-medium block">وقت الدخول</span>
-              <span className="font-bold text-slate-900 dir-ltr inline-block">{formattedCheckIn}</span>
+              <span className="font-bold text-slate-900">{checkInAt || '—'}</span>
             </div>
             <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
               <span className="text-[10px] text-slate-500 font-medium block">وقت الانصراف</span>
-              <span className="font-bold text-slate-900 dir-ltr inline-block">{formattedCheckOut}</span>
+              <span className="font-bold text-slate-900">{checkOutAt || '—'}</span>
             </div>
-            {formattedDuration !== '—' && (
-              <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center col-span-2 sm:col-span-1">
-                <span className="text-[10px] text-slate-500 font-medium block">مدة العمل</span>
-                <span className="font-bold text-emerald-700 dir-ltr inline-block">{formattedDuration}</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -130,7 +102,7 @@ export function AttendanceActionCard({
   // Active / Pending Attendance View
   return (
     <div className="w-full max-w-lg mx-auto space-y-3" dir="rtl">
-      {/* Top Location Status Bar */}
+      {/* Top Location Status Bar (Shown ONLY when work is active or pending) */}
       <div className="flex items-center justify-between gap-2 px-3.5 py-2 bg-white border border-slate-200/80 rounded-2xl shadow-xs text-xs">
         <div className="flex items-center gap-2 truncate">
           <span
@@ -143,7 +115,7 @@ export function AttendanceActionCard({
             }`}
           />
           <span className="text-slate-700 truncate font-medium text-[11px]">
-            {toWesternNumerals(locationStatusMessage)}
+            {locationStatusMessage}
           </span>
         </div>
         <div className="shrink-0">

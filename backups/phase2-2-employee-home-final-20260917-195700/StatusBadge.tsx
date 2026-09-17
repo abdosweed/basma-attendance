@@ -1,5 +1,4 @@
 import React from 'react';
-import { toWesternNumerals } from '@/lib/number-formatter';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -54,7 +53,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   size = 'md',
 }) => {
-  const formattedLabel = label ? toWesternNumerals(label) : undefined;
   const sizeClasses = {
     sm: 'px-2 py-0.5 text-[10px] gap-1',
     md: 'px-2.5 py-1 text-xs gap-1.5',
@@ -73,28 +71,28 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>{formattedLabel || (status === 'AUTHORIZED_OUTSIDE' ? 'خروج بإذن رسمي' : 'أنت داخل نطاق العمل')}</span>
+            <span>{label || (status === 'AUTHORIZED_OUTSIDE' ? 'خروج بإذن رسمي' : 'أنت داخل نطاق العمل')}</span>
           </span>
         );
       case 'UNCERTAIN':
         return (
           <span className={`inline-flex items-center rounded-full font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 ${sizeClasses} ${className}`} dir="rtl">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>{formattedLabel || 'الموقع يحتاج لحظات للتثبيت'}</span>
+            <span>{label || 'الموقع يحتاج لحظات للتثبيت'}</span>
           </span>
         );
       case 'OUTSIDE_CONFIRMED':
         return (
           <span className={`inline-flex items-center rounded-full font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 ${sizeClasses} ${className}`} dir="rtl">
             <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-            <span>{formattedLabel || 'أنت خارج نطاق الفرع'}</span>
+            <span>{label || 'أنت خارج نطاق الفرع'}</span>
           </span>
         );
       case 'LOCATION_UNAVAILABLE':
         return (
           <span className={`inline-flex items-center rounded-full font-semibold bg-slate-100 text-slate-700 border border-slate-200 ${sizeClasses} ${className}`} dir="rtl">
             <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <span>{formattedLabel || 'تعذر تحديد موقعك'}</span>
+            <span>{label || 'تعذر تحديد موقعك'}</span>
           </span>
         );
       case 'CHECKING':
@@ -102,7 +100,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         return (
           <span className={`inline-flex items-center rounded-full font-semibold bg-sky-50 text-sky-700 border border-sky-200/80 ${sizeClasses} ${className}`} dir="rtl">
             <Loader2 className="w-3.5 h-3.5 text-sky-600 animate-spin shrink-0" />
-            <span>{formattedLabel || 'جارٍ التحقق من موقعك...'}</span>
+            <span>{label || 'جارٍ التحقق من موقعك...'}</span>
           </span>
         );
     }
@@ -115,14 +113,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         return (
           <span className={`inline-flex items-center rounded-full font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 ${sizeClasses} ${className}`} dir="rtl">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>{formattedLabel || 'جهاز موثق ومعتمد'}</span>
+            <span>{label || 'جهاز موثق ومعتمد'}</span>
           </span>
         );
       case 'PENDING':
         return (
           <span className={`inline-flex items-center rounded-full font-medium bg-amber-50 text-amber-700 border border-amber-200 ${sizeClasses} ${className}`} dir="rtl">
             <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>{formattedLabel || 'في انتظار اعتماد الإدارة'}</span>
+            <span>{label || 'في انتظار اعتماد الإدارة'}</span>
           </span>
         );
       case 'REVOKED':
@@ -131,7 +129,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         return (
           <span className={`inline-flex items-center rounded-full font-medium bg-rose-50 text-rose-700 border border-rose-200 ${sizeClasses} ${className}`} dir="rtl">
             <Ban className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-            <span>{formattedLabel || (status === 'BLOCKED' ? 'جهاز محظور' : 'ملغى الاعتماد')}</span>
+            <span>{label || (status === 'BLOCKED' ? 'جهاز محظور' : 'ملغى الاعتماد')}</span>
           </span>
         );
     }
@@ -145,7 +143,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       return (
         <span className={`inline-flex items-center rounded-full font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 ${sizeClasses} ${className}`} dir="rtl">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-          <span>{formattedLabel || 'حاضر'}</span>
+          <span>{label || 'حاضر'}</span>
         </span>
       );
     case 'LATE':
@@ -153,7 +151,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       return (
         <span className={`inline-flex items-center rounded-full font-medium bg-amber-50 text-amber-700 border border-amber-200 ${sizeClasses} ${className}`} dir="rtl">
           <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-          <span>{formattedLabel || 'متأخر'}</span>
+          <span>{label || 'متأخر'}</span>
         </span>
       );
     case 'ABSENT':
@@ -161,21 +159,21 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       return (
         <span className={`inline-flex items-center rounded-full font-medium bg-rose-50 text-rose-700 border border-rose-200 ${sizeClasses} ${className}`} dir="rtl">
           <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-          <span>{formattedLabel || 'غائب'}</span>
+          <span>{label || 'غائب'}</span>
         </span>
       );
     case 'ON_BREAK':
       return (
         <span className={`inline-flex items-center rounded-full font-medium bg-sky-50 text-sky-700 border border-sky-200 ${sizeClasses} ${className}`} dir="rtl">
           <Coffee className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-          <span>{formattedLabel || 'في استراحة'}</span>
+          <span>{label || 'في استراحة'}</span>
         </span>
       );
     case 'ON_LEAVE':
       return (
         <span className={`inline-flex items-center rounded-full font-medium bg-blue-50 text-blue-700 border border-blue-200 ${sizeClasses} ${className}`} dir="rtl">
           <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-          <span>{formattedLabel || 'في إجازة'}</span>
+          <span>{label || 'في إجازة'}</span>
         </span>
       );
     case 'INFO':
@@ -183,7 +181,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       return (
         <span className={`inline-flex items-center rounded-full font-medium bg-slate-100 text-slate-700 border border-slate-200 ${sizeClasses} ${className}`} dir="rtl">
           <Info className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-          <span>{formattedLabel || String(status)}</span>
+          <span>{label || String(status)}</span>
         </span>
       );
   }

@@ -152,18 +152,18 @@ export function PushNotificationManager({ showCardOnly = false }: { showCardOnly
     <>
       {/* Secondary Compact Prompt Banner */}
       {showCardOnly && !isSubscribed && (
-        <div className="bg-sky-50/50 border border-sky-200/60 text-slate-800 rounded-xl p-2.5 shadow-2xs mb-2.5 dir-rtl">
-          <div className="flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-sky-100/80 text-sky-700 flex items-center justify-center shrink-0">
-                <Bell className="w-3.5 h-3.5" />
+        <div className="bg-sky-50/70 border border-sky-200/80 text-slate-800 rounded-2xl p-3 shadow-xs mb-3 dir-rtl">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                <Bell className="w-4 h-4" />
               </div>
-              <div className="space-y-0">
-                <h4 className="font-bold text-xs text-slate-900 leading-tight">🔔 فعّل إشعارات بصمة</h4>
-                <p className="text-[10px] text-slate-500 leading-tight">
+              <div>
+                <h4 className="font-bold text-xs text-slate-900">فعّل إشعارات بصمة 🔔</h4>
+                <p className="text-[11px] text-slate-600">
                   {permission === 'denied'
-                    ? 'غير مفعّلة من إعدادات الجهاز'
-                    : 'استلم تنبيهات الحضور والطلبات'}
+                    ? 'الإشعارات غير مفعّلة من إعدادات الجهاز'
+                    : 'استلم تنبيهات الحضور والطلبات فورياً'}
                 </p>
               </div>
             </div>
@@ -172,9 +172,9 @@ export function PushNotificationManager({ showCardOnly = false }: { showCardOnly
               <button
                 onClick={handleSubscribe}
                 disabled={loading}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition-all shrink-0 shadow-2xs disabled:opacity-50"
+                className="bg-sky-600 hover:bg-sky-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition-all shrink-0 shadow-xs disabled:opacity-50"
               >
-                {loading ? 'جاري...' : 'تفعيل'}
+                {loading ? 'جاري التفعيل...' : 'تفعيل'}
               </button>
             )}
           </div>

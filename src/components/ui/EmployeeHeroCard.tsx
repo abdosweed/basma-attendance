@@ -19,6 +19,8 @@ interface EmployeeHeroCardProps {
   onRequestManagerVerification?: () => void;
 }
 
+import { formatWesternTime } from '@/lib/number-formatter';
+
 export const EmployeeHeroCard: React.FC<EmployeeHeroCardProps> = ({
   locationStatus,
   deviceStatus,
@@ -38,15 +40,7 @@ export const EmployeeHeroCard: React.FC<EmployeeHeroCardProps> = ({
 
   useEffect(() => {
     const updateClock = () => {
-      const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString('ar-SA', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true,
-        })
-      );
+      setCurrentTime(formatWesternTime(new Date(), true));
     };
     updateClock();
     const interval = setInterval(updateClock, 1000);

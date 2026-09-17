@@ -16,7 +16,6 @@ import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
 import { setupOfflineAutoSync, saveOfflineAttendance } from '@/lib/offline-sync';
 import { validateClientLocationQuality, detectImpossibleSpeed } from '@/lib/geo-security';
 import { triggerHaptic } from '@/lib/haptics';
-import { formatWesternDate, formatWesternTime, toWesternNumerals } from '@/lib/number-formatter';
 import {
   Clock,
   Coffee,
@@ -421,18 +420,18 @@ export default function EmployeePortalPage() {
 
       <main className="flex-1 max-w-lg w-full mx-auto p-3.5 sm:p-5 space-y-3.5 pb-24 md:pb-6" dir="rtl">
         {/* Compact Employee Header Card */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <span className="text-[11px] text-slate-500 font-medium block">مرحباً بعودتك 👋</span>
-              <h1 className="text-base font-bold text-slate-900 tracking-tight leading-tight">{employeeName}</h1>
+              <span className="text-[11px] text-slate-500 font-medium">مرحباً بعودتك 👋</span>
+              <h1 className="text-base font-bold text-slate-900 tracking-tight">{employeeName}</h1>
               <p className="text-xs text-sky-700 font-semibold">{jobTitle} • {branchName}</p>
             </div>
 
             <div className="flex flex-col items-end gap-1.5 shrink-0">
-              <div className="bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200/60 text-[10px] text-slate-600 font-medium flex items-center gap-1 shrink-0">
+              <div className="bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200/80 text-[10px] text-slate-600 font-medium flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-sky-700" />
-                {formatWesternDate(new Date())}
+                {new Date().toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short' })}
               </div>
               <StatusBadge status={statusCode} label={arabicStatusLabel} size="sm" />
             </div>
@@ -489,12 +488,12 @@ export default function EmployeePortalPage() {
 
         {/* Hero Attendance Action Card */}
         <AttendanceActionCard
-          checkInAt={todayRecord?.checkInAt ? formatWesternTime(todayRecord.checkInAt) : null}
-          checkOutAt={todayRecord?.checkOutAt ? formatWesternTime(todayRecord.checkOutAt) : null}
+          checkInAt={todayRecord?.checkInAt ? new Date(todayRecord.checkInAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : null}
+          checkOutAt={todayRecord?.checkOutAt ? new Date(todayRecord.checkOutAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : null}
           activeBreak={todayData?.activeBreak}
           shiftName={todayData?.shift?.name || 'الوردية العادية'}
-          scheduledStart={todayData?.shift?.startTime ? toWesternNumerals(todayData.shift.startTime) : '08:00'}
-          scheduledEnd={todayData?.shift?.endTime ? toWesternNumerals(todayData.shift.endTime) : '16:00'}
+          scheduledStart={todayData?.shift?.startTime || '08:00'}
+          scheduledEnd={todayData?.shift?.endTime || '16:00'}
           branchName={branchName}
           locationStatusMessage={geoStatus.message}
           locationStatusType={geoStatus.type}
@@ -512,7 +511,7 @@ export default function EmployeePortalPage() {
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={() => setShowPermissionModal(true)}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-2xs active:scale-[0.99]"
+              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
             >
               <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200/60 flex items-center justify-center font-bold shrink-0">
                 <Coffee className="w-4 h-4" />
@@ -525,7 +524,7 @@ export default function EmployeePortalPage() {
 
             <button
               onClick={() => setShowLeaveModal(true)}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-2xs active:scale-[0.99]"
+              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
             >
               <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 border border-sky-200/60 flex items-center justify-center font-bold shrink-0">
                 <Calendar className="w-4 h-4" />
@@ -538,7 +537,7 @@ export default function EmployeePortalPage() {
 
             <button
               onClick={() => router.push('/admin/reports/today')}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-2xs active:scale-[0.99]"
+              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
             >
               <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center font-bold shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
@@ -551,7 +550,7 @@ export default function EmployeePortalPage() {
 
             <button
               onClick={() => setShowCorrectionModal(true)}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-2xs active:scale-[0.99]"
+              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
             >
               <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center font-bold shrink-0">
                 <Clock className="w-4 h-4" />
@@ -565,11 +564,11 @@ export default function EmployeePortalPage() {
         </div>
 
         {/* Weekly Mini-Tracker (تتبع الالتزام الأسبوعي) */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-800">
             <span>📅 التزام الأيام الـ 5 الأخيرة</span>
-            <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-              ملخص الالتزام
+            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              التزام ممتاز
             </span>
           </div>
 
@@ -740,7 +739,7 @@ export default function EmployeePortalPage() {
           title: n.title,
           message: n.message,
           type: n.type || 'INFO',
-          createdAt: n.createdAt ? formatWesternTime(n.createdAt) : 'الآن',
+          createdAt: n.createdAt ? new Date(n.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 'الآن',
           isRead: Boolean(n.isRead || n.readAt),
         }))}
         onMarkRead={async (id) => {
