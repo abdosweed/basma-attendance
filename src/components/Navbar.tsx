@@ -19,39 +19,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
   const [items, setItems] = useState<any[]>(notifications);
   const [showDropdown, setShowDropdown] = useState(false);
   const [toastNotif, setToastNotif] = useState<any | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('theme') as 'dark' | 'light') || (localStorage.getItem('basma_theme') as 'dark' | 'light') || 'dark';
-    setTheme(savedTheme);
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light-mode');
-      document.body.classList.remove('light-mode');
-    } else {
+    if (typeof window !== 'undefined') {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.remove('light-mode');
       document.body.classList.remove('light-mode');
     }
   }, []);
-
-  const toggleTheme = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
-    localStorage.setItem('basma_theme', nextTheme);
-    if (nextTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light-mode');
-      document.body.classList.remove('light-mode');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.remove('light-mode');
-      document.body.classList.remove('light-mode');
-    }
-  };
 
   useEffect(() => {
     setItems(notifications);
@@ -389,20 +364,12 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
             </span>
           </div>
 
-          {/* أزرار الثيم والخروج تظهر على الشاشات الكبيرة فقط (تنقل للحساب الشخصي في الجوال) */}
+          {/* زر الخروج يظهر على الشاشات الكبيرة */}
           <div className="hidden md:flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={toggleTheme}
-              title={theme === 'dark' ? 'التحويل للوضع الفاتح ☀️' : 'التحويل للوضع الداكن 🌙'}
-              className="p-1.5 rounded-xl transition-all border border-slate-200 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-800/80 text-amber-500 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 shrink-0"
-            >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-sky-500" />}
-            </button>
-
             <button
               onClick={handleLogout}
               title="تسجيل الخروج"
-              className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all shrink-0"
+              className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shrink-0"
             >
               <LogOut className="w-4 h-4" />
             </button>

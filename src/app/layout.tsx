@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0f172a',
+  themeColor: '#f8fafc',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -44,12 +44,9 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var saved = localStorage.getItem('theme') || localStorage.getItem('basma_theme') || 'dark';
-                  if (saved === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
+                  document.documentElement.classList.remove('dark');
+                  localStorage.removeItem('theme');
+                  localStorage.removeItem('basma_theme');
                 } catch(e) {}
               })();
             `,
