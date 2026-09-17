@@ -20,12 +20,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('basma_theme') as 'dark' | 'light') || 'dark';
+    const savedTheme = (localStorage.getItem('theme') as 'dark' | 'light') || (localStorage.getItem('basma_theme') as 'dark' | 'light') || 'dark';
     setTheme(savedTheme);
-    if (savedTheme === 'light') {
-      document.documentElement.classList.add('light-mode');
-      document.body.classList.add('light-mode');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light-mode');
+      document.body.classList.remove('light-mode');
     } else {
+      document.documentElement.classList.remove('dark');
       document.documentElement.classList.remove('light-mode');
       document.body.classList.remove('light-mode');
     }
@@ -36,11 +38,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
     e.stopPropagation();
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
     localStorage.setItem('basma_theme', nextTheme);
-    if (nextTheme === 'light') {
-      document.documentElement.classList.add('light-mode');
-      document.body.classList.add('light-mode');
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light-mode');
+      document.body.classList.remove('light-mode');
     } else {
+      document.documentElement.classList.remove('dark');
       document.documentElement.classList.remove('light-mode');
       document.body.classList.remove('light-mode');
     }
