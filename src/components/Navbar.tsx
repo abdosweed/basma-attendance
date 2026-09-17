@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck, Sun, Moon, Activity } from 'lucide-react';
+import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck, Sun, Moon, Activity, CheckSquare } from 'lucide-react';
 
 interface NavbarProps {
   user?: any;
@@ -259,6 +259,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
         <div className="flex items-center gap-1.5 sm:gap-3 py-1">
           {isAdminOrManager && (
             <div className="hidden md:flex items-center gap-1 shrink-0">
+              <a
+                href="/admin/approvals"
+                className="px-2.5 py-1.5 bg-rose-50 dark:bg-rose-950/80 hover:bg-rose-100 dark:hover:bg-rose-900/90 text-rose-700 dark:text-rose-400 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-rose-200 dark:border-rose-800/60 flex items-center gap-1.5"
+              >
+                <CheckSquare className="w-3.5 h-3.5" />
+                <span>الاعتمادات</span>
+              </a>
+
               <a
                 href="/admin/shifts"
                 className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-slate-200 dark:border-slate-700"
