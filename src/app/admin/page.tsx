@@ -33,12 +33,14 @@ import {
   Upload,
   Send,
   Smartphone,
+  CheckSquare,
+  Activity,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'stats' | 'employees' | 'live' | 'map' | 'leaves' | 'suspicious' | 'reports' | 'settings'>('stats');
+  const [activeTab, setActiveTab] = useState<'live_activity' | 'team' | 'structure' | 'reports'>('live_activity');
   const [dashData, setDashData] = useState<any>(null);
   const [liveData, setLiveData] = useState<any[]>([]);
   const [employeesList, setEmployeesList] = useState<any[]>([]);
@@ -260,7 +262,7 @@ export default function AdminDashboardPage() {
 
       <main className="flex-1 max-w-[98%] w-full mx-auto p-3 sm:p-6 space-y-6">
         {/* الترويسة الرئيسية للوحة الإدارة */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-5 rounded-3xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900/90 via-slate-900/80 to-slate-950/90 border border-slate-800/80 p-5 rounded-3xl shadow-xl backdrop-blur-md">
           <div>
             <h1 className="text-xl font-black text-white flex items-center gap-2">
               لوحة التحكم الإدارية
@@ -274,69 +276,49 @@ export default function AdminDashboardPage() {
                 {envMode === 'LIVE' ? '🟢 وضع الإنتاج الحقيقي' : '🧪 بيئة التجربة والاختبار'}
               </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">متابعة الحضور والانصراف وإدارة الموظفين والفروع وتحديد بيئة المنظومة</p>
+            <p className="text-xs text-slate-400 mt-1">متابعة الحضور والانصراف، وإدارة فريق العمل، والفروع، والمطابقة المركزية</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {['SUPER_ADMIN', 'ADMIN'].includes(user?.role) && (
-              <div className="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-2xl border border-slate-800">
-                <button
-                  onClick={handleToggleEnvMode}
-                  title="التبديل بين بيئة الإنتاج والوضع التجريبي"
-                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${
-                    envMode === 'LIVE'
-                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md'
-                      : 'bg-amber-600 hover:bg-amber-500 text-white shadow-md'
-                  }`}
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>{envMode === 'LIVE' ? 'بيئة حقيقية 🟢' : 'بيئة تجريبية 🧪'}</span>
-                </button>
-
-                <button
-                  onClick={handleResetDemoData}
-                  disabled={resetLoading}
-                  title="تصفير وسحق جميع البصمات وسجلات الاختبار"
-                  className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{resetLoading ? 'تصفير...' : 'تصفير الاختبار'}</span>
-                </button>
-              </div>
-            )}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* زر الاعتمادات الموحد مع شارة المعاملات المعلقة */}
+            <button
+              onClick={() => router.push('/admin/approvals')}
+              className="px-4 py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-rose-600/25 active:scale-95 border border-rose-400/30"
+              title="مركز الاعتماد السريع لجميع الطلبات والمعاملات"
+            >
+              <CheckSquare className="w-4 h-4 text-white" />
+              <span>الاعتمادات</span>
+              {((dashData?.summary?.pendingDevicesCount || 0) + (leavesList.filter((l) => l.status === 'PENDING').length || 0)) > 0 && (
+                <span className="bg-white text-rose-600 px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-pulse">
+                  {(dashData?.summary?.pendingDevicesCount || 0) + (leavesList.filter((l) => l.status === 'PENDING').length || 0)}
+                </span>
+              )}
+            </button>
 
             {['SUPER_ADMIN', 'ADMIN', 'HR'].includes(user?.role) && (
               <>
                 <button
                   onClick={() => setShowAddEmployeeModal(true)}
-                  className="px-3.5 py-2 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-lg shadow-sky-600/20 active:scale-95"
+                  className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-bold rounded-2xl flex items-center gap-1.5 transition-all shadow-lg shadow-sky-600/20 active:scale-95 border border-sky-400/30"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>+ إضافة موظف</span>
                 </button>
 
                 <button
-                  onClick={() => setShowImportEmployeesModal(true)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all border border-slate-700"
+                  onClick={handleExportCSV}
+                  className="px-3.5 py-2.5 bg-slate-800/90 hover:bg-slate-700/90 text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-1.5 transition-all border border-slate-700/80 active:scale-95"
+                  title="تصدير سجلات وكشوف الحضور"
                 >
-                  <Upload className="w-4 h-4" />
-                  <span className="hidden sm:inline">استيراد CSV</span>
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">تصدير السجلات</span>
                 </button>
               </>
             )}
 
             <button
-              onClick={() => router.push('/admin/devices?status=PENDING')}
-              className="px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-md active:scale-95"
-              title="عرض وخصم طلبات اعتماد الأجهزة المعلقة"
-            >
-              <Smartphone className="w-4 h-4 text-amber-400" />
-              <span>طلبات الأجهزة ({dashData?.summary?.pendingDevicesCount || 0})</span>
-            </button>
-
-            <button
               onClick={fetchAdminData}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl flex items-center justify-center transition-all border border-slate-700 text-sky-400"
+              className="p-2.5 bg-slate-800/90 hover:bg-slate-700/90 text-xs font-bold rounded-2xl flex items-center justify-center transition-all border border-slate-700/80 text-sky-400 active:scale-95"
               title="تحديث البيانات"
             >
               <RefreshCw className="w-4 h-4" />
@@ -344,15 +326,13 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* بطاقات الإحصائيات السريعة اليومية - أصبحت أزراراً تفاعلية للفلترة السريعة */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* بطاقات الإحصائيات السريعة اليومية */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <button
-            onClick={() => setActiveTab('employees')}
-            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
-              activeTab === 'employees' ? 'border-sky-500 ring-2 ring-sky-500/30' : 'border-slate-800 hover:border-slate-700'
-            }`}
+            onClick={() => setActiveTab('team')}
+            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/90 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+            <div className="flex items-center justify-between text-slate-400 text-xs mb-2 font-medium">
               <span>إجمالي الموظفين</span>
               <Users className="w-4 h-4 text-sky-400" />
             </div>
@@ -360,25 +340,21 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('live')}
-            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
-              activeTab === 'live' ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-emerald-500/20 hover:border-emerald-500/40'
-            }`}
+            onClick={() => setActiveTab('live_activity')}
+            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-emerald-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-emerald-400 text-xs mb-2">
-              <span>🟢 حاضر الان</span>
+            <div className="flex items-center justify-between text-emerald-400 text-xs mb-2 font-medium">
+              <span>🟢 حاضر الآن</span>
               <CheckCircle2 className="w-4 h-4" />
             </div>
             <span className="text-2xl font-black text-emerald-400">{summary.presentCount || 0}</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('live')}
-            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
-              activeTab === 'live' ? 'border-yellow-500 ring-2 ring-yellow-500/30' : 'border-yellow-500/20 hover:border-yellow-500/40'
-            }`}
+            onClick={() => setActiveTab('live_activity')}
+            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-yellow-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-yellow-400 text-xs mb-2">
+            <div className="flex items-center justify-between text-yellow-400 text-xs mb-2 font-medium">
               <span>🟡 متأخر</span>
               <Clock className="w-4 h-4" />
             </div>
@@ -386,12 +362,10 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('stats')}
-            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
-              activeTab === 'stats' ? 'border-red-500 ring-2 ring-red-500/30' : 'border-red-500/20 hover:border-red-500/40'
-            }`}
+            onClick={() => setActiveTab('live_activity')}
+            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-red-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-red-400 text-xs mb-2">
+            <div className="flex items-center justify-between text-red-400 text-xs mb-2 font-medium">
               <span>🔴 غائب</span>
               <XCircle className="w-4 h-4" />
             </div>
@@ -399,12 +373,10 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('live')}
-            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
-              activeTab === 'live' ? 'border-orange-500 ring-2 ring-orange-500/30' : 'border-orange-500/20 hover:border-orange-500/40'
-            }`}
+            onClick={() => setActiveTab('live_activity')}
+            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-orange-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-orange-400 text-xs mb-2">
+            <div className="flex items-center justify-between text-orange-400 text-xs mb-2 font-medium">
               <span>🟠 في استراحة</span>
               <Coffee className="w-4 h-4" />
             </div>
@@ -412,12 +384,10 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('suspicious')}
-            className={`text-right bg-slate-900/80 border p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ${
-              activeTab === 'suspicious' ? 'border-rose-500 ring-2 ring-rose-500/30' : 'border-rose-500/30 hover:border-rose-500/50'
-            }`}
+            onClick={() => setActiveTab('live_activity')}
+            className="text-right bg-slate-900/60 hover:bg-slate-900/90 border border-rose-500/40 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-lg backdrop-blur-sm"
           >
-            <div className="flex items-center justify-between text-rose-400 text-xs mb-2">
+            <div className="flex items-center justify-between text-rose-400 text-xs mb-2 font-medium">
               <span>⚠️ محاولات مشبوهة</span>
               <ShieldAlert className="w-4 h-4" />
             </div>
@@ -425,312 +395,270 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        {/* شريط التبويبات الرئيسي للوحة التحكم */}
-        <div className="flex items-center gap-2 border-b border-slate-800 overflow-x-auto pb-2 scrollbar-none">
+        {/* شريط التبويبات الأربعة الموحدة (Consolidated 4 Tabs Navigation) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-slate-800/80 pb-3">
           <button
-            onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeTab === 'stats'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            onClick={() => setActiveTab('live_activity')}
+            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+              activeTab === 'live_activity'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
+                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
             }`}
           >
-            📊 النشاط المباشر
+            <Activity className="w-4 h-4" />
+            <span>1. النشاط المباشر ⚡</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('employees')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeTab === 'employees'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            onClick={() => setActiveTab('team')}
+            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+              activeTab === 'team'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
+                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
             }`}
           >
-            👥 إدارة الموظفين ({employeesList.length})
+            <Users className="w-4 h-4" />
+            <span>2. فريق العمل 👥</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('leaves')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeTab === 'leaves'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            onClick={() => setActiveTab('structure')}
+            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+              activeTab === 'structure'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
+                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
             }`}
           >
-            📅 الإجازات والتصحيح ({leavesList.filter((l) => l.status === 'PENDING').length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab('live')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeTab === 'live'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
-          >
-            🟢 الحضور المباشر
-          </button>
-
-          <button
-            onClick={() => setActiveTab('map')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeTab === 'map'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
-          >
-            🗺️ الفروع والـ Geofence
-          </button>
-
-          <button
-            onClick={() => setActiveTab('suspicious')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border ${
-              activeTab === 'suspicious'
-                ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-600/25'
-                : 'bg-slate-900 text-rose-400 hover:text-white border-rose-500/30'
-            }`}
-          >
-            ⚠️ سجل المحاولات المشبوهة ({dashData?.summary?.suspiciousAttemptsCount || 0})
+            <Building className="w-4 h-4" />
+            <span>3. الهيكل والمواعيد 🏢</span>
           </button>
 
           <button
             onClick={() => setActiveTab('reports')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
+            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
               activeTab === 'reports'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-lg shadow-sky-600/20'
+                : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800/80 hover:bg-slate-800/60'
             }`}
           >
-            📑 التقارير الشهيرة
-          </button>
-
-          <button
-            onClick={() => router.push('/admin/shifts')}
-            className="px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-slate-900 text-amber-400 hover:text-amber-300 border border-amber-500/30 flex items-center gap-1.5"
-          >
-            ⏰ إدارة الورديات والمواعيد
-          </button>
-
-          <button
-            onClick={() => router.push('/admin/devices')}
-            className="px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all bg-slate-900 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5"
-          >
-            📱 الأجهزة المقترنة الموثوقة
-          </button>
-
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
-              activeTab === 'settings'
-                ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
-          >
-            ⚙️ إعدادات المنظومة
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>4. التقارير والمطابقة 📑</span>
           </button>
         </div>
 
-        {/* TABS CONTENT */}
-
-        {/* 1. النشاط اليومي */}
-        {activeTab === 'stats' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5">
-              <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-sky-400" />
-                <span>آخر عمليات الحضور والانصراف المسجلة</span>
-              </h3>
-
-              <div className="space-y-3">
-                {dashData?.recentEvents?.map((evt: any) => (
-                  <div
-                    key={evt.id}
-                    className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800/80 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
-                          evt.type === 'CHECK_IN'
-                            ? 'bg-emerald-500/20 text-emerald-400'
-                            : evt.type === 'CHECK_OUT'
-                            ? 'bg-rose-500/20 text-rose-400'
-                            : 'bg-orange-500/20 text-orange-400'
-                        }`}
-                      >
-                        {evt.type === 'CHECK_IN' ? 'حضر' : evt.type === 'CHECK_OUT' ? 'خرج' : 'استراحة'}
-                      </div>
-                      <div>
-                        <span className="font-bold text-white block">
-                          {evt.employee?.firstName} {evt.employee?.lastName}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          {evt.branch?.name || 'الفرع الرئيسي'} • المسافة:{' '}
-                          {evt.distanceFromBranch ? `${Math.round(evt.distanceFromBranch)}m` : '0m'}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-[11px] font-mono text-sky-400 font-bold">
-                      {new Date(evt.serverTimestamp).toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true,
-                      })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5">
-              <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                <Building className="w-4 h-4 text-emerald-400" />
-                <span>الفروع المصرحة ونطاقات الحضور الجغرافية</span>
-              </h3>
-
-              <div className="space-y-3">
-                {dashData?.branches?.map((b: any) => (
-                  <div
-                    key={b.id}
-                    className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 flex items-center justify-between text-xs"
-                  >
-                    <div>
-                      <h4 className="font-bold text-white">{b.name}</h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{b.address || 'العنوان غير محدد'}</p>
-                      <div className="text-[10px] text-sky-400 font-mono mt-1">
-                        Lat: {b.latitude} | Lng: {b.longitude}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold rounded-xl text-xs border border-emerald-500/30">
-                        نطاق: {b.geofenceRadius}m
-                      </span>
-                      <button
-                        onClick={() => setSelectedBranchForEdit(b)}
-                        className="p-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold flex items-center gap-1 text-xs"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                        <span>تعديل</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 2. سجل وسيناريوهات المحاولات المشبوهة High-Clarity Audit Log */}
-        {activeTab === 'suspicious' && (
-          <div className="bg-slate-900/90 border border-rose-500/30 rounded-3xl p-5 space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-rose-400" />
-                  <span>تقرير المحاولات المشبوهة وخروقات الموقع الجغرافي (Suspicious Audit Log)</span>
+        {/* 1. النشاط المباشر (live_activity) */}
+        {activeTab === 'live_activity' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-sm">
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-sky-400" />
+                    آخر عمليات الحضور والانصراف المسجلة
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">مباشر ⚡</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  رصد تفصيلي لجميع محاولات التبصيم من أجهزة غير معتمدة أو خارج النطاق الجغرافي المحدد للفروع.
-                </p>
+
+                <div className="space-y-3">
+                  {dashData?.recentEvents?.map((evt: any) => (
+                    <div
+                      key={evt.id}
+                      className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800/80 flex items-center justify-between text-xs hover:border-slate-700/80 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
+                            evt.type === 'CHECK_IN'
+                              ? 'bg-emerald-500/20 text-emerald-400'
+                              : evt.type === 'CHECK_OUT'
+                              ? 'bg-rose-500/20 text-rose-400'
+                              : 'bg-orange-500/20 text-orange-400'
+                          }`}
+                        >
+                          {evt.type === 'CHECK_IN' ? 'حضر' : evt.type === 'CHECK_OUT' ? 'خرج' : 'استراحة'}
+                        </div>
+                        <div>
+                          <span className="font-bold text-white block">
+                            {evt.employee?.firstName} {evt.employee?.lastName}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {evt.branch?.name || 'الفرع الرئيسي'} • المسافة:{' '}
+                            {evt.distanceFromBranch ? `${Math.round(evt.distanceFromBranch)}m` : '0m'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-mono text-sky-400 font-bold">
+                        {new Date(evt.serverTimestamp).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true,
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <span className="px-3 py-1 bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-rose-500/30">
-                إجمالي المحاولات المحظورة: {dashData?.suspiciousAttempts?.length || 0}
-              </span>
+
+              {/* جدولة الحضور اللحظي */}
+              <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>جدول الحضور والغياب اللحظي اليوم</span>
+                  </h3>
+                  <div className="relative w-48">
+                    <Search className="w-3.5 h-3.5 text-slate-500 absolute top-2.5 right-2.5" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="بحث سريع..."
+                      className="w-full pr-8 pl-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto max-h-80 overflow-y-auto">
+                  <table className="w-full text-right text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-800 text-slate-400 font-bold sticky top-0 bg-slate-950">
+                        <th className="p-2.5">الموظف</th>
+                        <th className="p-2.5">حضر</th>
+                        <th className="p-2.5">انصرف</th>
+                        <th className="p-2.5">الحالة</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {filteredLive.slice(0, 15).map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                          <td className="p-2.5 font-bold text-white">{item.name}</td>
+                          <td className="p-2.5 font-mono text-emerald-400">{item.checkInTime}</td>
+                          <td className="p-2.5 font-mono text-rose-400">{item.checkOutTime}</td>
+                          <td className="p-2.5">
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${item.statusBadge}`}>
+                              {item.statusLabel}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-right text-xs text-slate-300">
-                <thead className="bg-slate-950/80 text-slate-400 text-[11px] font-bold border-b border-slate-800">
-                  <tr>
-                    <th className="p-3">الموظف</th>
-                    <th className="p-3">السبب والتشخيص</th>
-                    <th className="p-3">مستوى الخطورة</th>
-                    <th className="p-3">ملاحظات دقة GPS</th>
-                    <th className="p-3">الإجراء المتخذ</th>
-                    <th className="p-3">التوقيت والتاريخ</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {dashData?.suspiciousAttempts?.length > 0 ? (
-                    dashData.suspiciousAttempts.map((item: any) => (
-                      <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="p-3 font-bold text-white">
-                          <div>
-                            <span>{item.employee ? `${item.employee.firstName} ${item.employee.lastName}` : 'غير معروف'}</span>
-                            <span className="block text-[10px] text-slate-400 font-mono">
-                              #{item.employee?.employeeNumber || item.employeeId || 'N/A'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-rose-300 font-medium">
-                          <div className="flex items-center gap-1.5">
-                            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
-                            <span>
-                              {item.reason === 'GPS_OUT_OF_BOUNDS' || item.reason?.includes('خارج')
-                                ? '📍 محاولة تبصيم من خارج النطاق الجغرافي المصرح'
-                                : item.reason === 'LOW_ACCURACY' || item.reason?.includes('دقة')
-                                ? '📡 دقة الـ GPS ضئيلة جداً أو غير موثوقة'
-                                : item.reason === 'UNAUTHORIZED_DEVICE' || item.reason?.includes('جهاز')
-                                ? '📱 استخدام هاتف غير معتمد بحساب الموظف'
-                                : item.reason}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                              item.riskLevel === 'HIGH'
-                                ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
-                                : item.riskLevel === 'MEDIUM'
-                                ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
-                            }`}
-                          >
-                            {item.riskLevel === 'HIGH' ? '⚠️ عالي الخطورة' : item.riskLevel === 'MEDIUM' ? '⚡ متوسط' : item.riskLevel}
-                          </span>
-                        </td>
-                        <td className="p-3 text-[11px] font-mono text-slate-400">
-                          {item.latitude && item.longitude ? (
+            {/* سجل المحاولات المشبوهة High-Clarity Audit Log */}
+            <div className="bg-slate-900/80 border border-rose-500/30 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <ShieldAlert className="w-5 h-5 text-rose-400" />
+                    <span>تقرير المحاولات المشبوهة وخروقات الموقع الجغرافي (Suspicious Audit Log)</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    رصد تفصيلي لجميع محاولات التبصيم من أجهزة غير معتمدة أو خارج النطاق الجغرافي المحدد للفروع.
+                  </p>
+                </div>
+                <span className="px-3 py-1 bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl border border-rose-500/30">
+                  المحاولات المحظورة: {dashData?.suspiciousAttempts?.length || 0}
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-right text-xs text-slate-300">
+                  <thead className="bg-slate-950/80 text-slate-400 text-[11px] font-bold border-b border-slate-800">
+                    <tr>
+                      <th className="p-3">الموظف</th>
+                      <th className="p-3">السبب والتشخيص</th>
+                      <th className="p-3">مستوى الخطورة</th>
+                      <th className="p-3">ملاحظات دقة GPS</th>
+                      <th className="p-3">الإجراء المتخذ</th>
+                      <th className="p-3">التوقيت والتاريخ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {dashData?.suspiciousAttempts?.length > 0 ? (
+                      dashData.suspiciousAttempts.map((item: any) => (
+                        <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                          <td className="p-3 font-bold text-white">
                             <div>
-                              <span className="text-sky-400">
-                                Lat: {Number(item.latitude).toFixed(4)} | Lng: {Number(item.longitude).toFixed(4)}
-                              </span>
-                              <span className="block text-[10px] text-slate-500">
-                                الدقة: {Math.round(item.accuracy || 0)}m
+                              <span>{item.employee ? `${item.employee.firstName} ${item.employee.lastName}` : 'غير معروف'}</span>
+                              <span className="block text-[10px] text-slate-400 font-mono">
+                                #{item.employee?.employeeNumber || item.employeeId || 'N/A'}
                               </span>
                             </div>
-                          ) : (
-                            <span className="text-slate-500">غ/م</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          <span className="px-2.5 py-1 bg-red-500/20 text-red-400 font-bold rounded-xl text-[10px] border border-red-500/30">
-                            🛡️ حظر التبصيم (BLOCKED)
-                          </span>
-                        </td>
-                        <td className="p-3 font-mono text-[11px] text-slate-400">
-                          {new Date(item.createdAt || item.timestamp).toLocaleString('ar-EG', {
-                            dateStyle: 'short',
-                            timeStyle: 'short',
-                          })}
+                          </td>
+                          <td className="p-3 text-rose-300 font-medium">
+                            <div className="flex items-center gap-1.5">
+                              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                              <span>
+                                {item.reason === 'GPS_OUT_OF_BOUNDS' || item.reason?.includes('خارج')
+                                  ? '📍 محاولة تبصيم من خارج النطاق الجغرافي المصرح'
+                                  : item.reason === 'LOW_ACCURACY' || item.reason?.includes('دقة')
+                                  ? '📡 دقة الـ GPS ضئيلة جداً أو غير موثوقة'
+                                  : item.reason === 'UNAUTHORIZED_DEVICE' || item.reason?.includes('جهاز')
+                                  ? '📱 استخدام هاتف غير معتمد بحساب الموظف'
+                                  : item.reason}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                item.riskLevel === 'HIGH'
+                                  ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                                  : item.riskLevel === 'MEDIUM'
+                                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                                  : 'bg-slate-800 text-slate-400 border-slate-700'
+                              }`}
+                            >
+                              {item.riskLevel === 'HIGH' ? '⚠️ عالي الخطورة' : item.riskLevel === 'MEDIUM' ? '⚡ متوسط' : item.riskLevel}
+                            </span>
+                          </td>
+                          <td className="p-3 text-[11px] font-mono text-slate-400">
+                            {item.latitude && item.longitude ? (
+                              <div>
+                                <span className="text-sky-400">
+                                  Lat: {Number(item.latitude).toFixed(4)} | Lng: {Number(item.longitude).toFixed(4)}
+                                </span>
+                                <span className="block text-[10px] text-slate-500">
+                                  الدقة: {Math.round(item.accuracy || 0)}m
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-500">غ/م</span>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2.5 py-1 bg-red-500/20 text-red-400 font-bold rounded-xl text-[10px] border border-red-500/30">
+                              🛡️ حظر التبصيم (BLOCKED)
+                            </span>
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-slate-400">
+                            {new Date(item.createdAt || item.timestamp).toLocaleString('ar-EG', {
+                              dateStyle: 'short',
+                              timeStyle: 'short',
+                            })}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
+                          🎉 ممتاز! لا توجد أي محاولات مشبوهة أو خروقات موقع سجلت مؤخراً.
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-500 text-xs">
-                        🎉 ممتاز! لا توجد أي محاولات مشبوهة أو خروقات موقع سجلت مؤخراً.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
 
-        {/* 2. إدارة الموظفين */}
-        {activeTab === 'employees' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4">
+        {/* 2. فريق العمل (team) */}
+        {activeTab === 'team' && (
+          <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-500 absolute top-3 right-3" />
@@ -743,25 +671,35 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              {['SUPER_ADMIN', 'ADMIN', 'HR'].includes(user?.role) && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowAddEmployeeModal(true)}
-                    className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    <span>+ إضافة موظف جديد</span>
-                  </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => router.push('/admin/devices')}
+                  className="px-3.5 py-2.5 bg-slate-800/80 hover:bg-slate-700/80 text-emerald-400 text-xs font-bold rounded-2xl flex items-center justify-center gap-1.5 border border-slate-700/80"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  <span>الأجهزة المعتمدة</span>
+                </button>
 
-                  <button
-                    onClick={() => setShowImportEmployeesModal(true)}
-                    className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 border border-slate-700"
-                  >
-                    <Upload className="w-4 h-4" />
-                    <span>استيراد CSV</span>
-                  </button>
-                </div>
-              )}
+                {['SUPER_ADMIN', 'ADMIN', 'HR'].includes(user?.role) && (
+                  <>
+                    <button
+                      onClick={() => setShowAddEmployeeModal(true)}
+                      className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span>+ إضافة موظف</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowImportEmployeesModal(true)}
+                      className="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 border border-slate-700"
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span>استيراد CSV</span>
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -835,51 +773,42 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* 3. الإجازات والتصحيح */}
-        {activeTab === 'leaves' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-6">
-            <div>
-              <h3 className="text-base font-bold text-white mb-3">طلبات الإجازات والتصحيح المعلقة للموافقة</h3>
-              
-              <div className="space-y-3">
-                {leavesList.map((leave) => (
-                  <div key={leave.id} className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white">{leave.employee?.firstName} {leave.employee?.lastName}</span>
-                        <span className="text-[10px] bg-sky-500/20 text-sky-400 font-bold px-2 py-0.5 rounded-full">{leave.leaveType?.name}</span>
-                        <span className="text-slate-400 font-mono text-[10px]">({leave.totalDays} أيام)</span>
-                      </div>
-                      <p className="text-slate-300 mt-1">{leave.reason}</p>
-                      <div className="text-[10px] text-slate-500 mt-1 font-mono">
-                        من: {new Date(leave.startDate).toISOString().slice(0, 10)} ➔ إلى: {new Date(leave.endDate).toISOString().slice(0, 10)}
-                      </div>
-                    </div>
+        {/* 3. الهيكل والمواعيد (structure) */}
+        {activeTab === 'structure' && (
+          <div className="space-y-6">
+            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-white">إدارة الورديات ومواعيد العمل</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">تحديد مواعيد الورديات الثابتة والمرنة ورسوم الحضور</p>
+                </div>
+                <button
+                  onClick={() => router.push('/admin/shifts')}
+                  className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-amber-600/20"
+                >
+                  <Clock className="w-4 h-4" />
+                  <span>فتح إدارة الورديات والمواعيد ➔</span>
+                </button>
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-center">
-                      {leave.status === 'PENDING' ? (
-                        <>
-                          <button
-                            onClick={() => handleLeaveAction(leave.id, 'APPROVED')}
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-lg shadow-emerald-600/20"
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span>موافقة</span>
-                          </button>
-                          <button
-                            onClick={() => handleLeaveAction(leave.id, 'REJECTED')}
-                            className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 font-bold rounded-xl text-xs flex items-center gap-1 border border-red-500/30"
-                          >
-                            <XCircle className="w-4 h-4" />
-                            <span>رفض</span>
-                          </button>
-                        </>
-                      ) : (
-                        <span className={`px-3 py-1 font-bold rounded-xl text-[11px] ${leave.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                          {leave.status === 'APPROVED' ? 'تمت الموافقة' : 'مرفوض'}
-                        </span>
-                      )}
+            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
+              <h3 className="text-base font-bold text-white">إدارة وتعديل موقع الفرع ونطاق الحضور الجغرافي (Geofence)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {dashData?.branches?.map((branch: any) => (
+                  <div key={branch.id} className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div>
+                      <h4 className="text-sm font-bold text-white">{branch.name}</h4>
+                      <p className="text-xs text-slate-400">{branch.address || 'العنوان غير محدد'}</p>
+                      <div className="text-[10px] text-sky-400 font-mono mt-1">Lat: {branch.latitude} | Lng: {branch.longitude}</div>
                     </div>
+                    <button
+                      onClick={() => setSelectedBranchForEdit(branch)}
+                      className="w-full py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      <span>تعديل موقع الفرع ونطاق Geofence على الخريطة</span>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -887,134 +816,65 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* 4. الحضور المباشر */}
-        {activeTab === 'live' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-500 absolute top-3 right-3" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ابحث باسم الموظف أو الرقم الوظيفي..."
-                  className="w-full pr-10 pl-4 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-500 outline-none focus:border-sky-500"
-                />
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-right text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-bold bg-slate-950/50">
-                    <th className="p-3">رقم الموظف</th>
-                    <th className="p-3">الاسم والوظيفة</th>
-                    <th className="p-3">القسم والفرع</th>
-                    <th className="p-3">وقت الحضور</th>
-                    <th className="p-3">وقت الانصراف</th>
-                    <th className="p-3">ساعات العمل</th>
-                    <th className="p-3">الحالة الحالية</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {filteredLive.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3 font-mono font-bold text-sky-400">{item.employeeNumber}</td>
-                      <td className="p-3 font-bold text-white">{item.name}</td>
-                      <td className="p-3 text-slate-400">{item.department} - {item.branch}</td>
-                      <td className="p-3 font-mono text-emerald-400">{item.checkInTime}</td>
-                      <td className="p-3 font-mono text-rose-400">{item.checkOutTime}</td>
-                      <td className="p-3 font-bold text-slate-200">{item.workedHours}</td>
-                      <td className="p-3">
-                        <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold ${item.statusBadge}`}>
-                          {item.statusLabel}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* 5. الفروع والـ Geofence */}
-        {activeTab === 'map' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4">
-            <h3 className="text-base font-bold text-white">إدارة وتعديل موقع الفرع ونطاق الحضور الجغرافي</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {dashData?.branches?.map((branch: any) => (
-                <div key={branch.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
-                  <div>
-                    <h4 className="text-sm font-bold text-white">{branch.name}</h4>
-                    <p className="text-xs text-slate-400">{branch.address}</p>
-                    <div className="text-[10px] text-sky-400 font-mono mt-1">Lat: {branch.latitude} | Lng: {branch.longitude}</div>
-                  </div>
-                  <button
-                    onClick={() => setSelectedBranchForEdit(branch)}
-                    className="w-full py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    <span>تعديل موقع الفرع ونطاق Geofence على الخريطة</span>
+        {/* 4. التقارير والمطابقة (reports) */}
+        {activeTab === 'reports' && (
+          <div className="space-y-6">
+            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 space-y-5 shadow-xl backdrop-blur-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-base font-bold text-white">كشف الحضور والغياب الشهري للموظفين</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">مطابقة الساعات الفعلية والإضافية والتأخيرات لكل موظف</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="month"
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                  />
+                  <button onClick={handleExportCSV} className="px-3.5 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+                    <Download className="w-4 h-4" />
+                    <span>تصدير Excel / CSV</span>
                   </button>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
 
-        {/* 6. التقارير الشهيرة */}
-        {activeTab === 'reports' && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h3 className="text-base font-bold text-white">كشف الحضور والغياب الشهري للموظفين</h3>
-              <div className="flex items-center gap-2">
-                <input
-                  type="month"
-                  value={monthFilter}
-                  onChange={(e) => setMonthFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none"
-                />
-                <button onClick={handleExportCSV} className="px-3.5 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  <span>تصدير Excel / CSV</span>
-                </button>
+              <div className="overflow-x-auto">
+                <table className="w-full text-right text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 font-bold bg-slate-950/60">
+                      <th className="p-3">رقم الموظف</th>
+                      <th className="p-3">اسم الموظف</th>
+                      <th className="p-3 text-center">أيام الحضور</th>
+                      <th className="p-3 text-center">أيام الغياب</th>
+                      <th className="p-3 text-center">التأخير</th>
+                      <th className="p-3 text-center">ساعات العمل</th>
+                      <th className="p-3 text-center">الإضافي</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {reportData?.reportRows?.map((row: any) => (
+                      <tr key={row.id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="p-3 font-mono font-bold text-sky-400">{row.employeeNumber}</td>
+                        <td className="p-3 font-bold text-white">{row.name}</td>
+                        <td className="p-3 text-center font-bold text-emerald-400">{row.attendanceDays}</td>
+                        <td className="p-3 text-center font-bold text-rose-400">{row.absenceDays}</td>
+                        <td className="p-3 text-center font-mono text-yellow-400">{row.lateStr}</td>
+                        <td className="p-3 text-center font-bold text-slate-200">{row.workedHoursStr}</td>
+                        <td className="p-3 text-center font-mono text-sky-400">{row.overtimeStr}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-right text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-bold bg-slate-950/60">
-                    <th className="p-3">رقم الموظف</th>
-                    <th className="p-3">اسم الموظف</th>
-                    <th className="p-3 text-center">أيام الحضور</th>
-                    <th className="p-3 text-center">أيام الغياب</th>
-                    <th className="p-3 text-center">التأخير</th>
-                    <th className="p-3 text-center">ساعات العمل</th>
-                    <th className="p-3 text-center">الإضافي</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {reportData?.reportRows?.map((row: any) => (
-                    <tr key={row.id}>
-                      <td className="p-3 font-mono font-bold text-sky-400">{row.employeeNumber}</td>
-                      <td className="p-3 font-bold text-white">{row.name}</td>
-                      <td className="p-3 text-center font-bold text-emerald-400">{row.attendanceDays}</td>
-                      <td className="p-3 text-center font-bold text-rose-400">{row.absenceDays}</td>
-                      <td className="p-3 text-center font-mono text-yellow-400">{row.lateStr}</td>
-                      <td className="p-3 text-center font-bold text-slate-200">{row.workedHoursStr}</td>
-                      <td className="p-3 text-center font-mono text-sky-400">{row.overtimeStr}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {/* إعدادات المنظومة والمطابقة الحسابية */}
+            <div className="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-sm">
+              <SystemSettingsTab />
             </div>
           </div>
         )}
-
-        {/* 7. إعدادات المنظومة */}
-        {activeTab === 'settings' && <SystemSettingsTab />}
       </main>
 
       {/* المودالات الفاعلة */}

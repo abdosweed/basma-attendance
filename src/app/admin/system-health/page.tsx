@@ -32,6 +32,9 @@ export default function SystemHealthPage() {
   const [lastRefreshed, setLastRefreshed] = useState<string>('');
   const [isAutoRefresh, setIsAutoRefresh] = useState<boolean>(true);
 
+  const [envMode, setEnvMode] = useState<'DEMO' | 'LIVE'>('DEMO');
+  const [resetLoading, setResetLoading] = useState(false);
+
   const fetchUserAndHealth = async () => {
     setLoading(true);
     setErrorMsg(null);
@@ -57,10 +60,59 @@ export default function SystemHealthPage() {
       const data = await healthRes.json();
       setReport(data);
       setLastRefreshed(new Date().toLocaleTimeString('ar-SA'));
+
+      const envRes = await fetch('/api/admin/environment-switch');
+      if (envRes.ok) {
+        const envData = await envRes.json();
+        if (envData.environmentMode) setEnvMode(envData.environmentMode);
+      }
     } catch (err) {
       setErrorMsg('حدث خطأ في الاتصال بالخادم');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleEnvMode = async () => {
+    const nextMode = envMode === 'DEMO' ? 'LIVE' : 'DEMO';
+    const label = nextMode === 'LIVE' ? 'التحويل للوضع الحقيقي والعمل الفعلي' : 'التحويل لوضع التجربة والاختبار';
+    if (!window.confirm(`هل أنت متأكد من ${label}؟`)) return;
+
+    try {
+      const res = await fetch('/api/admin/environment-switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: nextMode }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEnvMode(data.mode);
+        fetchUserAndHealth();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleResetDemoData = async () => {
+    if (!window.confirm('⚠️ تحذير مهم: هل أنت متأكد من تصفير وإلغاء جميع سجلات البصمات والمحاولات التجريبية بالكامل لتنقية النظام للعمل الفعلي؟')) return;
+
+    setResetLoading(true);
+    try {
+      const res = await fetch('/api/admin/environment-switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'RESET_DEMO' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message);
+        fetchUserAndHealth();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -160,7 +212,32 @@ export default function SystemHealthPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {['SUPER_ADMIN', 'ADMIN'].includes(user?.role) && (
+              <div className="flex items-center gap-1.5 p-1 bg-slate-900 rounded-2xl border border-slate-800">
+                <button
+                  onClick={handleToggleEnvMode}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+                    envMode === 'LIVE'
+                      ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                      : 'bg-amber-600 hover:bg-amber-500 text-white'
+                  }`}
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>{envMode === 'LIVE' ? 'وضع حقيقي 🟢' : 'بيئة تجريبية 🧪'}</span>
+                </button>
+
+                <button
+                  onClick={handleResetDemoData}
+                  disabled={resetLoading}
+                  className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{resetLoading ? 'تصفير...' : 'تصفير الاختبار'}</span>
+                </button>
+              </div>
+            )}
+
             <button
               onClick={() => fetchUserAndHealth()}
               disabled={loading}
