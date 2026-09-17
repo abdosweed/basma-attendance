@@ -187,25 +187,25 @@ export default function SystemHealthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col font-sans">
       <Navbar user={user} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Header Title Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
           <div>
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
                 <Activity className="w-6 h-6 animate-pulse" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                   صحة المنظومة التشغيلية
-                  <span className="text-xs bg-slate-800 text-sky-400 px-2 py-0.5 rounded-full font-mono border border-slate-700">
+                  <span className="text-xs bg-slate-100 dark:bg-slate-800 text-sky-700 dark:text-sky-400 px-2 py-0.5 rounded-full font-mono border border-slate-200 dark:border-slate-700">
                     v1.7.0
                   </span>
                 </h1>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   لوحة المراقبة التشخيصية والاعتمادية المركزية (System Health & Operations Dashboard)
                 </p>
               </div>

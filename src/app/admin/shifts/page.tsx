@@ -244,37 +244,37 @@ export default function AdminShiftsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-sky-400 animate-spin" />
-          <p className="text-xs text-slate-400">جاري تحميل واجهة مواعيد الدوام والورديات الحديثة 2026...</p>
+          <RefreshCw className="w-8 h-8 text-sky-500 animate-spin" />
+          <p className="text-xs text-slate-500 dark:text-slate-400">جاري تحميل واجهة مواعيد الدوام والورديات الحديثة 2026...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col">
       <Navbar />
 
       <main className="flex-1 max-w-[98%] w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* الترويسة العليا */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-5 rounded-3xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 p-5 rounded-3xl shadow-sm dark:shadow-xl">
           <div className="flex items-center gap-3">
             <Link
               href="/admin"
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-2xl border border-slate-700 transition-all active:scale-95 flex items-center justify-center shrink-0"
+              className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sky-600 dark:text-sky-400 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all active:scale-95 flex items-center justify-center shrink-0"
               title="العودة للوحة الإدارة الرئيسية"
             >
               <ArrowRight className="w-5 h-5" />
             </Link>
 
             <div>
-              <h1 className="text-xl font-black text-white flex items-center gap-2">
-                <Clock className="w-6 h-6 text-sky-400" />
+              <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Clock className="w-6 h-6 text-sky-600 dark:text-sky-400" />
                 <span>إدارة الورديات ومواعيد الدوام الذكية (2026 Shift Engine)</span>
               </h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 تعريف أنواع الورديات، إعدادات تناوب يوم الجمعة، اختيار أيام الدوام التفاعلية وتسكين الموظفين بسهولة.
               </p>
             </div>
