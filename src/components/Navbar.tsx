@@ -294,6 +294,14 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
               </a>
 
               <a
+                href="/admin/audit-log"
+                className="px-2.5 py-1.5 bg-amber-50 dark:bg-amber-950/80 hover:bg-amber-100 dark:hover:bg-amber-900/90 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-amber-200 dark:border-amber-800/60 flex items-center gap-1"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">سجل التدقيق</span>
+              </a>
+
+              <a
                 href="/admin/system-health"
                 className="px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 dark:hover:bg-emerald-900/90 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1"
               >

@@ -14,6 +14,7 @@ import { NotificationSheet } from '@/components/ui/NotificationSheet';
 import { BasmaCard } from '@/components/ui/BasmaCard';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
+import { setupOfflineAutoSync, saveOfflineAttendance } from '@/lib/offline-sync';
 import {
   Fingerprint,
   MapPin,
@@ -197,6 +198,16 @@ export default function EmployeePortalPage() {
   useEffect(() => {
     fetchUserData();
     fetchDeviceStatus();
+
+    const cleanupSync = setupOfflineAutoSync((syncedCount) => {
+      setGeoStatus({
+        message: `تمت مزامنة ${syncedCount} حركة بصمة كانت محفوظة محلياً بنجاح 🟢`,
+        type: 'success',
+      });
+      fetchUserData();
+    });
+
+    return () => cleanupSync();
   }, []);
 
   // Polling خفيف كل 15 ثانية كـ Fallback في حالة كان الجهاز PENDING لحين الاعتماد
@@ -333,6 +344,20 @@ export default function EmployeePortalPage() {
       });
 
       try {
+        if (typeof window !== 'undefined' && !navigator.onLine) {
+          saveOfflineAttendance(
+            actionType === 'check-out' ? 'CHECK_OUT' : actionType === 'break-start' ? 'BREAK_START' : actionType === 'break-end' ? 'BREAK_END' : 'CHECK_IN',
+            { latitude: bestReading.latitude, longitude: bestReading.longitude, accuracy: bestReading.accuracy },
+            { deviceId: navigator.userAgent, trustedDeviceId: getOrCreateDeviceId() }
+          );
+          setGeoStatus({
+            message: '⚠️ تم حفظ البصمة محلياً (OFFLINE_PENDING)، وسيتم المزامنة تلقائياً فور توفر الشبكة 📶',
+            type: 'info',
+          });
+          setActionLoading(false);
+          return;
+        }
+
         let url = '/api/attendance/check-in';
         if (actionType === 'check-out') url = '/api/attendance/check-out';
         if (actionType === 'break-start') url = '/api/attendance/break/start';
@@ -379,7 +404,16 @@ export default function EmployeePortalPage() {
           await fetchUserData();
         }
       } catch (err) {
-        setGeoStatus({ message: 'حدث خطأ بالاتصال بالسيرفر أثناء معالجة الحضور', type: 'error' });
+        // في حالة فشل الاتصال المفاجئ (Network Error)
+        saveOfflineAttendance(
+          actionType === 'check-out' ? 'CHECK_OUT' : actionType === 'break-start' ? 'BREAK_START' : actionType === 'break-end' ? 'BREAK_END' : 'CHECK_IN',
+          { latitude: bestReading.latitude, longitude: bestReading.longitude, accuracy: bestReading.accuracy },
+          { deviceId: navigator.userAgent, trustedDeviceId: getOrCreateDeviceId() }
+        );
+        setGeoStatus({
+          message: '⚠️ متعذر الاتصال بالشبكة. تم حفظ البصمة محلياً وسيتم مزامنتها تلقائياً عند عودة الإنترنت 📶',
+          type: 'info',
+        });
       } finally {
         setActionLoading(false);
       }

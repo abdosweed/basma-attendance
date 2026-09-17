@@ -442,20 +442,27 @@ model SuspiciousAttempt {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
-// 19. سجل التدقيق الإداري (Audit Log)
+// 19. سجل التدقيق الإداري الشامل (Audit Log)
 model AuditLog {
   id        String   @id @default(uuid())
   userId    String
-  action    String // CREATE, UPDATE, DELETE, MANUAL_ATTENDANCE_CORRECTION, PERMISSION_CHANGE
-  entity    String // AttendanceRecord, Employee, Branch, Shift, UserRole
+  action    String   // APPROVAL, REJECTION, SHIFT_UPDATE, DEVICE_BIND, DEVICE_UNBIND, EMPLOYEE_TOGGLE, GEOFENCE_UPDATE, SYSTEM_SETTING, OFFLINE_SYNC
+  entity    String   // LEAVE_REQUEST, HOURLY_PERMISSION, CORRECTION, DEVICE, SHIFT, EMPLOYEE, BRANCH, SYSTEM_SETTING, ATTENDANCE
   entityId  String?
-  oldValue  String? // JSON string
-  newValue  String? // JSON string
+  oldValue  String?  // JSON string
+  newValue  String?  // JSON string
+  details   Json?    // Detailed JSON object for diffs/metadata
   reason    String?
   ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
 }
 
 // 20. الإشعارات (Notifications)
@@ -627,7 +634,3 @@ model PushSubscription {
   @@index([userId, isActive])
   @@index([platform])
 }
-
-
-
-
