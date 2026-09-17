@@ -28,6 +28,14 @@ export async function PATCH(
       return NextResponse.json({ error: 'طلب الإجازة غير موجود' }, { status: 404 });
     }
 
+    if (leave.status === action) {
+      return NextResponse.json({
+        success: true,
+        message: `طلب الإجازة معالج سابقاً بحالة: ${action === 'APPROVED' ? 'موافق عليه' : 'مرفوض'}`,
+        leave,
+      });
+    }
+
     const updatedLeave = await prisma.leaveRequest.update({
       where: { id: leave.id },
       data: {
@@ -38,16 +46,35 @@ export async function PATCH(
       },
     });
 
-    // إنشاء إشعار للموظف
-    const statusText = action === 'APPROVED' ? 'تمت الموافقة على' : 'تم رفض';
-    await prisma.notification.create({
-      data: {
+    // التأكد من عدم تكرار الإشعار للموظف خلال آخر 5 دقائق
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const existingNotif = await prisma.notification.findFirst({
+      where: {
         employeeId: leave.employeeId,
-        title: `تحديث طلب الإجازة (${action === 'APPROVED' ? 'موافقة' : 'رفض'})`,
-        message: `${statusText} طلب إجازتك الـ ${leave.leaveType.name} من ${leave.startDate.toISOString().slice(0, 10)} إلى ${leave.endDate.toISOString().slice(0, 10)}.`,
-        type: action === 'APPROVED' ? 'SUCCESS' : 'WARNING',
+        createdAt: { gte: fiveMinutesAgo },
+        title: { contains: 'تحديث طلب الإجازة' },
       },
     });
+
+    if (!existingNotif) {
+      const leaveTypeName = leave.leaveType?.name || 'إجازة';
+      const cleanLeaveType = leaveTypeName.startsWith('إجازة ') ? leaveTypeName.replace('إجازة ', '') : leaveTypeName;
+      const startDateStr = leave.startDate.toISOString().slice(0, 10);
+      const endDateStr = leave.endDate.toISOString().slice(0, 10);
+
+      const message = action === 'APPROVED'
+        ? `تمت الموافقة على طلب الإجازة (${cleanLeaveType}) للفترة من ${startDateStr} إلى ${endDateStr}.`
+        : `تم رفض طلب الإجازة (${cleanLeaveType}) للفترة من ${startDateStr} إلى ${endDateStr}.`;
+
+      await prisma.notification.create({
+        data: {
+          employeeId: leave.employeeId,
+          title: `تحديث طلب الإجازة (${action === 'APPROVED' ? 'موافقة' : 'رفض'})`,
+          message,
+          type: action === 'APPROVED' ? 'SUCCESS' : 'WARNING',
+        },
+      });
+    }
 
     // توثيق العملية في AuditLog
     await prisma.auditLog.create({
