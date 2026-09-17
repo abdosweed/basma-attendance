@@ -55,8 +55,51 @@ export function AttendanceActionCard({
     currentStatus = 'PRESENT';
   }
 
+  // Shift Timing Validation (Africa/Tripoli UTC+2)
+  const isOutsideShiftWindow = React.useMemo(() => {
+    if (!scheduledStart || !scheduledEnd) return false;
+    try {
+      const tripoliTimeStr = new Date().toLocaleTimeString('en-GB', {
+        timeZone: 'Africa/Tripoli',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+
+      const [nowH, nowM] = tripoliTimeStr.split(':').map(Number);
+      const [startH, startM] = scheduledStart.split(':').map(Number);
+      const [endH, endM] = scheduledEnd.split(':').map(Number);
+
+      const nowMins = nowH * 60 + nowM;
+      const startMins = startH * 60 + startM;
+      const endMins = endH * 60 + endM;
+
+      // Allow 30 mins grace window before start and 60 mins after end
+      const windowStart = startMins - 30;
+      const windowEnd = endMins + 60;
+
+      if (endMins < startMins) {
+        // Night shift spanning midnight
+        return nowMins < windowStart && nowMins > windowEnd;
+      }
+      return nowMins < windowStart || nowMins > windowEnd;
+    } catch (e) {
+      return false;
+    }
+  }, [scheduledStart, scheduledEnd]);
+
   return (
     <div className="w-full max-w-md mx-auto space-y-5" dir="rtl">
+      {/* Shift Timing Warning Banner */}
+      {isOutsideShiftWindow && !isCheckedIn && !isCheckedOut && (
+        <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-amber-900 dark:text-amber-300 text-xs flex items-start gap-2.5 shadow-sm">
+          <span className="text-base shrink-0">⚠️</span>
+          <div className="flex-1 leading-relaxed font-medium">
+            أنت حالياً خارج وقت ورديتك المعتمدة <span className="font-bold">({shiftName}: {scheduledStart} - {scheduledEnd})</span>. يمكنك تقديم طلب استئذان أو تصحيح.
+          </div>
+        </div>
+      )}
+
       {/* Top Location & Shift Status Pill */}
       <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm text-xs">
         <div className="flex items-center gap-2 truncate">

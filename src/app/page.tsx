@@ -208,6 +208,17 @@ export default function EmployeePortalPage() {
     return () => clearInterval(pollTimer);
   }, [deviceStatusState]);
 
+  // التحديث التلقائي للإشعارات والحضور كل 25 ثانية (Live / Auto-refresh Notifications Polling)
+  useEffect(() => {
+    const notifTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchUserData();
+      }
+    }, 25000);
+
+    return () => clearInterval(notifTimer);
+  }, []);
+
   const [verifiedAccuracy, setVerifiedAccuracy] = useState<number | null>(null);
   const [lastVerifiedTime, setLastVerifiedTime] = useState<string | null>(null);
   const [gpsQuality, setGpsQuality] = useState<'EXCELLENT' | 'GOOD' | 'POOR' | 'UNSUITABLE'>('GOOD');
@@ -565,33 +576,93 @@ export default function EmployeePortalPage() {
           onRequestCorrection={() => setShowCorrectionModal(true)}
         />
 
-        {/* Quick Action Grid (3 Primary Actions) */}
+        {/* Quick Action Grid (4 Primary Actions) */}
         <div className="grid grid-cols-2 gap-3 pt-2">
           <button
             onClick={() => setShowLeaveModal(true)}
-            className="p-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-[0.99]"
+            className="p-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-all shadow-sm active:scale-[0.99]"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-xs text-slate-900 block">طلب إجازة</span>
-              <span className="text-[10px] text-slate-500 font-medium">تقديم طلب إجازة سنوية</span>
+              <span className="font-bold text-xs text-slate-900 dark:text-white block">طلب إجازة 📅</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">سنوية / مرضية</span>
             </div>
           </button>
 
           <button
             onClick={() => setShowCorrectionModal(true)}
-            className="p-4 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] active:scale-[0.99]"
+            className="p-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-all shadow-sm active:scale-[0.99]"
           >
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-bold text-xs text-slate-900 block">تصحيح بصمة</span>
-              <span className="text-[10px] text-slate-500 font-medium">طلب تصحيح وقت سابق</span>
+              <span className="font-bold text-xs text-slate-900 dark:text-white block">تصحيح بصمة ✍️</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">مراجعة وقت سابق</span>
             </div>
           </button>
+
+          <button
+            onClick={() => setShowCorrectionModal(true)}
+            className="p-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-all shadow-sm active:scale-[0.99]"
+          >
+            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
+              <Coffee className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="font-bold text-xs text-slate-900 dark:text-white block">استئذان ساعي ⏱️</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">خروج مؤقت للعمل</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/reports/today')}
+            className="p-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-all shadow-sm active:scale-[0.99]"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="font-bold text-xs text-slate-900 dark:text-white block">سجل الشهر 📊</span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">تقرير الدوام كاملاً</span>
+            </div>
+          </button>
+        </div>
+
+        {/* Weekly Mini-Tracker (تتبع الالتزام الأسبوعي) */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
+            <span>📅 التزام الأيام الـ 5 الأخيرة</span>
+            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+              التزام 100%
+            </span>
+          </div>
+
+          <div className="grid grid-cols-5 gap-2 pt-1">
+            {[
+              { day: 'الأحد', status: 'PRESENT', label: 'حاضر' },
+              { day: 'الإثنين', status: 'PRESENT', label: 'حاضر' },
+              { day: 'الثلاثاء', status: 'LATE', label: 'تأخير' },
+              { day: 'الأربعاء', status: 'PRESENT', label: 'حاضر' },
+              { day: 'الخميس', status: 'PRESENT', label: 'اليوم' },
+            ].map((d, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-center">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{d.day}</span>
+                <span
+                  className={`w-3 h-3 rounded-full ${
+                    d.status === 'PRESENT'
+                      ? 'bg-emerald-500'
+                      : d.status === 'LATE'
+                      ? 'bg-amber-500 animate-pulse'
+                      : 'bg-rose-500'
+                  }`}
+                />
+                <span className="text-[9px] font-bold text-slate-700 dark:text-slate-300">{d.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* بطاقات الإحصائيات الفورية والفرع */}
@@ -735,6 +806,10 @@ export default function EmployeePortalPage() {
           setActiveTab(tab);
           if (tab === 'notifications') {
             setShowNotificationSheet(true);
+          } else if (tab === 'profile') {
+            router.push('/profile');
+          } else if (tab === 'history') {
+            router.push('/admin/reports/today');
           }
         }}
         unreadNotificationsCount={(todayData?.notifications || []).filter((n: any) => !n.isRead && !n.readAt).length}
