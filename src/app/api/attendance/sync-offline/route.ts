@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getAuthenticatedUser } from '@/lib/auth';
 import { OfflineAttendanceEvent } from '@/lib/offline-sync';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const userSession = await getAuthenticatedUser();
