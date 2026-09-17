@@ -12,6 +12,7 @@ import { BottomNav, TabType } from '@/components/ui/BottomNav';
 import { NotificationSheet } from '@/components/ui/NotificationSheet';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
+import { MetricCard } from '@/components/ui/metric-card';
 import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
 import { setupOfflineAutoSync, saveOfflineAttendance } from '@/lib/offline-sync';
 import { validateClientLocationQuality, detectImpossibleSpeed } from '@/lib/geo-security';
@@ -26,6 +27,7 @@ import {
   Calendar,
   Building,
   Smartphone,
+  FileText,
 } from 'lucide-react';
 
 export default function EmployeePortalPage() {
@@ -241,7 +243,7 @@ export default function EmployeePortalPage() {
     let watchId: number | null = null;
     let finished = false;
 
-    setGeoStatus({ message: 'جاري تحسين دقة الموقع وااختيار أفضل قراءة...', type: 'info' });
+    setGeoStatus({ message: 'جاري تحسين دقة الموقع واختيار أفضل قراءة...', type: 'info' });
 
     const finishAcquisition = async () => {
       if (finished) return;
@@ -398,17 +400,6 @@ export default function EmployeePortalPage() {
   const employeeName = todayData?.employee?.name || user?.name || 'الموظف';
   const jobTitle = todayData?.employee?.jobTitle || 'موظف';
   const branchName = todayData?.employee?.primaryBranch?.name || 'الفرع الرئيسي';
-  const statusCode = todayData?.statusCode || 'ABSENT';
-
-  // Map internal status to clean Arabic label (No raw enums)
-  const arabicStatusLabel =
-    statusCode === 'CHECKED_OUT'
-      ? 'انتهى الدوام'
-      : statusCode === 'ON_BREAK'
-      ? 'في استراحة'
-      : statusCode === 'PRESENT' || statusCode === 'LATE'
-      ? 'في الدوام'
-      : 'لم تبصم بعد';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -418,57 +409,71 @@ export default function EmployeePortalPage() {
         onRefreshNotifications={fetchUserData}
       />
 
-      <main className="flex-1 max-w-lg w-full mx-auto p-3.5 sm:p-5 space-y-3.5 pb-24 md:pb-6" dir="rtl">
-        {/* Compact Employee Header Card */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs space-y-2.5">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-[11px] text-slate-500 font-medium">مرحباً بعودتك 👋</span>
-              <h1 className="text-base font-bold text-slate-900 tracking-tight">{employeeName}</h1>
-              <p className="text-xs text-sky-700 font-semibold">{jobTitle} • {branchName}</p>
+      <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-5 pb-28 md:pb-6">
+        {/* Header Greeting Card */}
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <span className="text-xs text-slate-500 font-medium">مرحباً بعودتك 👋</span>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">{employeeName}</h1>
+              <p className="text-xs text-sky-700 font-semibold mt-0.5">{jobTitle} • {branchName}</p>
             </div>
-
-            <div className="flex flex-col items-end gap-1.5 shrink-0">
-              <div className="bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200/80 text-[10px] text-slate-600 font-medium flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-sky-700" />
+            <div className="text-left bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200/80 shrink-0">
+              <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-sky-700" />
                 {new Date().toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short' })}
               </div>
-              <StatusBadge status={statusCode} label={arabicStatusLabel} size="sm" />
             </div>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <StatusBadge status={todayData?.statusCode || 'ABSENT'} label={todayData?.statusText} size="sm" />
+            </div>
+
+            <button
+              onClick={fetchUserData}
+              title="تحديث البيانات"
+              className="p-1.5 bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl shadow-xs transition-all active:scale-95"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
         {/* Device Trust Status Alerts */}
         {deviceStatusState === 'PENDING' && (
-          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <Clock className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-between gap-3 shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-3">
+              <Clock className="w-5 h-5 text-amber-600 animate-pulse shrink-0" />
               <div className="text-xs">
                 <span className="font-bold block">جهازك بانتظار الاعتماد من الإدارة 🟡</span>
+                <span className="text-amber-700">تم تقديم هذا الهاتف للإدارة قيد الموافقة.</span>
               </div>
             </div>
             <button
               onClick={fetchDeviceStatus}
-              className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-xs font-bold border border-amber-300 flex items-center gap-1 shrink-0 transition-all"
+              className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl text-xs font-bold border border-amber-300 flex items-center gap-1 shrink-0 transition-all"
             >
-              <RefreshCw className="w-3 h-3 animate-spin" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               <span>تحديث</span>
             </button>
           </div>
         )}
 
         {deviceStatusState === 'REVOKED' && (
-          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
               <div className="text-xs">
                 <span className="font-bold block">تم إلغاء اعتماد هذا الجهاز 🔴</span>
+                <span className="text-rose-700">يمكنك طلب إعادة الاعتماد من الإدارة.</span>
               </div>
             </div>
             <button
               onClick={handleRequestDeviceApproval}
               disabled={actionLoading}
-              className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shrink-0 transition-all disabled:opacity-50"
+              className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 shrink-0 transition-all disabled:opacity-50"
             >
               <Smartphone className="w-3.5 h-3.5" />
               <span>طلب الاعتماد</span>
@@ -477,16 +482,19 @@ export default function EmployeePortalPage() {
         )}
 
         {deviceStatusState === 'BLOCKED' && (
-          <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-2.5 shadow-xs text-xs">
-            <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0" />
-            <span className="font-bold">هذا الجهاز محظور من المنظومة</span>
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center gap-3 shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold block">هذا الجهاز محظور من المنظومة</span>
+              <span className="text-slate-500 font-normal">يرجى مراجعة إدارة النظام لتوضيح سبب الحظر.</span>
+            </div>
           </div>
         )}
 
-        {/* Secondary Web Push Prompt (Hidden if subscribed) */}
+        {/* Soft Push Notification Activation Prompt */}
         <PushNotificationManager showCardOnly />
 
-        {/* Hero Attendance Action Card */}
+        {/* Hero Attendance Action Area */}
         <AttendanceActionCard
           checkInAt={todayRecord?.checkInAt ? new Date(todayRecord.checkInAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : null}
           checkOutAt={todayRecord?.checkOutAt ? new Date(todayRecord.checkOutAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true }) : null}
@@ -505,15 +513,15 @@ export default function EmployeePortalPage() {
           onRequestCorrection={() => setShowCorrectionModal(true)}
         />
 
-        {/* Quick Action Grid (Ordered: 1. استئذان, 2. إجازة, 3. سجل الشهر, 4. تصحيح) */}
-        <div className="space-y-2 pt-1">
+        {/* Quick Action Grid (Ordered by Daily Usefulness: 1. استئذان, 2. إجازة, 3. سجل الشهر, 4. تصحيح) */}
+        <div className="space-y-2 pt-1" dir="rtl">
           <h3 className="text-xs font-bold text-slate-700 px-1">الخدمات والإجراءات السريعة</h3>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setShowPermissionModal(true)}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
+              className="p-3.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-xs active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 border border-purple-200/60 flex items-center justify-center font-bold shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 border border-purple-200/60 flex items-center justify-center font-bold shrink-0">
                 <Coffee className="w-4 h-4" />
               </div>
               <div>
@@ -524,9 +532,9 @@ export default function EmployeePortalPage() {
 
             <button
               onClick={() => setShowLeaveModal(true)}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
+              className="p-3.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-xs active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 border border-sky-200/60 flex items-center justify-center font-bold shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 border border-sky-200/60 flex items-center justify-center font-bold shrink-0">
                 <Calendar className="w-4 h-4" />
               </div>
               <div>
@@ -537,9 +545,9 @@ export default function EmployeePortalPage() {
 
             <button
               onClick={() => router.push('/admin/reports/today')}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
+              className="p-3.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-xs active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center font-bold shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center font-bold shrink-0">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <div>
@@ -550,9 +558,9 @@ export default function EmployeePortalPage() {
 
             <button
               onClick={() => setShowCorrectionModal(true)}
-              className="p-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.99]"
+              className="p-3.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-right flex items-center gap-3 transition-all shadow-xs active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center font-bold shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center font-bold shrink-0">
                 <Clock className="w-4 h-4" />
               </div>
               <div>
@@ -563,8 +571,37 @@ export default function EmployeePortalPage() {
           </div>
         </div>
 
+        {/* Compact Today Summary Card */}
+        <div className="space-y-2" dir="rtl">
+          <h3 className="text-xs font-bold text-slate-700 px-1">ملخص دوام اليوم</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <MetricCard
+              title="وقت الدخول الفعلي"
+              value={
+                todayRecord?.checkInAt
+                  ? new Date(todayRecord.checkInAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true })
+                  : 'لم يتم التسجيل'
+              }
+              variant={todayRecord?.checkInAt ? 'emerald' : 'default'}
+              subtitle={todayRecord?.checkInAt ? 'موقع جغرافي مؤكد' : 'بانتظار البصمة'}
+            />
+            <MetricCard
+              title="وقت الانصراف الفعلي"
+              value={
+                todayRecord?.checkOutAt
+                  ? new Date(todayRecord.checkOutAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', hour12: true })
+                  : todayRecord?.checkInAt
+                  ? 'في العمل الآن'
+                  : 'لم يتم التسجيل'
+              }
+              variant={todayRecord?.checkOutAt ? 'emerald' : todayRecord?.checkInAt ? 'sky' : 'default'}
+              subtitle={todayRecord?.checkOutAt ? 'منصرف رسمياً' : todayRecord?.checkInAt ? 'دوام قائم' : '—'}
+            />
+          </div>
+        </div>
+
         {/* Weekly Mini-Tracker (تتبع الالتزام الأسبوعي) */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-3.5 shadow-xs space-y-2">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-2" dir="rtl">
           <div className="flex items-center justify-between text-xs font-bold text-slate-800">
             <span>📅 التزام الأيام الـ 5 الأخيرة</span>
             <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
@@ -572,7 +609,7 @@ export default function EmployeePortalPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-5 gap-1.5 pt-0.5">
+          <div className="grid grid-cols-5 gap-2 pt-1">
             {[
               { day: 'الأحد', status: 'PRESENT', label: 'حاضر' },
               { day: 'الإثنين', status: 'PRESENT', label: 'حاضر' },
@@ -580,10 +617,10 @@ export default function EmployeePortalPage() {
               { day: 'الأربعاء', status: 'PRESENT', label: 'حاضر' },
               { day: 'الخميس', status: 'PRESENT', label: 'اليوم' },
             ].map((d, i) => (
-              <div key={i} className="flex flex-col items-center gap-1 p-1.5 bg-slate-50 rounded-xl text-center border border-slate-100">
+              <div key={i} className="flex flex-col items-center gap-1.5 p-2 bg-slate-50 rounded-xl text-center border border-slate-100">
                 <span className="text-[10px] text-slate-500 font-medium">{d.day}</span>
                 <span
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-2.5 h-2.5 rounded-full ${
                     d.status === 'PRESENT'
                       ? 'bg-emerald-500'
                       : d.status === 'LATE'
@@ -624,7 +661,7 @@ export default function EmployeePortalPage() {
 
       {/* Verification Code Interactive Dialog */}
       {verificationModal.isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4" dir="rtl">
           <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-5">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-sky-50 border border-sky-200 rounded-2xl text-sky-700">

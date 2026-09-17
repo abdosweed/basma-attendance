@@ -3,7 +3,7 @@
 import React from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Coffee, Fingerprint, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
+import { Clock, Coffee, Fingerprint, CheckCircle2, LogOut, MapPin } from 'lucide-react';
 
 export interface AttendanceActionCardProps {
   checkInAt?: string | null;
@@ -42,38 +42,71 @@ export function AttendanceActionCard({
   onBreakEnd,
   onRequestCorrection,
 }: AttendanceActionCardProps) {
-  // Determine Attendance State
+  // Determine State
   const isCheckedIn = Boolean(checkInAt);
   const isCheckedOut = Boolean(checkOutAt);
   const isOnBreak = Boolean(activeBreak);
 
   let currentStatus: 'PRESENT' | 'ON_BREAK' | 'CHECKED_OUT' | 'ABSENT' = 'ABSENT';
+  let statusArabicLabel = 'لم تسجل حضورك بعد';
   let heroTitle = 'لم تسجل حضورك بعد';
   let heroSubtitle = `وردية اليوم: ${shiftName} (${scheduledStart} - ${scheduledEnd})`;
 
   if (isCheckedOut) {
     currentStatus = 'CHECKED_OUT';
-    heroTitle = 'انتهى دوامك اليوم 🎉';
-    heroSubtitle = 'شكراً لالتزامك! تم تسجيل الانصراف وإكمال ساعات العمل بنجاح.';
+    statusArabicLabel = 'انتهى الدوام';
+    heroTitle = 'انتهى دوامك اليوم';
+    heroSubtitle = 'شكراً لالتزامك وتفانيك!';
   } else if (isOnBreak) {
     currentStatus = 'ON_BREAK';
-    heroTitle = 'أنت في استراحة حالياً';
+    statusArabicLabel = 'في استراحة';
+    heroTitle = 'أنت في استراحة حالياً ☕';
     heroSubtitle = activeBreak?.startTime
       ? `بدأت الاستراحة الساعة ${activeBreak.startTime}`
-      : 'يمكنك إنهاء الاستراحة والعودة للدوام في أي وقت.';
+      : 'يمكنك إنهاء الاستراحة والعودة للدوام عند الاستعداد.';
   } else if (isCheckedIn) {
     currentStatus = 'PRESENT';
+    statusArabicLabel = 'في الدوام';
     heroTitle = 'أنت في الدوام الآن 🟢';
     heroSubtitle = `سجلت الحضور الساعة ${checkInAt} • ${branchName}`;
   }
 
+  // State D: COMPLETED DAY (Calm, single completed hero without GPS prompts or duplicated pills)
+  if (isCheckedOut) {
+    return (
+      <div className="w-full max-w-lg mx-auto space-y-3" dir="rtl">
+        <div className="p-5 bg-white border border-slate-200/80 rounded-3xl shadow-xs text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-slate-900">{heroTitle}</h2>
+            <p className="text-xs text-slate-500">{heroSubtitle}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
+            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+              <span className="text-[10px] text-slate-500 font-medium block">وقت الدخول</span>
+              <span className="font-bold text-slate-900">{checkInAt || '—'}</span>
+            </div>
+            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center">
+              <span className="text-[10px] text-slate-500 font-medium block">وقت الانصراف</span>
+              <span className="font-bold text-slate-900">{checkOutAt || '—'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Active / Pending Attendance View
   return (
-    <div className="w-full max-w-lg mx-auto space-y-4" dir="rtl">
-      {/* Top Location Status Bar */}
-      <div className="flex items-center justify-between gap-2 px-4 py-3 bg-white border border-slate-200/80 rounded-2xl shadow-sm text-xs">
+    <div className="w-full max-w-lg mx-auto space-y-3" dir="rtl">
+      {/* Top Location Status Bar (Shown ONLY when work is active or pending) */}
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2 bg-white border border-slate-200/80 rounded-2xl shadow-xs text-xs">
         <div className="flex items-center gap-2 truncate">
           <span
-            className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+            className={`w-2 h-2 rounded-full shrink-0 ${
               locationStatusType === 'success'
                 ? 'bg-emerald-500 animate-pulse'
                 : locationStatusType === 'error'
@@ -81,50 +114,49 @@ export function AttendanceActionCard({
                 : 'bg-sky-500'
             }`}
           />
-          <span className="text-slate-700 truncate font-medium">
+          <span className="text-slate-700 truncate font-medium text-[11px]">
             {locationStatusMessage}
           </span>
         </div>
         <div className="shrink-0">
-          <StatusBadge status={currentStatus} size="sm" />
+          <StatusBadge status={currentStatus} label={statusArabicLabel} size="sm" />
         </div>
       </div>
 
-      {/* Main Biometric Status & Action Hero */}
-      <div className="relative p-6 bg-white border border-slate-200/80 rounded-3xl shadow-sm text-center space-y-5">
-        {/* Dynamic Hero Title & Subtitle */}
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-slate-900">{heroTitle}</h2>
+      {/* Main Attendance Action Hero */}
+      <div className="relative p-5 bg-white border border-slate-200/80 rounded-3xl shadow-xs text-center space-y-4">
+        <div className="space-y-0.5">
+          <h2 className="text-base font-bold text-slate-900">{heroTitle}</h2>
           <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">{heroSubtitle}</p>
         </div>
 
-        {/* Primary Biometric Action Buttons */}
-        <div className="py-2 flex flex-col items-center justify-center">
+        {/* Primary Action Button Area */}
+        <div className="py-1 flex flex-col items-center justify-center">
           {/* State A: Not Checked In */}
-          {!isCheckedIn && !isCheckedOut && (
+          {!isCheckedIn && (
             <button
               onClick={onCheckIn}
               disabled={actionLoading || isOutsideGeofence}
-              className="relative group w-44 h-44 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-600/20 flex flex-col items-center justify-center gap-2 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+              className="relative group w-40 h-40 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
             >
               <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping pointer-events-none" />
-              <Fingerprint className="w-10 h-10 text-white" />
-              <span className="text-base font-extrabold tracking-wide">تسجيل الحضور</span>
-              <span className="text-[11px] opacity-90">اضغط لربط الموقع والجهاز</span>
+              <Fingerprint className="w-9 h-9 text-white" />
+              <span className="text-sm font-extrabold tracking-wide">تسجيل الحضور</span>
+              <span className="text-[10px] opacity-90">ربط الموقع والجهاز</span>
             </button>
           )}
 
-          {/* State B: Working (Checked In & Not on Break) */}
-          {isCheckedIn && !isCheckedOut && !isOnBreak && (
-            <div className="w-full space-y-3">
+          {/* State B: Working */}
+          {isCheckedIn && !isOnBreak && (
+            <div className="w-full space-y-2.5">
               <Button
                 variant="danger"
-                size="lg"
+                size="md"
                 fullWidth
                 isLoading={actionLoading}
                 onClick={onCheckOut}
-                leftIcon={<LogOut className="w-5 h-5" />}
-                className="text-sm font-bold min-h-[48px]"
+                leftIcon={<LogOut className="w-4 h-4" />}
+                className="text-xs font-bold min-h-[44px]"
               >
                 تسجيل الانصراف
               </Button>
@@ -132,12 +164,12 @@ export function AttendanceActionCard({
               {onBreakStart && (
                 <Button
                   variant="secondary"
-                  size="md"
+                  size="sm"
                   fullWidth
                   isLoading={actionLoading}
                   onClick={onBreakStart}
-                  leftIcon={<Coffee className="w-4 h-4" />}
-                  className="text-xs font-semibold"
+                  leftIcon={<Coffee className="w-3.5 h-3.5" />}
+                  className="text-xs font-medium"
                 >
                   بدء استراحة مدفوعة
                 </Button>
@@ -149,37 +181,24 @@ export function AttendanceActionCard({
           {isOnBreak && (
             <Button
               variant="primary"
-              size="lg"
+              size="md"
               fullWidth
               isLoading={actionLoading}
               onClick={onBreakEnd}
-              leftIcon={<CheckCircle2 className="w-5 h-5" />}
-              className="bg-sky-600 hover:bg-sky-700 text-white shadow-md font-bold text-sm min-h-[48px]"
+              leftIcon={<CheckCircle2 className="w-4 h-4" />}
+              className="bg-sky-600 hover:bg-sky-700 text-white shadow-xs font-bold text-xs min-h-[44px]"
             >
               إنهاء الاستراحة والعودة للعمل
             </Button>
           )}
-
-          {/* State D: Completed */}
-          {isCheckedOut && (
-            <div className="w-full p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-1.5">
-              <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-              <div className="text-sm font-bold text-emerald-900">
-                تم تسجيل الانصراف بنجاح
-              </div>
-              <div className="text-xs text-emerald-700">
-                نتمنى لك بقية يوم سعيدة!
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Exception Workflow: Correction Link */}
-        {onRequestCorrection && !isCheckedOut && (
-          <div className="pt-3 border-t border-slate-100">
+        {/* Correction Exception Link */}
+        {onRequestCorrection && (
+          <div className="pt-2 border-t border-slate-100">
             <button
               onClick={onRequestCorrection}
-              className="text-xs font-semibold text-slate-500 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 transition-colors"
+              className="text-[11px] font-semibold text-slate-500 hover:text-emerald-700 hover:underline inline-flex items-center gap-1 transition-colors"
             >
               <span>تعذر تسجيل البصمة؟ تقديم طلب تصحيح</span>
             </button>
