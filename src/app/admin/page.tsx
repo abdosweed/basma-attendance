@@ -8,6 +8,7 @@ import AddEmployeeModal from '@/components/AddEmployeeModal';
 import EditEmployeeModal from '@/components/EditEmployeeModal';
 import ImportEmployeesModal from '@/components/ImportEmployeesModal';
 import SystemSettingsTab from '@/components/SystemSettingsTab';
+import PayrollReportsTab from '@/components/PayrollReportsTab';
 import {
   Users,
   CheckCircle2,
@@ -849,64 +850,12 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* 4. التقارير والمطابقة (reports) */}
+        {/* 4. التقارير والمطابقة وكشوفات الرواتب (reports) */}
         {activeTab === 'reports' && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 space-y-5 shadow-sm dark:shadow-xl backdrop-blur-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">كشف الحضور والغياب الشهري للموظفين</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">مطابقة الساعات الفعلية والإضافية والتأخيرات لكل موظف</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="month"
-                    value={monthFilter}
-                    onChange={(e) => setMonthFilter(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none"
-                  />
-                  <button onClick={handleExportCSV} className="px-3.5 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                    <Download className="w-4 h-4" />
-                    <span>تصدير Excel / CSV</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-right text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold bg-slate-100/90 dark:bg-slate-950/60">
-                      <th className="p-3">رقم الموظف</th>
-                      <th className="p-3">اسم الموظف</th>
-                      <th className="p-3 text-center">أيام الحضور</th>
-                      <th className="p-3 text-center">أيام الغياب</th>
-                      <th className="p-3 text-center">التأخير</th>
-                      <th className="p-3 text-center">ساعات العمل</th>
-                      <th className="p-3 text-center">الإضافي</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/60">
-                    {reportData?.reportRows?.map((row: any) => (
-                      <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                        <td className="p-3 font-mono font-bold text-sky-600 dark:text-sky-400">{row.employeeNumber}</td>
-                        <td className="p-3 font-bold text-slate-900 dark:text-white">{row.name}</td>
-                        <td className="p-3 text-center font-bold text-emerald-600 dark:text-emerald-400">{row.attendanceDays}</td>
-                        <td className="p-3 text-center font-bold text-rose-600 dark:text-rose-400">{row.absenceDays}</td>
-                        <td className="p-3 text-center font-mono text-yellow-600 dark:text-yellow-400">{row.lateStr}</td>
-                        <td className="p-3 text-center font-bold text-slate-700 dark:text-slate-200">{row.workedHoursStr}</td>
-                        <td className="p-3 text-center font-mono text-sky-600 dark:text-sky-400">{row.overtimeStr}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* إعدادات المنظومة والمطابقة الحسابية */}
-            <div className="bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm dark:shadow-xl backdrop-blur-sm">
-              <SystemSettingsTab />
-            </div>
-          </div>
+          <PayrollReportsTab
+            branches={dashData?.branches || []}
+            employees={employeesList}
+          />
         )}
       </main>
 
