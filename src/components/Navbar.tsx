@@ -224,7 +224,7 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
   const isAdminOrManager = ['SUPER_ADMIN', 'ADMIN', 'HR', 'BRANCH_MANAGER', 'SUPERVISOR'].includes(user?.role);
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md text-white border-b border-slate-800">
+    <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-900 dark:text-white border-b border-slate-200/80 dark:border-slate-800">
       {/* Toast Notification العائم */}
       {toastNotif && (
         <div className="fixed top-16 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 bg-slate-900 border border-sky-500/50 shadow-2xl rounded-2xl p-4 text-white animate-in slide-in-from-top-5 duration-300 flex items-start gap-3">
@@ -245,9 +245,9 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
             <Fingerprint className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
               بصمة
-              <span className="text-[9px] bg-sky-500/20 text-sky-400 font-semibold px-1.5 py-0.2 rounded-full border border-sky-500/30">
+              <span className="text-[9px] bg-sky-500/20 text-sky-700 dark:text-sky-400 font-semibold px-1.5 py-0.2 rounded-full border border-sky-500/30">
                 PWA
               </span>
             </h1>

@@ -415,7 +415,11 @@ export default function EmployeePortalPage() {
       <div className="w-full bg-emerald-600 text-white text-center py-2 text-xs font-bold shadow-md z-50">
         ⚡ تم تفعيل واجهة بصمة الحديثة v1.14.0 (Live UI Update)
       </div>
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        notifications={todayData?.notifications || []}
+        onRefreshNotifications={fetchUserData}
+      />
 
       <main className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-6 space-y-5 pb-28 md:pb-6">
         {/* Header greeting card */}
@@ -435,7 +439,7 @@ export default function EmployeePortalPage() {
           </div>
 
           {/* حالة الحضور الحالية */}
-          <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3.5 w-3.5">
                 <span
@@ -458,15 +462,15 @@ export default function EmployeePortalPage() {
                 />
               </span>
               <div>
-                <span className="text-[10px] text-slate-400 block">حالتك الحالية اليوم</span>
-                <span className="text-xs font-bold text-white">{todayData?.statusText}</span>
+                <span className="text-[10px] text-slate-500 block font-medium">حالتك الحالية اليوم</span>
+                <span className="text-xs font-bold text-slate-900">{todayData?.statusText}</span>
               </div>
             </div>
 
             <button
               onClick={fetchUserData}
               title="تحديث البيانات"
-              className="p-2 bg-slate-800 text-slate-300 hover:text-white rounded-xl"
+              className="p-2 bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl shadow-xs transition-all active:scale-95"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -595,47 +599,28 @@ export default function EmployeePortalPage() {
 
         {/* بطاقات الإحصائيات الفورية والفرع */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-            <div className="flex items-center gap-2 text-slate-400 text-[11px] mb-1">
-              <Clock className="w-4 h-4 text-sky-400" />
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-2 text-slate-500 text-[11px] mb-1">
+              <Clock className="w-4 h-4 text-blue-600" />
               <span>وقت الحضور</span>
             </div>
-            <span className="text-sm font-bold text-white">
+            <span className="text-sm font-bold text-slate-900">
               {todayRecord?.checkInAt
                 ? new Date(todayRecord.checkInAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
                 : 'لم يسجل'}
             </span>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-            <div className="flex items-center gap-2 text-slate-400 text-[11px] mb-1">
-              <Building className="w-4 h-4 text-emerald-400" />
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <div className="flex items-center gap-2 text-slate-500 text-[11px] mb-1">
+              <Building className="w-4 h-4 text-emerald-600" />
               <span>الفرع المصرح</span>
             </div>
-            <span className="text-xs font-bold text-white truncate block">
+            <span className="text-xs font-bold text-slate-900 truncate block">
               {todayData?.employee?.primaryBranch?.name || 'الفرع الرئيسي'}
             </span>
           </div>
         </div>
-
-        {/* الإشعارات التنبيهية للموظف */}
-        {todayData?.notifications?.length > 0 && (
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-300 mb-3">
-              <Bell className="w-4 h-4 text-sky-400" />
-              <span>أحدث الإشعارات</span>
-            </div>
-
-            <div className="space-y-2">
-              {todayData.notifications.map((n: any) => (
-                <div key={n.id} className="p-3 bg-slate-950/80 rounded-2xl border border-slate-800/80 text-xs">
-                  <div className="font-bold text-white mb-0.5">{n.title}</div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">{n.message}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       {/* مودال طلب الإجازة */}
@@ -755,16 +740,33 @@ export default function EmployeePortalPage() {
             setShowNotificationSheet(true);
           }
         }}
-        unreadNotificationsCount={0}
+        unreadNotificationsCount={(todayData?.notifications || []).filter((n: any) => !n.isRead && !n.readAt).length}
       />
 
       {/* Notification Sheet Drawer */}
       <NotificationSheet
         isOpen={showNotificationSheet}
         onClose={() => setShowNotificationSheet(false)}
-        notifications={[]}
-        onMarkRead={() => {}}
-        onMarkAllRead={() => {}}
+        notifications={(todayData?.notifications || []).map((n: any) => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          type: n.type || 'INFO',
+          createdAt: n.createdAt ? new Date(n.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 'الآن',
+          isRead: Boolean(n.isRead || n.readAt),
+        }))}
+        onMarkRead={async (id) => {
+          try {
+            await fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+            await fetchUserData();
+          } catch (e) {}
+        }}
+        onMarkAllRead={async () => {
+          try {
+            await fetch('/api/notifications/read-all', { method: 'POST' });
+            await fetchUserData();
+          } catch (e) {}
+        }}
       />
     </div>
   );
