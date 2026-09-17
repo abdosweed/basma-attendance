@@ -97,23 +97,36 @@ export default function AdminDashboardPage() {
     } catch (e) {}
   }, []);
 
+  // مؤقت أمان حازم خارجي يضمن عدم التعليق نهائياً لكسر شاشة التحميل بعد 5 ثوانٍ كحد أقصى
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      setLoading((prev) => {
+        if (prev) {
+          console.warn("Safety timeout triggered: Forcing dashboard mount.");
+          return false;
+        }
+        return false;
+      });
+    }, 5000);
+
+    return () => clearTimeout(safetyTimer);
+  }, []);
+
   const fetchAdminData = async (signal?: AbortSignal) => {
-    // مؤقت أمان يضمن كسر شاشة التحميل خلال 3 ثوانٍ كحد أقصى
-    const safetyTimeout = setTimeout(() => {
+    // مؤقت أمان داخلي يضمن كسر شاشة التحميل خلال 3 ثوانٍ كحد أقصى للطلب
+    const fetchSafetyTimeout = setTimeout(() => {
       setLoading(false);
     }, 3000);
 
     try {
       const meRes = await fetch('/api/auth/me', { signal });
       if (!meRes.ok) {
-        clearTimeout(safetyTimeout);
         setLoading(false);
         router.push('/login');
         return;
       }
       const me = await meRes.json();
       if (!['SUPER_ADMIN', 'ADMIN', 'HR', 'BRANCH_MANAGER', 'SUPERVISOR'].includes(me.user?.role)) {
-        clearTimeout(safetyTimeout);
         setLoading(false);
         router.push('/');
         return;
@@ -180,7 +193,7 @@ export default function AdminDashboardPage() {
         console.error('Admin dashboard load error:', e);
       }
     } finally {
-      clearTimeout(safetyTimeout);
+      clearTimeout(fetchSafetyTimeout);
       setLoading(false);
     }
   };
