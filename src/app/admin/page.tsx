@@ -62,20 +62,29 @@ export default function AdminDashboardPage() {
   const [resetLoading, setResetLoading] = useState(false);
 
   const fetchAdminData = async () => {
+    // مؤقت أمان يضمن كسر شاشة التحميل السوداء خلال 4 ثوانٍ كحد أقصى حتى لو تأخر أحد المسارات
+    const safetyTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 4000);
+
     try {
       const meRes = await fetch('/api/auth/me');
       if (!meRes.ok) {
+        clearTimeout(safetyTimeout);
+        setLoading(false);
         router.push('/login');
         return;
       }
       const me = await meRes.json();
       if (!['SUPER_ADMIN', 'ADMIN', 'HR', 'BRANCH_MANAGER', 'SUPERVISOR'].includes(me.user?.role)) {
+        clearTimeout(safetyTimeout);
+        setLoading(false);
         router.push('/');
         return;
       }
       setUser(me.user);
 
-      const [dashRes, liveRes, reportRes, empRes, leavesRes, correctionsRes, envRes] = await Promise.all([
+      const results = await Promise.allSettled([
         fetch('/api/admin/dashboard'),
         fetch('/api/admin/live'),
         fetch(`/api/reports/monthly?month=${monthFilter}`),
@@ -85,31 +94,34 @@ export default function AdminDashboardPage() {
         fetch('/api/admin/environment-switch'),
       ]);
 
-      if (dashRes.ok) setDashData(await dashRes.json());
-      if (liveRes.ok) {
-        const l = await liveRes.json();
+      const [dashRes, liveRes, reportRes, empRes, leavesRes, correctionsRes, envRes] = results;
+
+      if (dashRes.status === 'fulfilled' && dashRes.value.ok) setDashData(await dashRes.value.json());
+      if (liveRes.status === 'fulfilled' && liveRes.value.ok) {
+        const l = await liveRes.value.json();
         setLiveData(l.liveAttendance || []);
       }
-      if (reportRes.ok) setReportData(await reportRes.json());
-      if (empRes.ok) {
-        const e = await empRes.json();
+      if (reportRes.status === 'fulfilled' && reportRes.value.ok) setReportData(await reportRes.value.json());
+      if (empRes.status === 'fulfilled' && empRes.value.ok) {
+        const e = await empRes.value.json();
         setEmployeesList(e.employees || []);
       }
-      if (leavesRes.ok) {
-        const l = await leavesRes.json();
+      if (leavesRes.status === 'fulfilled' && leavesRes.value.ok) {
+        const l = await leavesRes.value.json();
         setLeavesList(l.leaves || []);
       }
-      if (correctionsRes.ok) {
-        const c = await correctionsRes.json();
+      if (correctionsRes.status === 'fulfilled' && correctionsRes.value.ok) {
+        const c = await correctionsRes.value.json();
         setCorrectionsList(c.corrections || []);
       }
-      if (envRes.ok) {
-        const env = await envRes.json();
+      if (envRes.status === 'fulfilled' && envRes.value.ok) {
+        const env = await envRes.value.json();
         if (env.environmentMode) setEnvMode(env.environmentMode);
       }
     } catch (e) {
-      console.error(e);
+      console.error('Admin dashboard load error:', e);
     } finally {
+      clearTimeout(safetyTimeout);
       setLoading(false);
     }
   };
