@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogOut, ShieldCheck, UserCheck, LayoutDashboard, Fingerprint, Bell, Check, CheckCheck, Sun, Moon, Activity, CheckSquare } from 'lucide-react';
 
+import { setAppBadge, clearAppBadge } from '@/lib/pwa-badge';
+
 interface NavbarProps {
   user?: any;
   notifications?: any[];
@@ -55,6 +57,7 @@ export default function Navbar({ user, notifications = [], onRefreshNotification
     setItems(notifications);
     const unread = notifications.filter((n) => !n.readAt && !n.isRead).length;
     setUnreadCount(unread);
+    setAppBadge(unread);
   }, [notifications]);
 
   // الاتصال بقناة البث المباشر للإشعارات Real-Time SSE Stream مع دعم التعافي والـ Fallback Polling

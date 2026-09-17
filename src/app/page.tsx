@@ -16,6 +16,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { getOrCreateDeviceId, getDeviceInfo } from '@/lib/device-fingerprint';
 import { setupOfflineAutoSync, saveOfflineAttendance } from '@/lib/offline-sync';
 import { validateClientLocationQuality, detectImpossibleSpeed } from '@/lib/geo-security';
+import { triggerHaptic } from '@/lib/haptics';
 import {
   Fingerprint,
   MapPin,
@@ -421,12 +422,15 @@ export default function EmployeePortalPage() {
         }
 
         if (!res.ok) {
+          triggerHaptic('error');
           setGeoStatus({ message: data.error || 'فشلت العملية', type: 'error' });
         } else {
+          triggerHaptic('success');
           setGeoStatus({ message: data.message || 'تمت العملية بنجاح', type: 'success' });
           await fetchUserData();
         }
       } catch (err) {
+        triggerHaptic('warning');
         // في حالة فشل الاتصال المفاجئ (Network Error)
         saveOfflineAttendance(
           actionType === 'check-out' ? 'CHECK_OUT' : actionType === 'break-start' ? 'BREAK_START' : actionType === 'break-end' ? 'BREAK_END' : 'CHECK_IN',

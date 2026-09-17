@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+import { triggerHaptic } from '@/lib/haptics';
+import { setAppBadge } from '@/lib/pwa-badge';
 import {
   CheckCircle2,
   XCircle,
@@ -85,6 +87,7 @@ export default function AdminApprovalsPage() {
 
   // القرار المباشر (قبول أو رفض)
   const handleDecision = async (item: ApprovalItem, action: 'APPROVED' | 'REJECTED', reasonNote?: string) => {
+    triggerHaptic('tap');
     setProcessingId(item.id);
 
     // Optimistic UI Update: إخفاء البطاقة فوراً لتجربة سلسة وخدمة متفائلة
@@ -95,6 +98,7 @@ export default function AdminApprovalsPage() {
       if (item.category === 'HOURLY_PERMISSION') next.hourlyPermission = Math.max(0, next.hourlyPermission - 1);
       if (item.category === 'CORRECTION') next.correction = Math.max(0, next.correction - 1);
       if (item.category === 'DEVICE') next.device = Math.max(0, next.device - 1);
+      setAppBadge(next.total);
       return next;
     });
 

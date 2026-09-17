@@ -9,23 +9,34 @@
   
   html {
     font-family: var(--font-sans);
+    overscroll-behavior-y: contain;
   }
 
   body {
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    overscroll-behavior-y: contain;
     background-color: #f8fafc;
     color: #0f172a;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .dark body {
+    background-color: #020617;
+    color: #f8fafc;
   }
 }
 
-/* Safe Area Insets for iOS & Android */
+/* Safe Area Insets for iOS & Android Native PWA */
 .pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 16px);
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
 }
 .pt-safe {
-  padding-top: env(safe-area-inset-top, 16px);
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+.mb-safe {
+  margin-bottom: max(16px, env(safe-area-inset-bottom));
 }
 
 /* Custom Minimal Shadow & Glass Utility */
