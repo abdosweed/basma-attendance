@@ -81,20 +81,20 @@ export default function SystemSettingsTab() {
   }
 
   return (
-    <form onSubmit={handleSave} className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-5 text-xs">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+    <form onSubmit={handleSave} className="bg-white border border-slate-200/90 shadow-sm rounded-2xl p-6 text-slate-900 space-y-5 text-xs">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Settings className="w-5 h-5 text-sky-400" />
+          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <Settings className="w-5 h-5 text-sky-600" />
             <span>الإعدادات المركزية وسياسات الجغرافيا والأجهزة</span>
           </h3>
-          <p className="text-xs text-slate-400">التحكم في حدود دقة الـ GPS، سياسات الـ Fake GPS، والأجهزة الموثوقة</p>
+          <p className="text-xs text-slate-600 mt-0.5">التحكم في حدود دقة الـ GPS، سياسات الـ Fake GPS، والأجهزة الموثوقة</p>
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-sky-600/20 active:scale-95 disabled:opacity-50"
+          className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg shadow-sm text-xs flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
         >
           {saving ? (
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -108,42 +108,42 @@ export default function SystemSettingsTab() {
       </div>
 
       {errorMsg && (
-        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 flex items-center gap-2">
+        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {statusMsg && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 flex items-center gap-2">
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-medium flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{statusMsg}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-          <h4 className="font-bold text-white text-xs flex items-center gap-2 text-sky-400">
+        <div className="space-y-4 bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 text-sky-600">
             <Globe className="w-4 h-4" />
             <span>بيانات الشركة والمنطقة الزمنية</span>
           </h4>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">اسم المؤسسة / الشركة</label>
+            <label className="block font-semibold text-sm text-slate-800 mb-1">اسم المؤسسة / الشركة</label>
             <input
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white outline-none"
+              className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 font-medium rounded-lg outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">المنطقة الزمنية المعتمدة (Timezone)</label>
+            <label className="block font-semibold text-sm text-slate-800 mb-1">المنطقة الزمنية المعتمدة (Timezone)</label>
             <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white outline-none font-mono"
+              className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 font-medium rounded-lg outline-none focus:ring-2 focus:ring-sky-500 font-mono"
             >
               <option value="Africa/Tripoli">Africa/Tripoli (طرابلس GMT+2)</option>
               <option value="Asia/Riyadh">Asia/Riyadh (الرياض GMT+3)</option>
@@ -153,31 +153,31 @@ export default function SystemSettingsTab() {
           </div>
         </div>
 
-        <div className="space-y-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-          <h4 className="font-bold text-white text-xs flex items-center gap-2 text-emerald-400">
+        <div className="space-y-4 bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2 text-emerald-600">
             <Shield className="w-4 h-4" />
             <span>سياسات الموقع الجغرافي والـ Geofence</span>
           </h4>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">حد دقة الـ GPS المسموح به (بالمتر)</label>
+            <label className="block font-semibold text-sm text-slate-800 mb-1">حد دقة الـ GPS المسموح به (بالمتر)</label>
             <input
               type="number"
               min="10"
               max="500"
               value={maxAcceptedGpsAccuracy}
               onChange={(e) => setMaxAcceptedGpsAccuracy(parseInt(e.target.value) || 50)}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-emerald-400 font-mono font-bold outline-none"
+              className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 font-bold rounded-lg outline-none focus:ring-2 focus:ring-sky-500 font-mono"
             />
-            <p className="text-[10px] text-slate-400 mt-1">إذا كانت دقة GPS الموظف أسوأ من هذه القيمة، سيتم حظر الحضور فوراً</p>
+            <p className="text-xs text-slate-600 mt-1">إذا كانت دقة GPS الموظف أسوأ من هذه القيمة، سيتم حظر الحضور فوراً</p>
           </div>
 
           <div>
-            <label className="block font-bold text-slate-300 mb-1">سياسة التعامل مع المحاولات المشبوهة / Fake GPS</label>
+            <label className="block font-semibold text-sm text-slate-800 mb-1">سياسة التعامل مع المحاولات المشبوهة / Fake GPS</label>
             <select
               value={suspiciousLocationPolicy}
               onChange={(e) => setSuspiciousLocationPolicy(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white outline-none font-bold"
+              className="w-full px-3 py-2 bg-white border border-slate-300 text-slate-900 font-medium rounded-lg outline-none focus:ring-2 focus:ring-sky-500"
             >
               <option value="BLOCK">⛔ منع التسجيل تماماً مع التوثيق في سجل المخاطر</option>
               <option value="WARNING">⚠️ السماح التسجيل مع وضع علامة تحذيرية للإدارة</option>

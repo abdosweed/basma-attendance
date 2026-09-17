@@ -53,7 +53,7 @@ let cachedAdminData: {
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(cachedAdminData.user || null);
-  const [activeTab, setActiveTab] = useState<'live_activity' | 'team' | 'structure' | 'reports'>('live_activity');
+  const [activeTab, setActiveTab] = useState<'live_activity' | 'team' | 'structure' | 'reports' | 'settings'>('live_activity');
   const [dashData, setDashData] = useState<any>(cachedAdminData.dashData || null);
   const [liveData, setLiveData] = useState<any[]>(cachedAdminData.liveData || []);
   const [employeesList, setEmployeesList] = useState<any[]>(cachedAdminData.employeesList || []);
@@ -307,30 +307,30 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar user={user} />
 
-      <main className="flex-1 max-w-[98%] w-full mx-auto p-3 sm:p-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 pt-8 pb-12 space-y-8">
         {/* الترويسة الرئيسية للوحة الإدارة */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 p-5 rounded-3xl shadow-sm dark:shadow-xl backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200/90 p-5 rounded-2xl shadow-sm">
           <div>
-            <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
               لوحة التحكم الإدارية
               <span
                 className={`text-xs font-bold px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 ${
                   envMode === 'LIVE'
-                    ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                    : 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30 animate-pulse'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                    : 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse'
                 }`}
               >
                 {envMode === 'LIVE' ? '🟢 وضع الإنتاج الحقيقي' : '🧪 بيئة التجربة والاختبار'}
               </span>
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">متابعة الحضور والانصراف، وإدارة فريق العمل، والفروع، والمطابقة المركزية</p>
+            <p className="text-xs text-slate-600 mt-1">متابعة الحضور والانصراف، وإدارة فريق العمل، والفروع، والمطابقة المركزية</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             {/* زر الاعتمادات الموحد مع شارة المعاملات المعلقة */}
             <button
               onClick={() => router.push('/admin/approvals')}
-              className="px-4 py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white text-xs font-bold rounded-2xl flex items-center gap-2 transition-all shadow-lg shadow-rose-600/25 active:scale-95 border border-rose-400/30"
+              className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition-all shadow-sm active:scale-95 border border-rose-500/30"
               title="مركز الاعتماد السريع لجميع الطلبات والمعاملات"
             >
               <CheckSquare className="w-4 h-4 text-white" />
@@ -346,7 +346,7 @@ export default function AdminDashboardPage() {
               <>
                 <button
                   onClick={() => setShowAddEmployeeModal(true)}
-                  className="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white text-xs font-bold rounded-2xl flex items-center gap-1.5 transition-all shadow-lg shadow-sky-600/20 active:scale-95 border border-sky-400/30"
+                  className="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>+ إضافة موظف</span>
@@ -354,10 +354,10 @@ export default function AdminDashboardPage() {
 
                 <button
                   onClick={handleExportCSV}
-                  className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700/90 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-1.5 transition-all border border-slate-200 dark:border-slate-700/80 active:scale-95"
+                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-emerald-800 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all border border-slate-300 active:scale-95"
                   title="تصدير سجلات وكشوف الحضور"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4 text-emerald-600" />
                   <span className="hidden sm:inline">تصدير السجلات</span>
                 </button>
               </>
@@ -365,7 +365,7 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={() => fetchAdminData()}
-              className="p-2.5 bg-slate-100 dark:bg-slate-800/90 hover:bg-slate-200 dark:hover:bg-slate-700/90 text-xs font-bold rounded-2xl flex items-center justify-center transition-all border border-slate-200 dark:border-slate-700/80 text-sky-600 dark:text-sky-400 active:scale-95"
+              className="p-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded-lg flex items-center justify-center transition-all border border-slate-300 text-sky-600 active:scale-95"
               title="تحديث البيانات"
             >
               <RefreshCw className="w-4 h-4" />
@@ -373,83 +373,83 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* بطاقات الإحصائيات السريعة اليومية */}
+        {/* بطاقات الإحصائيات السريعة اليومية (KPI Cards) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           <button
             onClick={() => setActiveTab('team')}
-            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/90 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
+            className="text-right bg-white hover:bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-4 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
           >
-            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-slate-600 text-xs mb-2 font-semibold">
               <span>إجمالي الموظفين</span>
-              <Users className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <Users className="w-4 h-4 text-sky-600" />
             </div>
-            <span className="text-2xl font-black text-slate-900 dark:text-white">{summary.totalEmployees || 0}</span>
+            <span className="text-2xl font-black text-slate-900">{summary.totalEmployees || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-emerald-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
+            className="text-right bg-white hover:bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-4 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
           >
-            <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-emerald-700 text-xs mb-2 font-semibold">
               <span>🟢 حاضر الآن</span>
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             </div>
-            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{summary.presentCount || 0}</span>
+            <span className="text-2xl font-black text-emerald-700">{summary.presentCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-yellow-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
+            className="text-right bg-white hover:bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-4 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
           >
-            <div className="flex items-center justify-between text-yellow-600 dark:text-yellow-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-amber-700 text-xs mb-2 font-semibold">
               <span>🟡 متأخر</span>
-              <Clock className="w-4 h-4" />
+              <Clock className="w-4 h-4 text-amber-600" />
             </div>
-            <span className="text-2xl font-black text-yellow-600 dark:text-yellow-400">{summary.lateCount || 0}</span>
+            <span className="text-2xl font-black text-amber-700">{summary.lateCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-red-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
+            className="text-right bg-white hover:bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-4 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
           >
-            <div className="flex items-center justify-between text-red-600 dark:text-red-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-red-700 text-xs mb-2 font-semibold">
               <span>🔴 غائب</span>
-              <XCircle className="w-4 h-4" />
+              <XCircle className="w-4 h-4 text-red-600" />
             </div>
-            <span className="text-2xl font-black text-red-600 dark:text-red-400">{summary.absentCount || 0}</span>
+            <span className="text-2xl font-black text-red-700">{summary.absentCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-orange-500/30 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
+            className="text-right bg-white hover:bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-4 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
           >
-            <div className="flex items-center justify-between text-orange-600 dark:text-orange-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-orange-700 text-xs mb-2 font-semibold">
               <span>🟠 في استراحة</span>
-              <Coffee className="w-4 h-4" />
+              <Coffee className="w-4 h-4 text-orange-600" />
             </div>
-            <span className="text-2xl font-black text-orange-600 dark:text-orange-400">{summary.onBreakCount || 0}</span>
+            <span className="text-2xl font-black text-orange-700">{summary.onBreakCount || 0}</span>
           </button>
 
           <button
             onClick={() => setActiveTab('live_activity')}
-            className="text-right bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 border border-rose-500/40 p-4 rounded-3xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm dark:shadow-lg backdrop-blur-sm"
+            className="text-right bg-white hover:bg-slate-50 border border-slate-200 shadow-sm rounded-xl p-4 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
           >
-            <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 text-xs mb-2 font-medium">
+            <div className="flex items-center justify-between text-rose-700 text-xs mb-2 font-semibold">
               <span>⚠️ محاولات مشبوهة</span>
-              <ShieldAlert className="w-4 h-4" />
+              <ShieldAlert className="w-4 h-4 text-rose-600" />
             </div>
-            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">{summary.suspiciousAttemptsCount || 0}</span>
+            <span className="text-2xl font-black text-rose-700">{summary.suspiciousAttemptsCount || 0}</span>
           </button>
         </div>
 
-        {/* شريط التبويبات الأربعة الموحدة (Consolidated 4 Tabs Navigation) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+        {/* شريط التبويبات الخمسة الموحدة */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 border-b border-slate-200 pb-3">
           <button
             onClick={() => setActiveTab('live_activity')}
-            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+            className={`py-3 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
               activeTab === 'live_activity'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
-                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'
             }`}
           >
             <Activity className="w-4 h-4" />
@@ -458,10 +458,10 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('team')}
-            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+            className={`py-3 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
               activeTab === 'team'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
-                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -470,10 +470,10 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('structure')}
-            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+            className={`py-3 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
               activeTab === 'structure'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
-                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'
             }`}
           >
             <Building className="w-4 h-4" />
@@ -482,14 +482,26 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab('reports')}
-            className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 border ${
+            className={`py-3 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
               activeTab === 'reports'
-                ? 'bg-gradient-to-r from-sky-600 to-cyan-600 text-white border-sky-400/50 shadow-md'
-                : 'bg-white dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'
             }`}
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>4. التقارير والمطابقة 📑</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`py-3 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
+              activeTab === 'settings'
+                ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border-slate-200'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>5. الإعدادات المركزية ⚙️</span>
           </button>
         </div>
 
@@ -869,6 +881,11 @@ export default function AdminDashboardPage() {
             branches={dashData?.branches || []}
             employees={employeesList}
           />
+        )}
+
+        {/* 5. الإعدادات المركزية وسياسات الجغرافيا والأجهزة (settings) */}
+        {activeTab === 'settings' && (
+          <SystemSettingsTab />
         )}
       </main>
 

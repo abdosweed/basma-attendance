@@ -422,19 +422,20 @@ export default function PayrollReportsTab({ branches = [], employees = [] }: Pay
                 ))
               ) : (
                 <tr>
-                  <td colSpan={11} className="p-8 text-center text-slate-400 text-xs">
-                    لا توجد سجلات مطابقة للفلاتر المختارة.
+                  <td colSpan={11} className="p-12 text-center bg-slate-50/50">
+                    <div className="flex flex-col items-center justify-center max-w-sm mx-auto">
+                      <Calendar className="w-12 h-12 text-slate-400 mb-3" />
+                      <h4 className="text-slate-800 font-bold text-base mb-1">لا توجد سجلات مطابقة</h4>
+                      <p className="text-slate-500 text-xs leading-relaxed">
+                        لم يتم العثور على أي سجلات حضور أو انصراف تطابق الفلاتر المختارة، جرب تغيير النطاق الزمني أو اختيار فرع آخر.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* 4. إعدادات المنظومة والمطابقة الحسابية (SystemSettingsTab) */}
-      <div className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-5 shadow-sm dark:shadow-xl">
-        <SystemSettingsTab />
       </div>
     </div>
   );
