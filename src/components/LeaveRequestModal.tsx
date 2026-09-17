@@ -10,16 +10,16 @@ interface LeaveRequestModalProps {
 
 export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestModalProps) {
   const [leaveTypeId, setLeaveTypeId] = useState('');
+  const [leaveTypes, setLeaveTypes] = useState<Array<{ id: string; name: string; code: string }>>([]);
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
   const [reason, setReason] = useState('');
-  const [leaveTypes, setLeaveTypes] = useState<any[]>([]);
-
-  const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [balances, setBalances] = useState<{ annualRemaining: number; sickRemaining: number } | null>(null);
 
   useEffect(() => {
-    // جلب أنواع الإجازات من السيرفر
+    // جلب أنواع الإجازات وأرصدة الإجازات من السيرفر
     async function loadTypes() {
       try {
         const res = await fetch('/api/leave-requests');
@@ -28,6 +28,9 @@ export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestMo
           if (data.leaveTypes && data.leaveTypes.length > 0) {
             setLeaveTypes(data.leaveTypes);
             setLeaveTypeId(data.leaveTypes[0].id);
+          }
+          if (data.balances) {
+            setBalances(data.balances);
           }
         }
       } catch (e) {}
@@ -42,6 +45,26 @@ export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestMo
     if (!startDate || !endDate || !reason.trim()) {
       setErrorMsg('يرجى تحديد تواريخ الإجازة وكتابة السبب بشكل واضح.');
       return;
+    }
+
+    // التحقق من تجاوز الأيام المتاحة ما لم تكن بدون مرتب
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const requestedDays = Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const selectedType = leaveTypes.find((t) => t.id === leaveTypeId);
+
+    if (selectedType && selectedType.code !== 'UNPAID' && !selectedType.name.includes('بدون مرتب')) {
+      if (selectedType.code === 'ANNUAL' || selectedType.name.includes('سنوية')) {
+        if (balances && requestedDays > balances.annualRemaining) {
+          setErrorMsg(`طلبك (${requestedDays} أيام) يتجاوز رصيدك السنوي المتبقي (${balances.annualRemaining} يوم). يمكنك تقديم إجازة بدون مرتب.`);
+          return;
+        }
+      } else if (selectedType.code === 'SICK' || selectedType.name.includes('مرضية')) {
+        if (balances && requestedDays > balances.sickRemaining) {
+          setErrorMsg(`طلبك (${requestedDays} أيام) يتجاوز رصيدك المرضي المتبقي (${balances.sickRemaining} يوم).`);
+          return;
+        }
+      }
     }
 
     setSaving(true);
@@ -93,6 +116,16 @@ export default function LeaveRequestModal({ onClose, onSuccess }: LeaveRequestMo
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
+          {/* Leave Balance Banner */}
+          {balances && (
+            <div className="p-3 bg-sky-950/60 border border-sky-500/30 rounded-2xl flex items-center justify-between text-xs">
+              <span className="text-slate-300 font-medium">الرصيد المتبقي لك:</span>
+              <span className="font-bold text-sky-400">
+                {balances.annualRemaining} يوم سنوي | {balances.sickRemaining} يوم مرضي
+              </span>
+            </div>
+          )}
+
           {errorMsg && (
             <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />

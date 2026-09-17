@@ -17,14 +17,41 @@ export async function GET(request: Request) {
     // جلب أنواع الإجازات المتاحة
     const leaveTypes = await prisma.leaveType.findMany();
 
-    // الموظف العادي يرى طلباته فقط
+    // الموظف العادي يرى طلباته مع حساب الرصيد المتبقي
     if (session.role === 'EMPLOYEE' && session.employeeId) {
       const leaves = await prisma.leaveRequest.findMany({
         where: { employeeId: session.employeeId },
         include: { leaveType: true },
         orderBy: { createdAt: 'desc' },
       });
-      return NextResponse.json({ leaves, leaveTypes });
+
+      // حساب أيام الإجازات المستهلكة المعتمدة للعام الحالي
+      const currentYear = new Date().getFullYear();
+      const approvedLeavesThisYear = leaves.filter(
+        (l) => l.status === 'APPROVED' && new Date(l.startDate).getFullYear() === currentYear
+      );
+
+      const annualUsed = approvedLeavesThisYear
+        .filter((l) => l.leaveType.code === 'ANNUAL' || l.leaveType.name.includes('سنوية'))
+        .reduce((sum, l) => sum + l.totalDays, 0);
+
+      const sickUsed = approvedLeavesThisYear
+        .filter((l) => l.leaveType.code === 'SICK' || l.leaveType.name.includes('مرضية'))
+        .reduce((sum, l) => sum + l.totalDays, 0);
+
+      const annualRemaining = Math.max(0, 21 - annualUsed);
+      const sickRemaining = Math.max(0, 14 - sickUsed);
+
+      return NextResponse.json({
+        leaves,
+        leaveTypes,
+        balances: {
+          annualRemaining,
+          sickRemaining,
+          annualMax: 21,
+          sickMax: 14,
+        },
+      });
     }
 
     // الإدارة ترى طلبات الموظفين

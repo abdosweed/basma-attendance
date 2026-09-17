@@ -40,7 +40,31 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { date, proposedCheckIn, proposedCheckOut, reason } = body;
+    const { isPermission, type, startTime, endTime, date, proposedCheckIn, proposedCheckOut, reason } = body;
+
+    if (isPermission) {
+      if (!date || !startTime || !endTime || !reason) {
+        return NextResponse.json({ error: 'يرجى تحديد تفاصيل طلب الاستئذان الساعي (التوقيت والسبب).' }, { status: 400 });
+      }
+
+      const permission = await prisma.permissionRequest.create({
+        data: {
+          employeeId: session.employeeId,
+          date: date.slice(0, 10),
+          type: type || 'TEMPORARY_EXIT',
+          startTime,
+          endTime,
+          reason: reason.trim(),
+          status: 'PENDING',
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'تم إرسال طلب الاستئذان الساعي بنجاح، وهو بانتظار موافقة الإدارة.',
+        permission,
+      });
+    }
 
     if (!date || !reason) {
       return NextResponse.json({ error: 'يرجى تحديد التاريخ وسبب طلب تصحيح البصمة.' }, { status: 400 });

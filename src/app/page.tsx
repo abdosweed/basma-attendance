@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import InstallPWAPrompt from '@/components/InstallPWAPrompt';
 import LeaveRequestModal from '@/components/LeaveRequestModal';
 import CorrectionRequestModal from '@/components/CorrectionRequestModal';
+import HourlyPermissionModal from '@/components/HourlyPermissionModal';
 import { EmployeeHeroCard } from '@/components/ui/EmployeeHeroCard';
 import { AttendanceActionCard } from '@/components/employee/attendance-action-card';
 import { BottomNav, TabType } from '@/components/ui/BottomNav';
@@ -43,6 +44,7 @@ export default function EmployeePortalPage() {
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showCorrectionModal, setShowCorrectionModal] = useState(false);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
 
   const [verificationModal, setVerificationModal] = useState<{
     isOpen: boolean;
@@ -605,7 +607,7 @@ export default function EmployeePortalPage() {
           </button>
 
           <button
-            onClick={() => setShowCorrectionModal(true)}
+            onClick={() => setShowPermissionModal(true)}
             className="p-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 rounded-2xl text-right flex items-center gap-3 transition-all shadow-sm active:scale-[0.99]"
           >
             <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
@@ -704,6 +706,16 @@ export default function EmployeePortalPage() {
         <CorrectionRequestModal
           onClose={() => setShowCorrectionModal(false)}
           onSuccess={() => fetchUserData()}
+        />
+      )}
+
+      {/* مودال طلب الاستئذان الساعي */}
+      {showPermissionModal && (
+        <HourlyPermissionModal
+          onClose={() => setShowPermissionModal(false)}
+          onSuccess={() => fetchUserData()}
+          shiftStart={todayData?.shift?.startTime || '08:00'}
+          shiftEnd={todayData?.shift?.endTime || '16:00'}
         />
       )}
 
