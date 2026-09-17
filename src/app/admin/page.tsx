@@ -37,17 +37,29 @@ import {
   Activity,
 } from 'lucide-react';
 
+// Memory module cache for instant Stale-While-Revalidate loading (0s load time)
+let cachedAdminData: {
+  dashData?: any;
+  liveData?: any[];
+  employeesList?: any[];
+  leavesList?: any[];
+  correctionsList?: any[];
+  reportData?: any;
+  envMode?: 'DEMO' | 'LIVE';
+  user?: any;
+} = {};
+
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(cachedAdminData.user || null);
   const [activeTab, setActiveTab] = useState<'live_activity' | 'team' | 'structure' | 'reports'>('live_activity');
-  const [dashData, setDashData] = useState<any>(null);
-  const [liveData, setLiveData] = useState<any[]>([]);
-  const [employeesList, setEmployeesList] = useState<any[]>([]);
-  const [leavesList, setLeavesList] = useState<any[]>([]);
-  const [correctionsList, setCorrectionsList] = useState<any[]>([]);
-  const [reportData, setReportData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [dashData, setDashData] = useState<any>(cachedAdminData.dashData || null);
+  const [liveData, setLiveData] = useState<any[]>(cachedAdminData.liveData || []);
+  const [employeesList, setEmployeesList] = useState<any[]>(cachedAdminData.employeesList || []);
+  const [leavesList, setLeavesList] = useState<any[]>(cachedAdminData.leavesList || []);
+  const [correctionsList, setCorrectionsList] = useState<any[]>(cachedAdminData.correctionsList || []);
+  const [reportData, setReportData] = useState<any>(cachedAdminData.reportData || null);
+  const [loading, setLoading] = useState(!cachedAdminData.dashData);
   const [searchQuery, setSearchQuery] = useState('');
   const [empSearchQuery, setEmpSearchQuery] = useState('');
   const [monthFilter, setMonthFilter] = useState(new Date().toISOString().slice(0, 7));
@@ -58,17 +70,40 @@ export default function AdminDashboardPage() {
   const [showImportEmployeesModal, setShowImportEmployeesModal] = useState(false);
   const [selectedEmployeeForEdit, setSelectedEmployeeForEdit] = useState<any>(null);
 
-  const [envMode, setEnvMode] = useState<'DEMO' | 'LIVE'>('DEMO');
+  const [envMode, setEnvMode] = useState<'DEMO' | 'LIVE'>(cachedAdminData.envMode || 'DEMO');
   const [resetLoading, setResetLoading] = useState(false);
 
-  const fetchAdminData = async () => {
-    // مؤقت أمان يضمن كسر شاشة التحميل السوداء خلال 4 ثوانٍ كحد أقصى حتى لو تأخر أحد المسارات
+  const activeAbortControllerRef = React.useRef<AbortController | null>(null);
+
+  // استرجاع الكاش من sessionStorage لإخفاء شاشة التحميل فوراً
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('basma_admin_cache');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.dashData) {
+          cachedAdminData = parsed;
+          setDashData(parsed.dashData);
+          if (parsed.liveData) setLiveData(parsed.liveData);
+          if (parsed.employeesList) setEmployeesList(parsed.employeesList);
+          if (parsed.leavesList) setLeavesList(parsed.leavesList);
+          if (parsed.reportData) setReportData(parsed.reportData);
+          if (parsed.user) setUser(parsed.user);
+          if (parsed.envMode) setEnvMode(parsed.envMode);
+          setLoading(false);
+        }
+      }
+    } catch (e) {}
+  }, []);
+
+  const fetchAdminData = async (signal?: AbortSignal) => {
+    // مؤقت أمان يضمن كسر شاشة التحميل خلال 3 ثوانٍ كحد أقصى
     const safetyTimeout = setTimeout(() => {
       setLoading(false);
-    }, 4000);
+    }, 3000);
 
     try {
-      const meRes = await fetch('/api/auth/me');
+      const meRes = await fetch('/api/auth/me', { signal });
       if (!meRes.ok) {
         clearTimeout(safetyTimeout);
         setLoading(false);
@@ -83,100 +118,86 @@ export default function AdminDashboardPage() {
         return;
       }
       setUser(me.user);
+      cachedAdminData.user = me.user;
 
       const results = await Promise.allSettled([
-        fetch('/api/admin/dashboard'),
-        fetch('/api/admin/live'),
-        fetch(`/api/reports/monthly?month=${monthFilter}`),
-        fetch('/api/employees'),
-        fetch('/api/leave-requests'),
-        fetch('/api/corrections'),
-        fetch('/api/admin/environment-switch'),
+        fetch('/api/admin/dashboard', { signal }),
+        fetch('/api/admin/live', { signal }),
+        fetch(`/api/reports/monthly?month=${monthFilter}`, { signal }),
+        fetch('/api/employees', { signal }),
+        fetch('/api/leave-requests', { signal }),
+        fetch('/api/corrections', { signal }),
+        fetch('/api/admin/environment-switch', { signal }),
       ]);
 
       const [dashRes, liveRes, reportRes, empRes, leavesRes, correctionsRes, envRes] = results;
 
-      if (dashRes.status === 'fulfilled' && dashRes.value.ok) setDashData(await dashRes.value.json());
+      if (dashRes.status === 'fulfilled' && dashRes.value.ok) {
+        const d = await dashRes.value.json();
+        setDashData(d);
+        cachedAdminData.dashData = d;
+      }
       if (liveRes.status === 'fulfilled' && liveRes.value.ok) {
         const l = await liveRes.value.json();
         setLiveData(l.liveAttendance || []);
+        cachedAdminData.liveData = l.liveAttendance || [];
       }
-      if (reportRes.status === 'fulfilled' && reportRes.value.ok) setReportData(await reportRes.value.json());
+      if (reportRes.status === 'fulfilled' && reportRes.value.ok) {
+        const r = await reportRes.value.json();
+        setReportData(r);
+        cachedAdminData.reportData = r;
+      }
       if (empRes.status === 'fulfilled' && empRes.value.ok) {
         const e = await empRes.value.json();
         setEmployeesList(e.employees || []);
+        cachedAdminData.employeesList = e.employees || [];
       }
       if (leavesRes.status === 'fulfilled' && leavesRes.value.ok) {
         const l = await leavesRes.value.json();
         setLeavesList(l.leaves || []);
+        cachedAdminData.leavesList = l.leaves || [];
       }
       if (correctionsRes.status === 'fulfilled' && correctionsRes.value.ok) {
         const c = await correctionsRes.value.json();
         setCorrectionsList(c.corrections || []);
+        cachedAdminData.correctionsList = c.corrections || [];
       }
       if (envRes.status === 'fulfilled' && envRes.value.ok) {
         const env = await envRes.value.json();
-        if (env.environmentMode) setEnvMode(env.environmentMode);
+        if (env.environmentMode) {
+          setEnvMode(env.environmentMode);
+          cachedAdminData.envMode = env.environmentMode;
+        }
       }
-    } catch (e) {
-      console.error('Admin dashboard load error:', e);
+
+      // حفظ الكاش السريع
+      try {
+        sessionStorage.setItem('basma_admin_cache', JSON.stringify(cachedAdminData));
+      } catch (err) {}
+    } catch (e: any) {
+      if (e.name !== 'AbortError') {
+        console.error('Admin dashboard load error:', e);
+      }
     } finally {
       clearTimeout(safetyTimeout);
       setLoading(false);
     }
   };
 
-  const handleToggleEnvMode = async () => {
-    const nextMode = envMode === 'DEMO' ? 'LIVE' : 'DEMO';
-    const label = nextMode === 'LIVE' ? 'التحويل للوضع الحقيقي والعمل الفعلي' : 'التحويل لوضع التجربة والاختبار';
-    if (!window.confirm(`هل أنت متأكد من ${label}؟`)) return;
-
-    try {
-      const res = await fetch('/api/admin/environment-switch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: nextMode }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setEnvMode(data.mode);
-        fetchAdminData();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleResetDemoData = async () => {
-    if (!window.confirm('⚠️ تحذير مهم: هل أنت متأكد من تصفير وإلغاء جميع سجلات البصمات والمحاولات التجريبية بالكامل لتنقية النظام للعمل الفعلي؟')) return;
-
-    setResetLoading(true);
-    try {
-      const res = await fetch('/api/admin/environment-switch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'RESET_DEMO' }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert(data.message);
-        fetchAdminData();
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchAdminData();
+    const controller = new AbortController();
+    activeAbortControllerRef.current = controller;
+
+    fetchAdminData(controller.signal);
 
     const interval = setInterval(() => {
-      fetchAdminData();
+      fetchAdminData(controller.signal);
     }, 25000);
 
-    return () => clearInterval(interval);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [monthFilter]);
 
   const handleDisableEmployee = async (empId: string, currentStatus: string) => {
@@ -329,7 +350,7 @@ export default function AdminDashboardPage() {
             )}
 
             <button
-              onClick={fetchAdminData}
+              onClick={() => fetchAdminData()}
               className="p-2.5 bg-slate-800/90 hover:bg-slate-700/90 text-xs font-bold rounded-2xl flex items-center justify-center transition-all border border-slate-700/80 text-sky-400 active:scale-95"
               title="تحديث البيانات"
             >
