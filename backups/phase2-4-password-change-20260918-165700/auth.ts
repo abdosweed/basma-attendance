@@ -15,7 +15,6 @@ export interface UserSessionPayload {
   employeeId?: string;
   companyId?: string;
   name: string;
-  mustChangePassword?: boolean;
 }
 
 export async function hashPassword(password: string): Promise<string> {

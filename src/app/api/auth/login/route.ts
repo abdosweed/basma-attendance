@@ -85,6 +85,7 @@ export async function POST(request: Request) {
       employeeId: employee?.id,
       companyId: employee?.companyId,
       name: employee ? `${employee.firstName} ${employee.lastName}` : user.email,
+      mustChangePassword: user.mustChangePassword,
     };
 
     await setSessionCookie(sessionData);

@@ -8,14 +8,14 @@ const JWT_SECRET = new TextEncoder().encode(
 
 const TOKEN_COOKIE_NAME = 'basma_session_token';
 
-// المسارات التي تتطلب فحص الجلسة وإلزام تغيير كلمة المرور
-const PROTECTED_ROUTES = ['/', '/admin', '/employee', '/hr', '/manager', '/profile', '/change-password'];
+// المسارات المعزولة التي تتطلب تسجيل الدخول
+const PROTECTED_ROUTES = ['/admin', '/employee', '/hr', '/manager'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
-    route === '/' ? pathname === '/' : pathname.startsWith(route)
+    pathname.startsWith(route)
   );
 
   if (!isProtectedRoute) {
@@ -25,9 +25,6 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get(TOKEN_COOKIE_NAME)?.value;
 
   if (!token) {
-    if (pathname === '/change-password') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('callbackUrl', encodeURIComponent(pathname));
     return NextResponse.redirect(loginUrl);
@@ -36,21 +33,6 @@ export async function middleware(request: NextRequest) {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const role = (payload as any).role;
-    const mustChangePassword = Boolean((payload as any).mustChangePassword);
-
-    // إلزامية تغيير كلمة المرور للمستخدمين الذين يحملون الخيار true
-    if (mustChangePassword) {
-      if (pathname !== '/change-password') {
-        return NextResponse.redirect(new URL('/change-password', request.url));
-      }
-      return NextResponse.next();
-    }
-
-    // إذا كانت كلمة المرور غير ملزمة بالتغيير وحاول الوصول إلى /change-password
-    if (!mustChangePassword && pathname === '/change-password') {
-      const destination = role === 'EMPLOYEE' ? '/' : '/admin';
-      return NextResponse.redirect(new URL(destination, request.url));
-    }
 
     // منع الموظف العادي من الدخول إلى لوحة التحكم الإدارية /admin
     if (pathname.startsWith('/admin') && role === 'EMPLOYEE') {
@@ -66,5 +48,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/change-password', '/admin/:path*', '/employee/:path*', '/hr/:path*', '/manager/:path*', '/profile'],
+  matcher: ['/admin/:path*', '/employee/:path*', '/hr/:path*', '/manager/:path*'],
 };

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getAuthenticatedUser, verifyPassword, hashPassword, validatePasswordPolicy, setSessionCookie } from '@/lib/auth';
+﻿import { NextResponse } from 'next/server';
+import { getAuthenticatedUser, verifyPassword, hashPassword, validatePasswordPolicy } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
@@ -49,12 +49,6 @@ export async function POST(request: Request) {
         failedLoginAttempts: 0,
         lockoutUntil: null,
       },
-    });
-
-    // 4. تحديث الكوكي للجلسة الحالية لمنع إعادة التوجيه في Middleware
-    await setSessionCookie({
-      ...session,
-      mustChangePassword: false,
     });
 
     return NextResponse.json({

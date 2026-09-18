@@ -29,7 +29,9 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.error || 'فشل تسجيل الدخول');
       } else {
-        if (data.user?.role === 'EMPLOYEE') {
+        if (data.user?.mustChangePassword) {
+          router.push('/change-password');
+        } else if (data.user?.role === 'EMPLOYEE') {
           router.push('/');
         } else {
           router.push('/admin');
